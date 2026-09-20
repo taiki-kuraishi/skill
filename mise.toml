@@ -1,9 +1,10 @@
 [tools]
 bun = "1.4.2"
 dprint = "0.56.1"
+lefthook = "2.1.12"
 
 [tasks.install]
-run = ["mise trust --all", "mise install"]
+run = ["mise trust --all", "mise install", "lefthook install"]
 
 [tasks.format]
 run = "dprint fmt"

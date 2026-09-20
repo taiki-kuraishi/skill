@@ -7,3 +7,7 @@ backend = "core:bun"
 [[tools.dprint]]
 version = "0.56.1"
 backend = "aqua:dprint/dprint"
+
+[[tools.lefthook]]
+version = "2.1.12"
+backend = "aqua:evilmartians/lefthook"

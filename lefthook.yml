@@ -1,0 +1,4 @@
+pre-commit:
+  commands:
+    dprint-check:
+      run: dprint check --allow-no-files {staged_files}
