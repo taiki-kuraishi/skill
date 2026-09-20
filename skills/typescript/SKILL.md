@@ -1,6 +1,7 @@
 ---
 name: typescript
 description: TypeScript コードを書く・修正する・レビューするときの規約。ts ファイルや TypeScript の関数を扱う場面すべてで使用すること — return 型アノテーションの省略、else を使わない早期 return など。コード生成、リファクタリング、バグ修正、レビュー指摘への対応でも発火させる。
+disable-model-invocation: false
 ---
 
 # typescript

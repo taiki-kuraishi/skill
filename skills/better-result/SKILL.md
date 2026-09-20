@@ -1,6 +1,7 @@
 ---
 name: better-result
 description: better-result ライブラリ（Result 型）を使う TypeScript コードを書く・修正するときの規約。Result.gen による generator-based 合成の書き方を扱う。better-result の import、Result 型のエラー処理、fallible なステップの連結、TaggedError を含むコードを書く・レビューする場面では必ず使用すること。
+disable-model-invocation: false
 ---
 
 # better-result
