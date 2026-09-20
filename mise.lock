@@ -3,3 +3,7 @@
 [[tools.bun]]
 version = "1.4.2"
 backend = "core:bun"
+
+[[tools.dprint]]
+version = "0.56.1"
+backend = "aqua:dprint/dprint"
