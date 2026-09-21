@@ -39,7 +39,17 @@ public execute = (payload) =>
 - body の return は必ず `Result.ok(...)` / `Result.err(...)`。裸の値を返すと Panic（throw）する
 - guard 句は Err を直接 yield して即 short-circuit: `if (!user.active) { yield* new InactiveUser({...}); }`
 - エラー型は手書きしない。yield した Err と return した Result から自動 union される（typescript skill の「戻り値の型アノテーションは書かない」と整合）
-- 非同期ステップは `Result.gen(async function* () { ... })` の中で `yield* Result.await(promise)` を使う。`yield* await ...` と書かない
+- 非同期ステップは `Result.gen(async function* () { ... })` の中で `yield* await promise` で受ける。`Result.await(promise)` を挟まない
+
+  ```ts
+  // Good: await を直接 yield* する
+  const run = yield* await this.runs.find();
+
+  // Bad: 等価なのに冗長なラップを挟む
+  const run = yield* Result.await(this.runs.find());
+  ```
+
+  なぜ: `yield* await p` は `yield* Result.await(p)` と完全に等価（ライブラリの `Result.await` 自体が `yield* await p` を返すだけ）で、 await の対象がその場で読める。ラップを挟むとノイズになるだけ
 
 ## 単一ステップは map / andThen で十分
 
