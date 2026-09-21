@@ -89,3 +89,54 @@ const build = (args: BuildArgs) => {
 ```
 
 なぜ: union と早期 return なら各入力に対応する出力が明示され、条件付き spread より型の分岐を追いやすい。
+
+## 小さすぎる処理を関数化しない
+
+1 箇所でしか使わない数行の処理に名前を付けず、呼び出し箇所にそのまま書く。
+
+```ts
+// Bad: 中身を追うために定義へジャンプさせられる
+const toDisplayName = (user: User) => user.nickname ?? user.name;
+// ...遠く離れて...
+const label = toDisplayName(user);
+
+// Good: その場で読み切れる
+const label = user.nickname ?? user.name;
+```
+
+なぜ: 関数化は重複を減らすための道具で、1 回しか使わない処理に名前を付けると読み手は定義へのジャンプを強いられる。同じ処理が 2 箇所以上ある場合だけ切り出す。
+
+## 各メソッドで繰り返す依存の生成は constructor に置く
+
+class の複数メソッドで同じ依存オブジェクトを作るなら、モジュール直下のヘルパー関数を作らず constructor で一度だけ作る。
+
+```ts
+// Bad: ヘルパーを各メソッドで呼び、同じオブジェクトを作り直している
+const repositoryOf = (env: Env) => new Repository({ db: createClient(env) });
+
+class Api {
+  public async add() {
+    const repository = await repositoryOf(this.env);
+    // ...
+  }
+  public async list() {
+    const repository = await repositoryOf(this.env);
+    // ...
+  }
+}
+
+// Good: 生成は constructor に 1 箇所
+class Api {
+  private readonly repository: Repository;
+
+  constructor(env: Env) {
+    this.repository = new Repository({ db: createClient(env) });
+  }
+
+  public async add() {
+    this.repository.add(/* ... */);
+  }
+}
+```
+
+なぜ: constructor で作れば生成と依存関係が class の先頭に集まり、各メソッドは使うことに集中できる。メソッドごとの呼び出しヘルパーは重複を生み、そのヘルパーの存在理由を読み手に考えさせる。
