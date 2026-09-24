@@ -1,6 +1,6 @@
 ---
 name: better-result
-description: better-result ライブラリ（Result 型）を使う TypeScript コードを書く・修正するときの規約。Result.gen による generator-based 合成の書き方を扱う。better-result の import、Result 型のエラー処理、fallible なステップの連結、TaggedError を含むコードを書く・レビューする場面では必ず使用すること。
+description: better-result ライブラリ（Result 型）を使う TypeScript コードを書く・修正するときの規約。Result.gen による generator-based 合成の書き方と、Result.tryPromise / Result.try で包む処理の粒度を扱う。better-result の import、Result 型のエラー処理、fallible なステップの連結、例外を投げる処理の Result 化、TaggedError を含むコードを書く・レビューする場面では必ず使用すること。
 disable-model-invocation: false
 ---
 
@@ -54,3 +54,35 @@ public execute = (payload) =>
 ## 単一ステップは map / andThen で十分
 
 fallible なステップが 1 つだけなら generator を使わず `map` / `andThen` でよい。全てを `Result.gen` にするのは過剰。
+
+## Result.tryPromise には処理を 1 つだけ書く
+
+`Result.tryPromise` / `Result.try` の `try` に複数の処理を詰めず、例外を投げうる処理ごとに包んで `Result.gen` で繋げる。
+
+```ts
+// Bad: id 生成と insert が 1 つの try に入り、どちらの失敗も DbQueryError になる
+const save = (args) =>
+  Result.tryPromise({
+    try: async () => {
+      const id = await hashId(args);
+      await db.insert(users).values({ id, ...args });
+    },
+    catch: (cause) => new DbQueryError({ cause }),
+  });
+
+// Good: 処理ごとに包み、失敗をそれぞれのエラー型で返す
+const save = (args) =>
+  Result.gen(async function* () {
+    const id = yield* await Result.tryPromise({
+      try: async () => await hashId(args),
+      catch: (cause) => new HashIdError({ cause }),
+    });
+    yield* await Result.tryPromise({
+      try: async () => await db.insert(users).values({ id, ...args }),
+      catch: (cause) => new DbQueryError({ cause }),
+    });
+    return Result.ok(id);
+  });
+```
+
+なぜ: `catch` は 1 つしかないため、`try` に複数の処理があるとどこで失敗しても同じエラーに丸められ、DB と無関係な失敗まで `DbQueryError` として報告される。処理ごとに包めば失敗箇所がエラー型に表れ、`Result.gen` がそれらを union するので呼び出し側で区別して扱える。
