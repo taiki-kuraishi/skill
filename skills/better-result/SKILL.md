@@ -1,6 +1,6 @@
 ---
 name: better-result
-description: better-result ライブラリ（Result 型）を使う TypeScript コードを書く・修正するときの規約。Result.gen による generator-based 合成の書き方と、Result.tryPromise / Result.try で包む処理の粒度を扱う。better-result の import、Result 型のエラー処理、fallible なステップの連結、例外を投げる処理の Result 化、TaggedError を含むコードを書く・レビューする場面では必ず使用すること。
+description: better-result ライブラリ（Result 型）を使う TypeScript コードを書く・修正するときの規約。Result.gen による generator-based 合成の書き方（yield* するステップや条件分岐ごとの空行・コメントによる区切りを含む）と、Result.tryPromise / Result.try で包む処理の粒度を扱う。better-result の import、Result 型のエラー処理、fallible なステップの連結、例外を投げる処理の Result 化、TaggedError を含むコードを書く・レビューする場面では必ず使用すること。
 disable-model-invocation: false
 ---
 
@@ -50,6 +50,44 @@ public execute = (payload) =>
   ```
 
   なぜ: `yield* await p` は `yield* Result.await(p)` と完全に等価（ライブラリの `Result.await` 自体が `yield* await p` を返すだけ）で、 await の対象がその場で読める。ラップを挟むとノイズになるだけ
+
+## Result.gen のステップと分岐は空行で区切り、意図をコメントする
+
+`Result.gen` の body では、`yield*` する Result 呼び出しと条件分岐を 1 つの塊とし、塊の間に空行を入れ、各塊の先頭にその塊の意図を 1 行コメントで書く。
+
+```ts
+// Bad: ステップと分岐が詰まっていて、どこで何を判断しているか読み取りにくい
+Result.gen(async function* () {
+  const judged = yield* await placements.findByArticle({ articleId });
+  if (judged !== undefined) {
+    return Result.ok({ status: "skipped" as const });
+  }
+  const page = yield* await pages.fetch({ articleId });
+  yield* await placements.save({ articleId, page });
+  return Result.ok({ status: "judged" as const });
+});
+
+// Good: 塊ごとに空行とコメントで区切る
+Result.gen(async function* () {
+  // 判定済みかを確認する
+  const judged = yield* await placements.findByArticle({ articleId });
+
+  // 判定済みなら再判定せずスキップする
+  if (judged !== undefined) {
+    return Result.ok({ status: "skipped" as const });
+  }
+
+  // 判定対象のページを取得する
+  const page = yield* await pages.fetch({ articleId });
+
+  // 判定結果を保存する
+  yield* await placements.save({ articleId, page });
+
+  return Result.ok({ status: "judged" as const });
+});
+```
+
+なぜ: `yield*` の各行はどれも Err で short-circuit しうる境界で、分岐は処理の行き先を変える境界。それらを空行とコメントで見出し化すると、generator の一本道が「何を取り、何を判断し、何を書くか」の手順として上から読める。コメントはコードの言い換えではなく、その塊の目的（なぜ取るか・なぜ抜けるか）を書く。
 
 ## 単一ステップは map / andThen で十分
 
