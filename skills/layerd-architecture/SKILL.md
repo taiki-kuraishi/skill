@@ -1,6 +1,6 @@
 ---
 name: layerd-architecture
-description: レイヤードアーキテクチャ（client / repository / use case / service / utils・libs）で TypeScript の class やファイルを書く・修正する・レビューするときの規約。各層の責務と置き場所の判断、外部 API・SDK を呼ぶ client の設計（API key・timeout の隠蔽、エラーの値化、レスポンスの parse、endpoint と method の 1 対 1）、DB の repository の設計（1 table 1 repository、join 時の命名、transaction を持たない、1 query 1 method）、use case の execute への集約と Result.gen による合成、Cloudflare Workflow の step と use case の対応、service・utils・libs を作ってよい条件を扱う。client・repository・usecase・steps・service・utils・libs の新規作成やメソッド追加、処理の置き場所に迷う場面、レビュー指摘への対応では必ず使用すること。
+description: レイヤードアーキテクチャ（client / repository / use case / service / utils・libs）で TypeScript の class やファイルを書く・修正する・レビューするときの規約。各層の責務と置き場所の判断、層のファイルを class で書きモジュール直下に独立した関数を置かないこと（class 専用の処理は private method、共有処理は utils・libs へ移す）、外部 API・SDK を呼ぶ client の設計（API key・timeout の隠蔽、エラーの値化、レスポンスの parse、endpoint と method の 1 対 1）、DB の repository の設計（1 table 1 repository、join 時の命名、transaction を持たない、1 query 1 method）、use case の execute への集約と Result.gen による合成、Cloudflare Workflow の step と use case の対応、service・utils・libs を作ってよい条件を扱う。client・repository・usecase・steps・service・utils・libs の新規作成やメソッド追加、ヘルパー関数の置き場所に迷う場面、レビュー指摘への対応では必ず使用すること。
 ---
 
 # layerd-architecture
@@ -14,6 +14,30 @@ use case が client / repository を呼ぶ一方向の構成。処理はまず�
 | use case     | `src/steps` など         | client / repository の呼び出しと結果の合成                 |
 | service      | `src/service`            | 上の 3 層に属さない処理。作る前に user の承認を取る        |
 | utils / libs | `src/utils` / `src/libs` | 複数ファイルで使う stateless な関数 / ライブラリ設定・定数 |
+
+## 層のファイルは class で書き、モジュール直下に関数を置かない
+
+client / repository / use case のファイルには class だけを書く。その class でしか使わない処理は private method にし、複数ファイルで使う stateless な処理は utils / libs に移す。use case は private method を持たないので、後述の通り client / repository へ寄せる。
+
+```ts
+// Bad: どの class にも属さない関数がファイルに浮いている
+const normalizeWhitespace = (text: string) => text.replace(/\s+/g, " ").trim();
+const toPrompt = (answer: Answer) => `...${normalizeWhitespace(answer.text)}`;
+
+export class JudgeClient {
+  public judge = (answer: Answer) => this.createResponse({ input: toPrompt(answer) });
+}
+
+// Good: class 専用の処理は private method、汎用の処理は utils から import する
+import { normalizeWhitespace } from "../utils/string";
+
+export class JudgeClient {
+  public judge = (answer: Answer) => this.createResponse({ input: this.toPrompt(answer) });
+  private toPrompt = (answer: Answer) => `...${normalizeWhitespace(answer.text)}`;
+}
+```
+
+なぜ: class に収めればファイルの責務は public / private method がすべてになり、誰が使う処理かをアクセス修飾子で読める。浮いた関数は所属が曖昧で、他のファイルから import されると層の境界を越えた依存になる。
 
 ## client は外部サービスとの境界を閉じる
 
