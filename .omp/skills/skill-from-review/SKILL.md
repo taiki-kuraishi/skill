@@ -9,21 +9,21 @@ metadata:
 
 コードレビューの指摘を、ライブラリ単位の SKILL として SKILL 配布リポジトリに蓄積する手順。
 
-このリポジトリは vercel-labs/skills 互換の SKILL 配布リポジトリ（`skills/<name>/SKILL.md` 規約）。レビュー指摘は「特定ライブラリ・言語を書くときに今後も効く規約」に変換して蓄える。1 回限りの修正指示は SKILL 化しない。
+このリポジトリは vercel-labs/skills 互換の SKILL 配布リポジトリ（`skills/tk-stack-<name>/SKILL.md` 規約）。レビュー指摘は「特定ライブラリ・言語を書くときに今後も効く規約」に変換して蓄える。1 回限りの修正指示は SKILL 化しない。
 
 ## 手順
 
-1. **指摘を分類する** — 指摘を 1 件ずつ読み、「どのライブラリ / 言語 / フレームワークを書くときに効く規約か」で分類する。同じ対象に属する指摘は 1 つの SKILL にまとめる。例: 「関数の返型を書かない」「早期 return」→ `typescript`、「Result.gen の書き方」→ `better-result`
-2. **追記 or 新規作成を決める** — `skills/` 配下に同名（対象ライブラリ名）の SKILL があれば既存のスタイルと構成を踏襲して追記する。なければ新規作成する
+1. **指摘を分類する** — 指摘を 1 件ずつ読み、「どのライブラリ / 言語 / フレームワークを書くときに効く規約か」で分類する。同じ対象に属する指摘は 1 つの SKILL にまとめる。例: 「関数の返型を書かない」「早期 return」→ `tk-stack-typescript`、「Result.gen の書き方」→ `tk-stack-better-result`
+2. **追記 or 新規作成を決める** — `skills/` 配下に `tk-stack-<対象ライブラリ名>` の SKILL があれば既存のスタイルと構成を踏襲して追記する。なければ新規作成する
 3. **SKILL.md を書く** — 新規作成時の要件:
-   - ディレクトリ: `skills/<library-name>/SKILL.md`（`<library-name>` は lowercase、hyphen 区切り）
+   - ディレクトリ: `skills/tk-stack-<library-name>/SKILL.md`（`tk-stack-` prefix を付け、`<library-name>` は lowercase、hyphen 区切り）
    - フロントマターは `name`（ディレクトリ名と一致）と `description` のみ必須
    - `description` は trigger 判定の唯一の材料。「何をする規約か + どの場面で発火するか（ライブラリ名、扱う概念、依頼種別: 作成 / 修正 / レビュー）」を具体的に、やや積極的に書く
    - `description` に ASCII のコロン（`file:line` など）を含むときは値全体をシングルクォートで括る。裸のコロンは YAML パースエラーになり、SKILL が黙ってスキップされる
    - 各規約に Bad / Good のコード例と「なぜ」を 1〜2 文添える。MUST の羅列ではなく理由で語る
    - 対象リポジトリ固有の文脈（ファイル名や専用のドメイン語）を書かない。規約は他のプロジェクトでも使える形に一般化する
    - SKILL.md は短く保つ（目安 100 行以下）
-   - 新規作成したら `skills/skill-review/SKILL.md` の SKILL 一覧と `description` に名前を追記する。一覧に無い SKILL はレビューで読まれない
+   - 新規作成したら `skills/tk-stack-skill-review/SKILL.md` の SKILL 一覧と `description` に名前を追記する。一覧に無い SKILL はレビューで読まれない
 4. **検証する** — ユーザーの agent 環境を変えないよう `/tmp` 下の作業ディレクトリで `bunx skills add <repo-path> --agent claude-code -y` を実行し、対象 SKILL が発見・インストールされることを確認する。リポジトリ本体は stage / commit しない（user の指示があるまで）
 5. **user review に回す** — 変更ファイルと検証証拠を示してレビューを依頼する
 

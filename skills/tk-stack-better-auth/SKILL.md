@@ -1,11 +1,11 @@
 ---
-name: better-auth
+name: tk-stack-better-auth
 description: better-auth を使うアプリのテストを書く・修正する・レビューするときの規約。testUtils plugin 付きのテスト用 better-auth instance と in-memory DB（drizzle + PGlite など）のライフサイクルを TestAuthDatabase class に閉じ込め、テストケースの Arrange で user を作り、その cookie や認証ヘッダーで Playwright の E2E や API テストを行う書き方を扱う。ログイン済み前提のテスト、セッションや cookie の用意、betterAuth / drizzleAdapter / testUtils / getCookies / getAuthHeaders を含むテストヘルパーの作成、レビュー指摘への対応でも発火させる。
 ---
 
-# better-auth
+# tk-stack-better-auth
 
-better-auth を使うアプリをテストするときの規約。理由を理解した上で適用すること。DB を in-memory に差し替える手順は drizzle-orm の SKILL を参照。
+better-auth を使うアプリをテストするときの規約。理由を理解した上で適用すること。DB を in-memory に差し替える手順は tk-stack-drizzle-orm の SKILL を参照。
 
 ## テスト用 instance と DB のライフサイクルを 1 つの class に閉じ込める
 

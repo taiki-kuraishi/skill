@@ -1,9 +1,9 @@
 ---
-name: testing
+name: tk-stack-testing
 description: テストコードを書く・修正する・レビューするときの規約。spec ファイルやテスト関数を扱う場面すべてで使用すること — テスト本体に Arrange / Act / Assert のコメントを付ける構造化、テストデータを seed スクリプトや共有 fixture ではなく各テストケースの Arrange で作り、beforeEach / afterEach で DB を毎回まっさらに戻す方針など。テストの新規作成、修正、DB を使うテストの準備、レビュー指摘への対応でも発火させる。
 ---
 
-# testing
+# tk-stack-testing
 
 テストコードを書くときの規約。理由を理解した上で適用すること。
 

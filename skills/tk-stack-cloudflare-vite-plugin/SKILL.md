@@ -1,11 +1,11 @@
 ---
-name: cloudflare-vite-plugin
+name: tk-stack-cloudflare-vite-plugin
 description: Vite でビルドして Cloudflare Workers にデプロイするアプリを書く・修正する・レビューするときの規約。Worker script が無い assets-only の SPA や静的サイトも含め、@cloudflare/vite-plugin の cloudflare() でビルドし、wrangler の設定を vite.config.ts で自前で読まない構成を扱う。vite.config.ts の plugins・define・build.outDir の編集、wrangler.jsonc の assets（directory、not_found_handling）設定、unstable_readConfig の利用、CLOUDFLARE_ENV によるステージ切り替え、レビュー指摘への対応でも発火させる。
 ---
 
-# cloudflare-vite-plugin
+# tk-stack-cloudflare-vite-plugin
 
-[Cloudflare Vite plugin](https://developers.cloudflare.com/workers/vite-plugin/) を使うときの規約。理由を理解した上で適用すること。クライアントコードでの環境変数の読み方は vite の SKILL を参照。
+[Cloudflare Vite plugin](https://developers.cloudflare.com/workers/vite-plugin/) を使うときの規約。理由を理解した上で適用すること。クライアントコードでの環境変数の読み方は tk-stack-vite の SKILL を参照。
 
 ## Cloudflare Workers へは @cloudflare/vite-plugin でビルドする
 

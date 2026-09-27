@@ -1,22 +1,22 @@
 ---
-name: skill-review
-description: taiki-kuraishi/skill リポジトリの SKILL（better-auth、better-result、cloudflare-vite-plugin、drizzle-orm、hono、layerd-architecture、playwright、testing、typescript、vite）を読み込み、その規約からズレているコードを指摘するレビュー手順。コードレビュー、diff・PR のレビュー、「SKILL・規約に沿っているか見て」という依頼、実装後の自己レビューで使用すること。
+name: tk-stack-skill-review
+description: taiki-kuraishi/skill リポジトリの SKILL（tk-stack-better-auth、tk-stack-better-result、tk-stack-cloudflare-vite-plugin、tk-stack-drizzle-orm、tk-stack-hono、tk-stack-layerd-architecture、tk-stack-playwright、tk-stack-testing、tk-stack-typescript、tk-stack-vite）を読み込み、その規約からズレているコードを指摘するレビュー手順。コードレビュー、diff・PR のレビュー、「SKILL・規約に沿っているか見て」という依頼、実装後の自己レビューで使用すること。
 ---
 
-# skill-review
+# tk-stack-skill-review
 
 コードを、taiki-kuraishi/skill リポジトリで定義された下記の SKILL の規約と突き合わせてレビューする。指摘の根拠はすべてこれらの規約に置く。根拠が SKILL にあれば、指摘された側は規約を読んで納得でき、合意済みのルールとレビュアーの好みが混ざらない。
 
-- `better-auth`
-- `better-result`
-- `cloudflare-vite-plugin`
-- `drizzle-orm`
-- `hono`
-- `layerd-architecture`
-- `playwright`
-- `testing`
-- `typescript`
-- `vite`
+- `tk-stack-better-auth`
+- `tk-stack-better-result`
+- `tk-stack-cloudflare-vite-plugin`
+- `tk-stack-drizzle-orm`
+- `tk-stack-hono`
+- `tk-stack-layerd-architecture`
+- `tk-stack-playwright`
+- `tk-stack-testing`
+- `tk-stack-typescript`
+- `tk-stack-vite`
 
 ## 手順
 
@@ -35,19 +35,19 @@ SKILL や対象ファイルが多く、subagent が使える環境なら、手�
 ```md
 ## 違反
 
-- `src/client/judge.ts:42` — [typescript] else・三項演算子を使わない。早期 return する
+- `src/client/judge.ts:42` — [tk-stack-typescript] else・三項演算子を使わない。早期 return する
   - ズレ: 異常系が else の中にあり、主処理がネストしている
   - 修正案: `if (!res.ok) { return Result.err(...) }` を先に置き、else を外す
 
 ## 要確認
 
-- `src/steps/launch.ts:10` — [layerd-architecture] use case は execute だけを持つ
+- `src/steps/launch.ts:10` — [tk-stack-layerd-architecture] use case は execute だけを持つ
   - 判断が割れる理由: ...
 
 ## 確認済み
 
-- 違反なし: better-result, testing
-- 適用外: playwright（ブラウザテストが対象に無い）
+- 違反なし: tk-stack-better-result, tk-stack-testing
+- 適用外: tk-stack-playwright（ブラウザテストが対象に無い）
 ```
 
 ## 判断の目安

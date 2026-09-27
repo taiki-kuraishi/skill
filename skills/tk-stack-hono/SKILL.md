@@ -1,9 +1,9 @@
 ---
-name: hono
+name: tk-stack-hono
 description: Hono の RPC を使う TypeScript コードを書く・修正する・レビューするときの規約。型付きクライアント（hono/client の hc、hc<typeof app>、AppType、hcWithType）を API サーバーのパッケージから export し、フロントエンドや他のサービスはそれを import するだけにする構成を扱う。monorepo で API とクライアント（SPA、別 Worker、テスト）が別パッケージになっている場面、RPC クライアントの作成、package.json の exports 設計、レビュー指摘への対応でも発火させる。
 ---
 
-# hono
+# tk-stack-hono
 
 [Hono](https://hono.dev/docs/guides/rpc) の RPC を書くときの規約。理由を理解した上で適用すること。
 

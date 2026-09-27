@@ -1,9 +1,9 @@
 ---
-name: vite
+name: tk-stack-vite
 description: Vite でビルドするフロントエンドのコードを書く・修正する・レビューするときの規約。環境変数（import.meta.env、VITE_ prefix、.env ファイル、ImportMetaEnv の型宣言）の読み方を扱う。API の URL などビルド時の値をクライアントに渡すコード、env や config を包む定数モジュールの作成、vite-env.d.ts の編集、レビュー指摘への対応でも発火させる。
 ---
 
-# vite
+# tk-stack-vite
 
 [Vite](https://vite.dev/guide/env-and-mode) を書くときの規約。理由を理解した上で適用すること。
 

@@ -1,10 +1,10 @@
 ---
-name: better-result
+name: tk-stack-better-result
 description: better-result ライブラリ（Result 型）を使う TypeScript コードを書く・修正するときの規約。Result.gen による generator-based 合成の書き方（yield* するステップや条件分岐ごとの空行・コメントによる区切りを含む）と、Result.tryPromise / Result.try で包む処理の粒度を扱う。better-result の import、Result 型のエラー処理、fallible なステップの連結、例外を投げる処理の Result 化、TaggedError を含むコードを書く・レビューする場面では必ず使用すること。
 disable-model-invocation: false
 ---
 
-# better-result
+# tk-stack-better-result
 
 [better-result](https://better-result.dev)（Result 型ライブラリ）を書くときの規約。
 
@@ -38,7 +38,7 @@ public execute = (payload) =>
 - unwrap は必ず `yield*`。plain `yield` は Result 全体を渡すことになり型エラーになる
 - body の return は必ず `Result.ok(...)` / `Result.err(...)`。裸の値を返すと Panic（throw）する
 - guard 句は Err を直接 yield して即 short-circuit: `if (!user.active) { yield* new InactiveUser({...}); }`
-- エラー型は手書きしない。yield した Err と return した Result から自動 union される（typescript skill の「戻り値の型アノテーションは書かない」と整合）
+- エラー型は手書きしない。yield した Err と return した Result から自動 union される（tk-stack-typescript skill の「戻り値の型アノテーションは書かない」と整合）
 - 非同期ステップは `Result.gen(async function* () { ... })` の中で `yield* await promise` で受ける。`Result.await(promise)` を挟まない
 
   ```ts

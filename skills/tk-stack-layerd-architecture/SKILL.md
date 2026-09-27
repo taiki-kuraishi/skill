@@ -1,9 +1,9 @@
 ---
-name: layerd-architecture
+name: tk-stack-layerd-architecture
 description: レイヤードアーキテクチャ（client / repository / use case / service / utils・libs）で TypeScript の class やファイルを書く・修正する・レビューするときの規約。各層の責務と置き場所の判断、層のファイルを class で書きモジュール直下に独立した関数を置かないこと（class 専用の処理は private method、共有処理は utils・libs へ移す）、外部 API・SDK を呼ぶ client の設計（API key・timeout の隠蔽、エラーの値化、レスポンスの parse、endpoint と method の 1 対 1）、DB の repository の設計（1 table 1 repository、join 時の命名、transaction を持たない、1 query 1 method）、use case の execute への集約と Result.gen による合成、Cloudflare Workflow の step と use case の対応、service・utils・libs を作ってよい条件を扱う。client・repository・usecase・steps・service・utils・libs の新規作成やメソッド追加、ヘルパー関数の置き場所に迷う場面、レビュー指摘への対応では必ず使用すること。
 ---
 
-# layerd-architecture
+# tk-stack-layerd-architecture
 
 use case が client / repository を呼ぶ一方向の構成。処理はまず下表のどれかに置き、どこにも属さないものだけを service にする。
 

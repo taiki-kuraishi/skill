@@ -1,9 +1,9 @@
 ---
-name: playwright
+name: tk-stack-playwright
 description: Playwright（@playwright/test）でブラウザテストを書く・修正する・レビューするときの規約。VRT（ビジュアルリグレッションテスト、toHaveScreenshot）と E2E テストの置き場所・実行環境・assert 対象の分け方、E2E のテストケース粒度（URL を変える操作単位、toHaveURL での検証）を扱う。spec ファイルの新規作成、テスト追加先の判断、playwright config の作成、レビュー指摘への対応でも発火させる。
 ---
 
-# playwright
+# tk-stack-playwright
 
 Playwright でブラウザテストを書くときの規約。理由を理解した上で適用すること。
 

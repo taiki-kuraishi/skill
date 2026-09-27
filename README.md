@@ -8,7 +8,7 @@ vercel-labs/skills 互換の SKILL 配布リポジトリ。
 bunx skills add taiki-kuraishi/skill
 ```
 
-SKILL は `skills/<name>/SKILL.md` の構成で追加する（`skills/` 内で `bunx skills init <name>` を実行、または SKILL.md を直接作成）。フロントマターの必須項目は `name` と `description`。
+SKILL は `skills/tk-stack-<name>/SKILL.md` の構成で追加する。`name` にも同じ `tk-stack-` prefix を付ける（`skills/` 内で `bunx skills init tk-stack-<name>` を実行、または SKILL.md を直接作成）。フロントマターの必須項目は `name` と `description`。
 
 ## 開発環境
 
