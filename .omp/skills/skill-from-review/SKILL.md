@@ -23,6 +23,7 @@ metadata:
    - 各規約に Bad / Good のコード例と「なぜ」を 1〜2 文添える。MUST の羅列ではなく理由で語る
    - 対象リポジトリ固有の文脈（ファイル名や専用のドメイン語）を書かない。規約は他のプロジェクトでも使える形に一般化する
    - SKILL.md は短く保つ（目安 100 行以下）
+   - 新規作成したら `skills/skill-review/SKILL.md` の SKILL 一覧と `description` に名前を追記する。一覧に無い SKILL はレビューで読まれない
 4. **検証する** — ユーザーの agent 環境を変えないよう `/tmp` 下の作業ディレクトリで `bunx skills add <repo-path> --agent claude-code -y` を実行し、対象 SKILL が発見・インストールされることを確認する。リポジトリ本体は stage / commit しない（user の指示があるまで）
 5. **user review に回す** — 変更ファイルと検証証拠を示してレビューを依頼する
 
