@@ -1,6 +1,6 @@
 ---
 name: skill-review
-description: taiki-kuraishi/skill リポジトリの SKILL（better-auth、better-result、drizzle-orm、layerd-architecture、playwright、testing、typescript）を読み込み、その規約からズレているコードを指摘するレビュー手順。コードレビュー、diff・PR のレビュー、「SKILL・規約に沿っているか見て」という依頼、実装後の自己レビューで使用すること。
+description: taiki-kuraishi/skill リポジトリの SKILL（better-auth、better-result、cloudflare-vite-plugin、drizzle-orm、hono、layerd-architecture、playwright、testing、typescript、vite）を読み込み、その規約からズレているコードを指摘するレビュー手順。コードレビュー、diff・PR のレビュー、「SKILL・規約に沿っているか見て」という依頼、実装後の自己レビューで使用すること。
 ---
 
 # skill-review
@@ -9,11 +9,14 @@ description: taiki-kuraishi/skill リポジトリの SKILL（better-auth、bette
 
 - `better-auth`
 - `better-result`
+- `cloudflare-vite-plugin`
 - `drizzle-orm`
+- `hono`
 - `layerd-architecture`
 - `playwright`
 - `testing`
 - `typescript`
+- `vite`
 
 ## 手順
 
