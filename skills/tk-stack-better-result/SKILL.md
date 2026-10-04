@@ -1,6 +1,6 @@
 ---
 name: tk-stack-better-result
-description: better-result ライブラリ（Result 型）を使う TypeScript コードを書く・修正するときの規約。Result.gen による generator-based 合成の書き方（yield* するステップや条件分岐ごとの空行・コメントによる区切りを含む）と、Result.tryPromise / Result.try で包む処理の粒度を扱う。better-result の import、Result 型のエラー処理、fallible なステップの連結、例外を投げる処理の Result 化、TaggedError を含むコードを書く・レビューする場面では必ず使用すること。
+description: better-result ライブラリ（Result 型）を使う TypeScript コードを設計する・書く・修正するときの規約。Result.gen による generator-based 合成の書き方（yield* するステップや条件分岐ごとの空行・コメントによる区切りを含む）、Result.tryPromise / Result.try で包む処理の粒度、エラーの種類の分け方（扱いを変える失敗は返す時点で別の TaggedError にし、isXxx のような判定関数で後から分類しない）を扱う。better-result の import、Result 型のエラー処理、fallible なステップの連結、例外を投げる処理の Result 化、TaggedError の定義、エラーの種類に応じたログレベル・リトライ・レスポンスの出し分けを含むコードや設計書を書く・レビューする場面では必ず使用すること。
 disable-model-invocation: false
 ---
 
@@ -124,3 +124,35 @@ const save = (args) =>
 ```
 
 なぜ: `catch` は 1 つしかないため、`try` に複数の処理があるとどこで失敗しても同じエラーに丸められ、DB と無関係な失敗まで `DbQueryError` として報告される。処理ごとに包めば失敗箇所がエラー型に表れ、`Result.gen` がそれらを union するので呼び出し側で区別して扱える。
+
+## 扱いを変える失敗は、返す時点で別の TaggedError にする
+
+呼び出し側で扱い（ログレベル、リトライ、レスポンス）を変える失敗は、失敗を検出した時点で専用の TaggedError として返す。汎用のエラーに status や message を詰めて返し、`isNotFound(error)` のような判定関数や `error.status === 404` の分岐で後から分類しない（設計段階でも同じ）。
+
+```ts
+// Bad: 404 も 500 も ApiResponseError に詰め、呼び出し側が status を見て分類し直す
+if (!res.ok) {
+  return Result.err(new ApiResponseError({ status: res.status, message: await res.text() }));
+}
+
+// false 側では 500 の ApiResponseError も型から消え、DbQueryError だけになる
+const isNotFound = (error: ApiResponseError | DbQueryError): error is ApiResponseError =>
+  error._tag === "ApiResponseError" && error.status === 404;
+
+// Good: status を読んだ client が、その場で意味ごとのエラーを返す
+if (res.status === 404) {
+  return Result.err(new UserNotFoundError({ userId, message: `user ${userId} not found` }));
+}
+if (!res.ok) {
+  return Result.err(new ApiResponseError({ status: res.status, message: await res.text() }));
+}
+
+// 呼び出し側は _tag で分ける。エラーの種類が増えると match が型エラーで知らせる
+result.error.match({
+  UserNotFoundError: (error) => console.warn(error.message),
+  ApiResponseError: (error) => console.error(error.message),
+  DbQueryError: (error) => console.error(error.message),
+});
+```
+
+なぜ: エラーを値で返すのは、起きうる失敗を型に載せて呼び出し側に扱わせるため。後から判定すると意味が status や message の値に埋もれ、判定の呼び忘れや分類の漏れを型検査で検出できない。status の意味を知るのは client なので、分類も client で済ませる。
