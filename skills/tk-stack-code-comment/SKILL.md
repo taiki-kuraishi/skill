@@ -1,6 +1,6 @@
 ---
 name: tk-stack-code-comment
-description: コードコメントの規約。言語を問わず、コードや設定ファイル（TypeScript、JavaScript、Python、Go、シェルスクリプト、YAML、TOML、JSONC など）を書く・修正する・レビューする場面すべてで使用すること — コメント・docstring・JSDoc にコードの what を書かず、コードから読めない why だけを書く。why が無ければコメントを書かない。コメントを書くつもりが無くても生成するコードにはコメントが入りうるので、コード生成、リファクタリング、バグ修正、設定ファイルの編集、レビュー指摘への対応でも発火させる。
+description: コードコメントの規約。言語を問わず、コードや設定ファイル（TypeScript、JavaScript、Python、Go、シェルスクリプト、YAML、TOML、JSONC など）を書く・修正する・レビューする場面すべてで使用すること — コメント・docstring・JSDoc にコードの what を書かず、コード・ドキュメント・外部の設定のどこにも書かれていない why だけを書く。why が無ければコメントを書かない。コメントを書くつもりが無くても生成するコードにはコメントが入りうるので、コード生成、リファクタリング、バグ修正、設定ファイルの編集、レビュー指摘への対応でも発火させる。
 ---
 
 # tk-stack-code-comment
@@ -33,3 +33,43 @@ set -euo pipefail
 なぜ: what はコード自身が正確に示しているので、言い換えたコメントは読む量を増やすうえ、コードを変えたときに古い説明が残って嘘になる。ライブラリや設定オプションの挙動の解説も what にあたり、ドキュメントに任せる。
 
 例外: 処理の区切りに見出しコメントを付けるよう別の SKILL が定めている箇所は、その SKILL に従う。関数を合成する `Result.gen` のステップ（tk-stack-better-result）や、テストの Arrange / Act / Assert（tk-stack-testing）がこれにあたる。これらの見出しは個々の行の言い換えではなく、複数のステップを繋ぐ流れを上から読むための目次として働く。
+
+## 理由の形をした what も書かない
+
+「〜ので」「〜しないと」と理由の形で書いても、中身がコード（同じファイルの別の行を含む）、使っているライブラリ・ツール・実行基盤のドキュメント、外部の設定（ruleset など）のどこかに書かれていることなら what にあたる。why として残すのは、コードを読む人が抱く疑問（なぜ定石と違う書き方なのか、なぜこの値なのか）への答えのうち、そのどこにも書かれていないものだけ。
+
+```yaml
+permissions:
+  contents: read
+  # Bad: action のドキュメントにある要件を、理由の形で言い換えている
+  # paths-filter は変更ファイル一覧を API から取るので、pull-requests: read が要る
+  pull-requests: read
+
+jobs:
+  changes:
+    steps:
+      # Bad: 同じファイルにある各 job の if: が示す挙動を、理由の形で言い換えている
+      # workflow_dispatch では各 job の if: で全 job を走らせるので、PR 以外では filter しない
+      - if: github.event_name == 'pull_request'
+        uses: dorny/paths-filter@v4
+
+  # Bad: 外部の設定（ruleset）を写している
+  # required check として ruleset に登録するのはこの job だけ（job 名は ruleset 側と対で固定）
+  all-green:
+    needs: [changes, lint]
+    if: always()
+```
+
+```yaml
+# Good: 定石の paths: をなぜ使わないのかは、どこにも書かれていない
+# workflow の paths: で絞らない。workflow ごと skip されると required check が Pending のまま残り、merge できなくなる
+on:
+  pull_request:
+
+permissions:
+  contents: read
+  # Good: ドキュメントから分かる要件にはコメントを書かない
+  pull-requests: read
+```
+
+なぜ: 中身がコード・ドキュメント・設定の言い換えなら、理由の形をしていても what と同じく読む量を増やし、元が変わったときに嘘になる。定石を避けた判断や配信元の癖のような事情はどこにも書かれていないので、コメントにしか残せない。
