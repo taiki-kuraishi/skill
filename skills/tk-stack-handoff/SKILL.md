@@ -1,22 +1,22 @@
 ---
 name: tk-stack-handoff
-description: root session がタスクごとに wt の worktree と herdr の子 workspace で omp を起動して委任し、子の質問に intercom で答え（答えられなければ user に聞き）、1 タスク 1 PR を user の承認後に子が merge する開発フロー
+description: repo 本体の default branch で動く root session が、タスクごとに wt の worktree と、root の herdr workspace の下の子 workspace で omp を起動して委任し、子の質問に intercom で答え（答えられなければ user に聞き）、1 タスク 1 PR を user の承認後に子が merge する開発フロー
 disable-model-invocation: true
 ---
 
 # tk-stack-handoff
 
-root session が、委任するタスクごとに wt で worktree を作り、herdr の子 workspace で omp（子）を起動して引き継ぎ prompt を送る。子は作業が止まる疑問を intercom で root に聞き、root は答えられなければ user に聞いて子に返す。子は終わったら default branch への PR を作る。user が PR を review して承認したら、root がそれを子に伝え、子が merge して root に返す。root は自分の branch を merge 後の default branch に rebase して片付け、前提がそろったタスクを起動する。1 タスクは 1 PR にする。root はやり取りと統合を持ち、実装は子に任せる。
+root session は repo 本体の checkout の default branch で動き、委任するタスクごとに wt で worktree を作り、root の herdr workspace の下に開いた子 workspace で omp（子）を起動して引き継ぎ prompt を送る。子は作業が止まる疑問を intercom で root に聞き、root は答えられなければ user に聞いて子に返す。子は終わったら default branch への PR を作る。user が PR を review して承認したら、root がそれを子に伝え、子が merge して root に返す。root は自分の checkout を merge 後の default branch に進めて片付け、前提がそろったタスクを起動する。1 タスクは 1 PR にする。root はやり取りと統合を持ち、実装と commit は子に任せる。
 
 `tk-stack-interface-first-development` の「引き継ぐ」から来たら、フェーズごとの引き継ぎ prompt と順序（例: `1 → 2 と 3 を並列 → 4`）をそのまま使う。
 
 ## 手順
 
-1. **確かめる** — herdr の中にいること（`test "${HERDR_ENV:-}" = 1`）、intercom がつながっていること（`intercom({ action: "status" })` が `Connected: Yes`）、gh が使えること（`gh auth status`）を確かめる。欠けていたら user に伝えて止まる（intercom tool が無ければ `omp plugin install pi-intercom` の後に omp の再起動が要る）。status の `Session ID`（子から見た root の宛先）、root の worktree（`git rev-parse --show-toplevel`）、repo 本体の checkout（`herdr worktree list --cwd "$PWD"` の `.result.source.source_checkout_path`）、default branch（`gh repo view --json defaultBranchRef -q .defaultBranchRef.name`）を控える。完了条件: 4 つの値がそろっている
+1. **確かめる** — herdr の中にいること（`test "${HERDR_ENV:-}" = 1`）、intercom がつながっていること（`intercom({ action: "status" })` が `Connected: Yes`）、gh が使えること（`gh auth status`）、root が repo 本体の checkout の default branch にいること（`git rev-parse --show-toplevel` が `git worktree list` の 1 行目の path で、`git branch --show-current` が `gh repo view --json defaultBranchRef -q .defaultBranchRef.name` と同じ）を確かめる。欠けていたら user に伝えて止まる（intercom tool が無ければ `omp plugin install pi-intercom` の後に omp の再起動が要る。root が linked worktree や別の branch にいたら、repo 本体の workspace に tab を足して default branch で起動し直してもらう）。status の `Session ID`（子から見た root の宛先）、root の checkout（`git rev-parse --show-toplevel`）、default branch を控える。完了条件: 3 つの値がそろっている
 2. **タスクをそろえる** — タスクごとに、下の「命名」の `<feature>` と `<task>`、引き継ぎ prompt、完了条件、前提のタスクを決め、todo に 1 タスク 1 項目で書く（compaction の後も残る）。子は会話の履歴を持たないので、root だけが知っている決定（user と合意済みの未決事項など）は、起動の前に設計書（無ければ引き継ぎ prompt）へ書き足す。完了条件: すべてのタスクに名前・引き継ぎ prompt・完了条件・前提があり、子が聞かずに済む決定が書かれている
 3. **起動する** — 前提のタスクの PR がすべて merge 済みのタスクを、下の「起動」で全部起動する。branch・子 workspace・worktree の表を user に示し、待つタスクの todo を block にしてから（待ちの理由を残すと、turn の終わりに omp が未完了の todo を催促しない）、turn を終えて子の message を待つ。完了条件: 起動したすべての子が `working` になった
 4. **子に応える** — 子の message が届くたびに、下の「子とのやり取り」に従って返す。PR を作ったという報告が来たら user に review を頼んで turn を終え、user の返事を待つ。完了条件: 届いた message すべてに、答えか review の結果（承認または指摘）を返した
-5. **統合する** — 承認されたタスクを、下の「統合」で子に merge させ、root の branch を rebase して片付ける。前提がそろったタスクができたら 3 へ、作業中の子が残っていれば turn を終えて 4 へ戻る。完了条件: すべてのタスクの PR が merge され、子の workspace・worktree・branch が残っていない。最後に、merge した PR と root の branch の HEAD を user に報告する
+5. **統合する** — 承認されたタスクを、下の「統合」で子に merge させ、root の checkout を default branch の最新に進めて片付ける。前提がそろったタスクができたら 3 へ、作業中の子が残っていれば turn を終えて 4 へ戻る。完了条件: すべてのタスクの PR が merge され、子の workspace・worktree・branch が残っていない。最後に、merge した PR と root の checkout の HEAD を user に報告する
 
 ## 命名
 
@@ -41,11 +41,11 @@ root session が、委任するタスクごとに wt で worktree を作り、he
 
 ```bash
 # 1. default branch の最新から worktree を切る。stdout の JSON の .path を控える
-git -C <root の worktree> fetch --prune origin
-wt -C <root の worktree> switch --create ho/<feature>/<task> --base origin/<default branch> --no-cd --format json
+git -C <root の checkout> fetch --prune origin
+wt -C <root の checkout> switch --create ho/<feature>/<task> --base origin/<default branch> --no-cd --format json
 
-# 2. repo 本体の workspace の下に子 workspace を開く。.result.workspace.workspace_id と .result.root_pane.pane_id を控える
-herdr worktree open --cwd <repo 本体の checkout> --path <path> --label "ho:<feature>/<task>" --no-focus
+# 2. root の workspace の下に子 workspace を開く。.result.workspace.workspace_id と .result.root_pane.pane_id を控える
+herdr worktree open --workspace "$HERDR_WORKSPACE_ID" --path <path> --label "ho:<feature>/<task>" --no-focus
 
 # 3. omp を起動する。入力を受け付けられるようになってから返る
 herdr agent start ho-<feature>-<task> --kind omp --pane <pane_id> --timeout 60000
@@ -58,8 +58,8 @@ herdr agent prompt ho-<feature>-<task> "$(cat /tmp/ho-<feature>-<task>.md)" --wa
 ```
 
 - worktree は wt で作る。wt の path の決まりと hooks が通る
-- base を root の branch ではなく `origin/<default branch>` にするのは、PR の差分をそのタスクの変更だけにするため
-- herdr は子 workspace を repo 本体の workspace の下にだけ開ける。root の workspace が linked worktree のとき `--workspace "$HERDR_WORKSPACE_ID"` は `linked_worktree_source` で失敗するので、`--cwd` に repo 本体の checkout を渡す。repo 本体の workspace が開いていなければ herdr が作る
+- base を手元の default branch ではなく `origin/<default branch>` にするのは、直前の fetch で取った最新から切るため（手元の default branch は統合でしか進まない）
+- root を repo 本体の checkout で動かすのは、herdr が子 workspace を repo 本体の workspace の下にだけ開けるため。root が linked worktree にいると `--workspace "$HERDR_WORKSPACE_ID"` は `linked_worktree_source` で失敗し、`--cwd` に repo 本体を渡すと子は root と別の workspace の下に並んで、どの root の子か user が追えなくなる
 - 引き継ぎ prompt を file から渡すのは、改行・引用符・backtick を shell の quote で壊さないため
 - `agent start` が `agent_not_ready` を返したら、`herdr agent read ho-<feature>-<task> --source visible --lines 40` で画面を読み、user に報告する
 
@@ -94,19 +94,20 @@ herdr agent prompt ho-<feature>-<task> "$(cat /tmp/ho-<feature>-<task>.md)" --wa
 user が承認したタスクごとに、次を順に行う。
 
 1. `intercom({ action: "ask", to: "ho-<feature>-<task>", message: "user が承認しました。PR を merge して、結果を reply してください" })` で、子に PR を merge させる
-2. merge したと返ったら、root の branch を merge 後の default branch にそろえ、片付ける
+2. merge したと返ったら、root の checkout を merge 後の default branch に進め、片付ける
 
 ```bash
-git -C <root の worktree> fetch --prune origin
-# 設計書など root の手元の変更は autostash で退避して戻す
-git -C <root の worktree> rebase --autostash origin/<default branch>
+git -C <root の checkout> fetch --prune origin
+# root は commit しないので fast-forward で進む。手元の設計書はそのまま残る
+git -C <root の checkout> merge --ff-only origin/<default branch>
 # workspace を閉じると子の omp も終わる
 herdr workspace close <workspace_id>
-wt -C <root の worktree> remove ho/<feature>/<task> --foreground
+wt -C <root の checkout> remove ho/<feature>/<task> --foreground
 rm -f /tmp/ho-<feature>-<task>.md
 ```
 
 - 子が merge できなかったら（CI の失敗・衝突・branch protection など）、子が返した理由を user に伝えて止まる
+- 並列の root は、repo 本体の workspace の tab で同じ checkout を共有する。`rebase --autostash` で進めるとほかの root の手元の変更まで stash に巻き込むので、`merge --ff-only` で進め、branch の切り替えも stash もしない。`merge --ff-only` が失敗したら、理由を user に伝えて止まる
 - `wt remove` は、branch の中身が default branch に入っていれば（squash merge でも）branch も消す。branch が残ったら、`gh pr view <PR の URL> --json state` で merge 済みかを確かめて user に報告する
-- remote の branch は、merge 後に自動で消す設定の repo なら GitHub が消す。残っていれば `git -C <root の worktree> push origin --delete ho/<feature>/<task>` で消す
+- remote の branch は、merge 後に自動で消す設定の repo なら GitHub が消す。残っていれば `git -C <root の checkout> push origin --delete ho/<feature>/<task>` で消す
 - 後のタスクは merge 後の default branch から切るので、前提のタスクのコードを持って始まる
