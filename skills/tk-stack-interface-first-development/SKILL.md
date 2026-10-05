@@ -1,6 +1,6 @@
 ---
 name: tk-stack-interface-first-development
-description: root session がファイル構成・API・UI・呼び出しの木・全関数の signature だけを設計書に定義し、フェーズごとの実装を user が開く別 session に引き継ぐ開発フロー
+description: repo 本体の default branch で動く root session が、ファイル構成・API・UI・呼び出しの木・全関数の signature だけを設計書に定義し、フェーズごとの実装を user が開く別 session に引き継ぐ開発フロー
 disable-model-invocation: true
 ---
 
@@ -8,9 +8,11 @@ disable-model-invocation: true
 
 複数フェーズに分かれる大規模な実装で、root session はインターフェースだけを設計書に定義し、実装を user が開く別 session（子）に引き継ぐ。root はコードを書かず、関数の中身や DB のクエリも考えない。その分を、子が設計書だけを読んで迷わず作れること、並列に進む子どうしがつなぎ目で食い違わないことに使う。設計書は root と子の契約で、書き換えるのは root だけにする。
 
+root は repo 本体の checkout（linked worktree ではない）の default branch で起動する。root はコードを書かず commit もしないので、自分の branch は要らない。herdr で委任するとき、子 workspace を root の workspace の下に開けるのも repo 本体の workspace だけ。複数の機能を並列に進めるときは、repo 本体の workspace に tab を足して root を起動し、同じ checkout を共有する（root は branch を切り替えない）。
+
 ## 手順
 
-1. **要件を固める** — 依頼と既存コードを読み、作る画面・endpoint・扱うデータ、使える既存の関数、ファイル配置の規約をつかむ。調査が広ければ subagent に任せ、root の context は設計に残す。設計が分かれる要件は user に聞き、小さな判断は仮置きして設計書の「未決事項」に書く。完了条件: 画面・endpoint・データの一覧と対象外が決まっている
+1. **要件を固める** — root が repo 本体の checkout の default branch にいること（`git rev-parse --show-toplevel` が `git worktree list` の 1 行目の path で、`git branch --show-current` が default branch）を確かめ、違えば、そこで起動し直すよう user に伝えて止まる。依頼と既存コードを読み、作る画面・endpoint・扱うデータ、使える既存の関数、ファイル配置の規約をつかむ。調査が広ければ subagent に任せ、root の context は設計に残す。設計が分かれる要件は user に聞き、小さな判断は仮置きして設計書の「未決事項」に書く。完了条件: 画面・endpoint・データの一覧と対象外が決まっている
 2. **設計書を書く** — 下の「設計書」の節を順に書き、repo に保存する（置き場所の規約が無ければ `docs/design/<機能名>.md`）。完了条件: 次の整合チェックをすべて満たす
    - 画面表示・フォーム送信・cron などの操作ごとに、呼び出しの木がある
    - 呼び出しの木のノードがすべて API・関数の節（既存を含む）にあり、関数の節のすべての関数がどれかの木に現れる
