@@ -1,6 +1,6 @@
 ---
 name: tk-stack-typescript
-description: TypeScript コードを書く・修正する・レビューするときの規約。ts ファイルや TypeScript の関数を扱う場面すべてで使用すること — return 型アノテーションの省略、else を使わない早期 return など。コード生成、リファクタリング、バグ修正、レビュー指摘への対応でも発火させる。
+description: TypeScript コードを書く・修正する・レビューするときの規約。ts ファイルや TypeScript の関数を扱う場面すべてで使用すること — return 型アノテーションやそのためだけの interface・type を書かず導出に任せること、else を使わない早期 return など。コード生成、リファクタリング、バグ修正、レビュー指摘への対応でも発火させる。
 disable-model-invocation: false
 ---
 
@@ -8,21 +8,25 @@ disable-model-invocation: false
 
 TypeScript コードを書くときの規約。理由を理解した上で適用すること。
 
-## 関数の戻り値の型アノテーションは書かない
+## 導出できる型を手書きしない
 
-戻り値の型は TypeScript が導出するため、手書きしない。
+関数の戻り値の型アノテーションも、それを書くためだけの `interface` / `type` も書かず、TypeScript の導出に任せる。
 
 ```ts
-// Bad: 導出できるものを手書きしている
+// Bad: 導出元と同じ形を interface に写し、戻り値に付けている
+interface Content {
+  title: string;
+  body: string;
+}
 const load = (): Promise<Content> => fetchContent();
 
 // Good: 導出に任せる
 const load = () => fetchContent();
 ```
 
-なぜ: アノテーションを書くと内部実装の変更時に 2 箇所のメンテが必要になる。導出で済む情報の手書きはノイズでしかない。
+なぜ: 手書きの型は導出元と同じ情報を二重に持つだけで、内部実装の変更時に 2 箇所のメンテが必要になる。型の名前が要る呼び出し側は `Awaited<ReturnType<typeof load>>` のように導出元から取ればよい。
 
-例外はほぼ無い。意図的に型を絞り込んで公開 API の契約を固定したい場合だけ検討し、書く前に「導出で足りないか」を自問すること。
+例外は TypeScript が戻り値を導出できない場合（自身の戻り値に依存する再帰関数など）だけ。公開 API・RPC・package の境界であることや、依存先の型から独立させたいことは書く理由にならない。境界でも導出した型がそのまま呼び出し側へ伝わる。
 
 ## else・三項演算子を使わない。早期 return する
 
