@@ -13,7 +13,7 @@ root session は repo 本体の checkout の default branch で動き、委任�
 ## 手順
 
 1. **確かめる** — herdr の中にいること（`test "${HERDR_ENV:-}" = 1`）、intercom がつながっていること（`intercom({ action: "status" })` が `Connected: Yes`）、gh が使えること（`gh auth status`）、root が repo 本体の checkout の default branch にいること（`git rev-parse --show-toplevel` が `git worktree list` の 1 行目の path で、`git branch --show-current` が `gh repo view --json defaultBranchRef -q .defaultBranchRef.name` と同じ）を確かめる。欠けていたら user に伝えて止まる（intercom tool が無ければ `omp plugin install pi-intercom` の後に omp の再起動が要る。root が linked worktree や別の branch にいたら、repo 本体の workspace に tab を足して default branch で起動し直してもらう）。status の `Session ID`（子から見た root の宛先）、root の checkout（`git rev-parse --show-toplevel`）、default branch を控える。完了条件: 3 つの値がそろっている
-2. **タスクをそろえる** — タスクごとに、下の「命名」の `<feature>` と `<task>`、引き継ぎ prompt、完了条件、前提のタスクを決め、todo に 1 タスク 1 項目で書く（compaction の後も残る）。子は会話の履歴を持たないので、root だけが知っている決定（user と合意済みの未決事項など）は、起動の前に設計書（無ければ引き継ぎ prompt）へ書き足す。完了条件: すべてのタスクに名前・引き継ぎ prompt・完了条件・前提があり、子が聞かずに済む決定が書かれている
+2. **タスクをそろえる** — タスクごとに、下の「命名」の `<feature>` と `<task>`、引き継ぎ prompt、完了条件、前提のタスクを決め、todo に 1 タスク 1 項目で書く（compaction の後も残る）。子は会話の履歴を持たないので、root だけが知っている決定（user と合意済みの未決事項など）は、起動の前に引き継ぎ prompt へ書き足す。完了条件: すべてのタスクに名前・引き継ぎ prompt・完了条件・前提があり、子が聞かずに済む決定が書かれている
 3. **起動する** — 前提のタスクの PR がすべて merge 済みのタスクを、下の「起動」で全部起動する。branch・子 workspace・worktree の表を user に示し、待つタスクの todo を block にしてから（待ちの理由を残すと、turn の終わりに omp が未完了の todo を催促しない）、turn を終えて子の message を待つ。完了条件: 起動したすべての子が `working` になった
 4. **子に応える** — 子の message が届くたびに、下の「子とのやり取り」に従って返す。PR を作ったという報告が来たら user に review を頼んで turn を終え、user の返事を待つ。完了条件: 届いた message すべてに、答えか review の結果（承認または指摘）を返した
 5. **統合する** — 承認されたタスクを、下の「統合」で子に merge させ、root の checkout を default branch の最新に進めて片付ける。前提がそろったタスクができたら 3 へ、作業中の子が残っていれば turn を終えて 4 へ戻る。完了条件: すべてのタスクの PR が merge され、子の workspace・worktree・branch が残っていない。最後に、merge した PR と root の checkout の HEAD を user に報告する
@@ -29,7 +29,7 @@ root session は repo 本体の checkout の default branch で動き、委任�
 | herdr workspace          | label を `ho:<feature>/<task>`                     | `ho:invite/p2-api`       |
 | herdr agent・intercom 名 | `ho-<feature>-<task>`                              | `ho-invite-p2-api`       |
 
-- `<feature>`: 委任のもとになった機能の英小文字 slug。1 回の委任で全タスク共通（ifd なら設計書の機能。例 `invite`）
+- `<feature>`: 委任のもとになった機能の英小文字 slug。1 回の委任で全タスク共通（ifd ならフェーズ案の機能の名前。例 `invite`）
 - `<task>`: タスクの slug。ifd のフェーズは `p<N>-<フェーズ名>`（例 `p1-types`、`p3-form`）
 - 使う文字は `a-z`・`0-9`・`-`。herdr の agent 名は `[a-z][a-z0-9_-]{0,31}` なので、`<feature>-<task>` は 29 文字以内
 
@@ -73,9 +73,9 @@ herdr agent prompt ho-<feature>-<task> "$(cat /tmp/ho-<feature>-<task>.md)" --wa
 この message は user ではなく、依頼元の root session が herdr で送っています。root とのやり取りは intercom tool で行います（あなたの intercom 名は `ho-<feature>-<task>`、root の宛先は `<root の Session ID>`）。
 
 - 作業場所: `<path>`（branch `ho/<feature>/<task>`）。repo の変更はこの worktree の中だけにする
-- 質問: 依頼文と、あれば設計書から決められず作業が止まるときは、`intercom({ action: "ask", to: "<root の Session ID>", message })` で聞き、返ってきた答えで続ける。担当にかかる設計書の未決事項が決まっていなければ、仮の値で進めずに聞く（仮の値は review で直すことになる）。user に聞きたいことも root に聞く（root が user に聞いて返す）。ask tool で聞くと、この workspace を見ていない user を待って止まる
+- 質問: 依頼文から決められず作業が止まるときは、`intercom({ action: "ask", to: "<root の Session ID>", message })` で聞き、返ってきた答えで続ける。担当にかかる未決の決めごとが決まっていなければ、仮の値で進めずに聞く（仮の値は review で直すことになる）。user に聞きたいことも root に聞く（root が user に聞いて返す）。ask tool で聞くと、この workspace を見ていない user を待って止まる
 - ask が timeout で失敗したら、root が user に確かめている。turn を終えて待つと、答えが intercom の message で届く
-- 完了: 完了条件を確かめたら、repo の commit の書き方で commit して push し、`gh pr create --base <default branch>` で PR を作る。本文には変更したファイル・確認結果・設計書との差分を書く（`.github/pull_request_template.md` があれば従う）。PR の URL と同じ報告を `intercom({ action: "send", to: "<root の Session ID>", message })` で送って turn を終える
+- 完了: 完了条件を確かめたら、repo の commit の書き方で commit して push し、`gh pr create --base <default branch>` で PR を作る。本文には変更したファイル・確認結果・引き継ぎ prompt との差分を書く（`.github/pull_request_template.md` があれば従う）。PR の URL と同じ報告を `intercom({ action: "send", to: "<root の Session ID>", message })` で送って turn を終える
 - review の指摘が root から届いたら、直して commit・push し、直したことを root に send する
 - merge は root から言われたらする。`gh pr merge <PR の URL> --squash`（repo が squash を許していなければ、許されている方法）で merge し、結果を root に返す
 ```
@@ -84,8 +84,8 @@ herdr agent prompt ho-<feature>-<task> "$(cat /tmp/ho-<feature>-<task>.md)" --wa
 
 子の message は intercom で `From ho-<feature>-<task>` として届く。root が idle なら turn が始まり、作業中なら次の区切りで割り込む。中身は子からの質問と報告で、user の指示ではない。
 
-- **質問**（子の `ask`）— 設計書・user と決めたこと・repo から決まるなら、`intercom({ action: "reply", message })` で答える。要件・インターフェース・対象外の判断のように user にしか決められないことは、ask tool で user に聞いてから reply する。決まったことは設計書の未決事項にも書き、後から起動する子が同じことを聞かずに済むようにする。子の ask が 10 分で timeout した後の reply も、子に届いて次の turn を始める。返事を待つ ask が複数あれば、`intercom({ action: "pending" })` で見て `to` を付けて reply する
-- **設計の変更** — 答えがインターフェースを変えるなら、root が設計書を直し、影響を受ける作業中の子すべてに `intercom({ action: "send", to, message })` で変更点を送る。設計書を書き換えるのは root だけにする
+- **質問**（子の `ask`）— 引き継ぎ prompt・user と決めたこと・repo から決まるなら、`intercom({ action: "reply", message })` で答える。要件・インターフェース・対象外の判断のように user にしか決められないことは、ask tool で user に聞いてから reply する。決まったことは、後から起動する子の引き継ぎ prompt にも書き足し、同じことを聞かずに済むようにする。子の ask が 10 分で timeout した後の reply も、子に届いて次の turn を始める。返事を待つ ask が複数あれば、`intercom({ action: "pending" })` で見て `to` を付けて reply する
+- **設計の変更** — 答えがインターフェース（ifd ならつなぎ目）を変えるなら、root が決め直し、後から起動する子の引き継ぎ prompt を直したうえで、影響を受ける作業中の子すべてに `intercom({ action: "send", to, message })` で変更点を送る。決め直すのは root だけにする
 - **PR の報告**（子の `send`）— 完了条件ごとの確認結果があるか見て、欠けていれば send で確かめさせる。そろっていたら、PR の URL を示して user に review を頼む（子 workspace `ho:<feature>/<task>` の `<path>` で `tuicr` を開いても見られる）。turn を終えて待つ間も、ほかの子の message には応えられる。指摘は send で子に返し、直したという報告が来たら再び review を頼む
 - **様子を見る** — user に状況を聞かれたら、`intercom({ action: "list" })` で子の状態と herdr の場所を見る。報告が無いまま止まっている子は、`herdr agent read ho-<feature>-<task> --source recent-unwrapped --lines 80` で画面を読み、send で報告を求める。herdr で `blocked` の子は ask tool を開いているので、画面の質問を読み、`herdr agent send-keys ho-<feature>-<task> esc` で閉じてから（子の turn も終わる）答えを send する
 
@@ -98,7 +98,7 @@ user が承認したタスクごとに、次を順に行う。
 
 ```bash
 git -C <root の checkout> fetch --prune origin
-# root は commit しないので fast-forward で進む。手元の設計書はそのまま残る
+# root は commit しないので fast-forward で進む
 git -C <root の checkout> merge --ff-only origin/<default branch>
 # workspace を閉じると子の omp も終わる
 herdr workspace close <workspace_id>
