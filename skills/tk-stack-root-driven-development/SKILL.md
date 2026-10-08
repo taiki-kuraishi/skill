@@ -1,6 +1,6 @@
 ---
 name: tk-stack-root-driven-development
-description: Root が user と要件・やることを合意し、次のフェーズだけを都度切り出して自ら実装し、各フェーズを tuicr レビューで止める開発フロー
+description: Root が user と要件・やることを合意し、次のフェーズだけを都度切り出して自ら実装し、各フェーズで tk-stack-review-request に従って user review を依頼し、承認まで止める開発フロー
 disable-model-invocation: true
 ---
 
@@ -10,11 +10,11 @@ root が会話・判断・すべての編集を持ち、subagent は判断材料
 
 ## 責務
 
-| 担当     | 責務                                                                                                                      |
-| -------- | ------------------------------------------------------------------------------------------------------------------------- |
-| root     | user との会話、要件整理、やることの整理、次のフェーズの設計、source / test / docs の実装と指摘修正                        |
-| subagent | 必要になった調査・探索・検証コマンドの実行と gate 前の skill-review・drift-review を read-only で行い、証拠を root へ返す |
-| user     | 要件・やること・各フェーズの合意、`tuicr` レビュー、フェーズ承認、Git 操作の判断                                          |
+| 担当     | 責務                                                                                                                             |
+| -------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| root     | user との会話、要件整理、やることの整理、次のフェーズの設計、source / test / docs の実装と指摘修正、user review の依頼・承認管理 |
+| subagent | 必要になった調査・探索・検証コマンドの実行と gate 前の skill-review・drift-review を read-only で行い、証拠を root へ返す        |
+| user     | 要件・やること・各フェーズの合意、user review、フェーズ承認、Git 操作の判断                                                      |
 
 この Skill の実行中はこの役割分担を優先する。`orchestrating-development`、`delegating-small-tasks`、`subagent-driven-development`、`executing-plans` に実装を渡さない。TDD などの技法は root が使い、テスト実行のような検証は下記の分担に従う。
 
@@ -23,7 +23,7 @@ root が会話・判断・すべての編集を持ち、subagent は判断材料
 1. **開始状態を固定する**
    - repository の status を読み、開始前からある差分を記録する。
    - 既存差分を今回の成果として扱わない。
-   - `status` / `diff` など read-only の VCS 確認は workflow 管理なので root が直接実行してよい。test / build / lint / 再現 / 動作確認は検証として subagent へ委譲する。
+   - `status` / `diff` など read-only の VCS 確認と、`tk-stack-review-request` に従う user review の依頼・結果受領は workflow 管理なので root が直接実行してよい。test / build / lint / 再現 / 動作確認は検証として subagent へ委譲する。
 
 2. **要件を合意する**
    - root が必要な質問を一度に1問ずつ user へ聞く。
@@ -53,9 +53,9 @@ root が会話・判断・すべての編集を持ち、subagent は判断材料
 6. **user review gate で止める**
    - 開始状態との差分を確認し、現在のフェーズに属する変更だけを報告する。
    - 変更は unstaged のまま保つ。
-   - `できるようになったこと / 変更ファイル / 検証と証拠 / 未解決事項` を示し、user に repository root で `tuicr` を実行するよう伝える。
+   - root が `skill://tk-stack-review-request` に従い、repository root の未コミット差分について user に review を依頼する。レビューの範囲は現在のフェーズとし、開始前や承認済みの差分が表示に含まれる場合は分けて示す。
    - skill-review・drift-review で直した指摘は `検証と証拠` に、直さなかった指摘・要確認・SKILL 同士の食い違いは理由を添えて `未解決事項` に入れる。
-   - ここで応答を終える。明示承認までは次フェーズのコードに触れない。
+   - 承認待ちとして応答を終える。`tk-stack-review-request` から承認結果を受け取るまでは次フェーズのコードに触れない。
    - 指摘は同じフェーズ内で root が修正し、gate に戻る。skill-review・drift-review は回し直さない（手順 5 は 1 フェーズに 1 回）。修正で挙動が変わり得るなら、検証を subagent に出し直し、証拠を修正後の状態にそろえる。
    - 承認後に現在の todo を完了し、手順 3 に戻って次のフェーズを切り出す。一覧に残りが無ければ終わる。
 
