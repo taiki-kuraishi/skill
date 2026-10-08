@@ -1,12 +1,12 @@
 ---
 name: tk-stack-interface-first-development
-description: repo 本体の default branch で動く root session が、次に始めるフェーズの分け方とフェーズ間のつなぎ目（共有の型・API）を user とチャットで合意し、フェーズごとの引き継ぎ prompt で、user が開く別 session に実装を引き継ぐ。前のフェーズが終わってから次のフェーズだけを同じ手順で決める開発フロー
+description: repo 本体の default branch で動く root session が、次に始めるフェーズとつなぎ目（共有の型・API）を user と合意して子 session に実装を渡し、起動方式にかかわらず質問・完了報告・tk-stack-review-request による user review を最後まで管理する。前のフェーズが merge されてから次の回だけを決める開発フロー
 disable-model-invocation: true
 ---
 
 # tk-stack-interface-first-development
 
-複数フェーズに分かれる大規模な実装で、root session は実装せず、次に始めるフェーズの分け方とフェーズ間のつなぎ目だけを user と決める。実装は、user が開く別 session（子）に引き継ぎ prompt で渡す。合意はチャットで取り、設計書の file は作らない。子が読むのは引き継ぎ prompt だけなので、決めたことはそこに書く。
+複数フェーズに分かれる大規模な実装で、root session は実装せず、次に始めるフェーズの分け方とフェーズ間のつなぎ目を user と決める。実装は別 session（子）に引き継ぎ prompt で渡すが、起動方式によらず root が質問・進捗・完了報告を受け、user review の窓口を最後まで持つ。合意はチャットで取り、設計書の file は作らない。子が読むのは引き継ぎ prompt だけなので、決めたことと root への連絡先はそこに書く。
 
 フェーズは最初に全部は決めない。最初に作るのは、この session でやることの一覧だけ。フェーズは、前のフェーズが merge されるたびに、その一覧から次の回の分だけを切り出す。
 
@@ -26,7 +26,7 @@ root は repo 本体の checkout（linked worktree ではない）の default br
    - skill-review: 型・項目の名前は日本語で書いた子との契約なので、命名の規約の違反にしない。識別子は子が repo の命名規約で決める（ファイルの path には命名の規約を当てる）
    - drift-review: 案が既存として挙げるものと、変更する担当のファイルを今のコードと突き合わせる。案どおりに実装すると古くなる文書は、今回のどのフェーズの担当にも入っていないものだけを指摘にする（入っていれば担当のフェーズが直す。後のフェーズで直すと決めたものは、一覧に足す）
 4. **合意する** — フェーズ案をチャットに示す。あわせて、手順 3 で直した指摘と、直さなかった指摘・要確認・SKILL 同士の食い違い（理由付き）を短く示して止まる。user の指摘は案に反映して示し直す。手順 3 のレビューは回し直さず、手順 2 の完了条件を満たすことは root が確かめる。完了条件: user が承認し、決めてほしいことの結論がすべて出ている
-5. **引き継ぐ** — 切り出した項目は、フェーズごとの todo に置き換える。フェーズごとに引き継ぎ prompt を出し、フェーズが複数なら並列に始めると添える。herdr の中（`HERDR_ENV=1`）なら、続けて `skill://tk-stack-handoff` に従い、root が子を起動して質問に答え、フェーズごとの PR を merge まで進める。それ以外は、この回の root の作業はここで終わり、user が merge できたと伝えに来たら再開する。今回のフェーズがすべて merge されたら、一覧に残りがあれば手順 2 に戻り、無ければ終わる
+5. **引き継いで監督する** — 切り出した項目はフェーズごとの todo に置き換える。root の `intercom({ action: "status" })` が `Connected: Yes` であることを確かめ、`Session ID` を控える。接続できなければ root で user に必要な設定を伝えて止まり、子へ窓口を移さない。今回のフェーズだけを、作業場所と root の連絡先を埋めた引き継ぎ prompt で始め、フェーズが複数なら並列に始めると添える。herdr の中（`HERDR_ENV=1`）なら、`skill://tk-stack-handoff` で子を起動し、質問・user review・PR の merge まで root が管理する。それ以外は「[手動で引き継ぐ](references/manual-handoff.md)」に従い、user が子を起動した後も root が報告と質問を受け、`skill://tk-stack-review-request` で user review を依頼する。子の状況は root が確認し、user に子の pane の巡回や報告の転送を頼まない。今回のフェーズがすべて merge されたら、一覧に残りがあれば手順 2 に戻り、無ければ終わる。完了条件: 今回のフェーズの承認と明示許可された統合が確認できている。許可待ち・未統合のフェーズがあれば root に待ちの状態を残す
 
 ## フェーズ案
 
@@ -112,19 +112,25 @@ Good: 表示は型だけを前提に API と同じ回で並列にし、接続だ
 
 ## 引き継ぎ prompt
 
-フェーズごとに次の形で出す。子は会話の履歴を持たず、読むのはこの prompt だけ。担当にかかるつなぎ目と決めたことは、案から全文を貼る。同じ回のほかのフェーズが無ければ、それを書いた 1 文は外す。
+フェーズごとに次の形で出す。子は会話の履歴を持たず、読むのはこの prompt だけ。作業場所・branch・root の full Session ID を起動前に埋め、担当にかかるつなぎ目と決めたことは案から全文を貼る。同じ回のほかのフェーズが無ければ、それを書いた 1 文は外す。
 
 ```md
 フェーズ N（<名前>）を実装してください。目的: <機能の 1 行>。同じ回のほかのフェーズ（<N 名前: ゴール>, …）は別の session が担当します。
 
+- 作業場所: `<worktree の path>`（branch `<branch>`）。repo の変更はこの worktree の中だけにする
+- root の連絡先: `<root の full Session ID>`。この session は子で、user との会話と user review の窓口は root が持つ
+- 開始: `intercom({ action: "status" })` が `Connected: Yes` であることを確かめ、自分の full Session ID とフェーズ N・cwd・branch を `intercom({ action: "send", to: "<root の full Session ID>", message })` で root に報告する。連絡先が未指定、接続できない、送信できない場合は実装を始めず、子が user review の窓口になる代替には切り替えない
+- 質問: 依頼文だけでは決められないことは `intercom({ action: "ask", to: "<root の full Session ID>", message })` で root に聞く。user に聞きたいことも root に聞く。ask が timeout したら turn を終えて root からの message を待つ
 - 担当: <ファイル・ディレクトリ>。触るのはここだけ
 - つなぎ目（user と合意済み。この形に合わせる）: <フェーズ N が作るつなぎ目>
 - 決めたこと: <フェーズ N にかかる「決めてほしいこと」の結論。仮置きは「仮置き」と書く>
 - 名前は日本語で書いてある。識別子と型の書き方は repo の規約で決める（つなぎ目は形が一致すればよい）。前提フェーズで作られたものと既存のものは、コードにある名前をそのまま使う。フェーズの中の関数やファイルの分け方は自由に決めてよい
-- つなぎ目のとおりでは実装できない、または担当外のファイルを変える必要が出たら、そこで止めて理由と変更案を報告する
+- つなぎ目のとおりでは実装できない、または担当外のファイルを変える必要が出たら、そこで止め、理由と変更案を intercom の `ask` で root に報告する
 - 完了条件: <フェーズの完了条件>
 - 完了条件を満たしたら、最初の報告の前に 1 回だけ、`tk-stack-skill-review` を使う subagent と `tk-stack-drift-review` を使う subagent に、並行して担当ファイルだけをレビューさせる。drift-review にはつなぎ目の全文も渡す（ほかのフェーズの担当ファイルはまだ無くてよい）。subagent には直させず、指摘はあなたが直し、直した後も完了条件を満たすことを確かめる。つなぎ目か担当外のファイルを変えないと直せない指摘は、直さずに報告する。報告の後に届く review の指摘を直すときは、この 2 つのレビューを回し直さず、完了条件だけ確かめて報告する
-- 最後に、変更したファイル・完了条件の確認結果・skill-review と drift-review で直した指摘と直さなかった指摘（理由付き）・つなぎ目との差分を報告する。commit はしない
+- 最後に、フェーズ N・cwd・branch・変更したファイル・完了条件ごとの確認コマンドと結果・skill-review と drift-review で直した指摘と直さなかった指摘（理由付き）・つなぎ目との差分を、intercom の `send` で root に報告して turn を終える
+- user review の依頼・指摘への返信・再依頼と、review の開始・終了は root に任せ、user に直接 review を頼まない。user がこの pane で review を頼んだ場合も root に連絡して窓口をそろえる。root から届いた指摘を直して再検証し、指摘ごとの対応結果と返信文を intercom の `send` で root に返して待つ
+- Git 操作は、user が明示した許可と範囲を root から受け取ったときだけ行う。許可された対象 branch と操作（commit・push・PR・merge など）を自分の worktree で実行し、commit hash・PR の merge commit などの結果を intercom の `send` で root に報告する。許可が無い間は commit しない。review の承認から Git の許可を推測しない
 ```
 
-子に止めて報告させるのは、つなぎ目は user と合意済みで後のフェーズの前提になり、担当外のファイルは同じ回の別の子が触りうるから。つなぎ目から来る規約の指摘を子に直させないのも同じ理由で、直すかどうかは root が決める。skill-review と drift-review の指示を prompt に書くのは、子がこの SKILL を読まないから。user がその報告を root に持ってきたら（tk-stack-handoff で委任したなら、子から intercom で直接届く）、root がつなぎ目を直して手順 4 で user と合意し直し、影響するフェーズの引き継ぎ prompt を出し直す。
+子に止めて root に報告させるのは、つなぎ目は user と合意済みで後のフェーズの前提になり、担当外のファイルは同じ回の別の子が触りうるから。つなぎ目から来る規約の指摘を子に直させないのも同じ理由で、直すかどうかは root が決める。連絡先と review の窓口を prompt に書くのは、子がこの SKILL を読まないから。報告は起動方式によらず intercom で root に直接届く。root がつなぎ目を直して手順 4 で user と合意し直し、影響するフェーズの引き継ぎ prompt を出し直す。
