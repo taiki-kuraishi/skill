@@ -1,6 +1,6 @@
 ---
 name: skill-from-review
-description: 'コードレビューの指摘（Crit のレビュー結果・コメント JSON、または file:line + コメント）をライブラリ単位の SKILL に変換して、skills 配布リポジトリに蓄積するための運用手順。レビュー指摘のリストを添付されたとき、コーディング規約を SKILL 化してほしいと言われたときに必ず使用すること。このリポジトリでの SKILL 作成・追記・分類の依頼全般で、skill-creator より先に発火させる（作成・追記はここから skill-creator を呼び出す）。'
+description: "コードレビューの指摘（Crit のレビュー結果・コメント JSON、または file:line + コメント）をライブラリ単位の SKILL に変換して、skills 配布リポジトリに蓄積するための運用手順。レビュー指摘のリストを添付されたとき、コーディング規約を SKILL 化してほしいと言われたときに必ず使用すること。このリポジトリでの SKILL 作成・追記・分類の依頼全般で、skill-creator より先に発火させる（作成・追記はここから skill-creator を呼び出す）。"
 metadata:
   internal: true
 ---

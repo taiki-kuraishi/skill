@@ -1,0 +1,7 @@
+config:
+  MD013: false
+globs:
+  - "**/*.md"
+  - ".omp/skills/**/*.md"
+  - ".pi/skills/**/*.md"
+gitignore: true

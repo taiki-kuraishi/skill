@@ -1,0 +1,45 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "platformAutomerge": false,
+  "ignoreTests": false,
+  "automerge": false,
+  "reviewers": ["taiki-kuraishi"],
+  "assignAutomerge": false,
+  "osvVulnerabilityAlerts": true,
+  "vulnerabilityAlerts": {
+    "enabled": true
+  },
+  "packageRules": [
+    {
+      "matchUpdateTypes": ["major"],
+      "automerge": false
+    },
+    {
+      "matchUpdateTypes": ["minor"],
+      "automerge": true
+    },
+    {
+      "matchUpdateTypes": ["patch"],
+      "enabled": false
+    }
+  ],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["/^dprint\\.json$/"],
+      "matchStrings": [
+        "\"npm:(?<depName>@dprint/[^@\"]+)@(?<currentValue>[^\"]+)\""
+      ],
+      "datasourceTemplate": "npm"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["/^dprint\\.json$/"],
+      "matchStrings": [
+        "https://plugins\\.dprint\\.dev/(?<depName>g-plane/pretty_yaml)-v(?<currentValue>[0-9.]+)\\.wasm"
+      ],
+      "datasourceTemplate": "github-releases"
+    }
+  ]
+}

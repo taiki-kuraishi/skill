@@ -1,10 +1,30 @@
+[settings]
+lockfile = true
+
+[settings.npm]
+package_manager = "bun"
+
 [tools]
 bun = "1.4.2"
 dprint = "0.56.1"
 lefthook = "2.1.12"
+node = "24.21.0"
+"npm:markdownlint-cli2" = "0.23.3"
+"npm:renovate" = "44.51.2"
 
 [tasks.install]
-run = ["mise trust --all", "mise install", "lefthook install"]
+run = ["mise trust --all", "mise install --locked", "lefthook install"]
 
 [tasks.format]
 run = "dprint fmt"
+
+[tasks.lint]
+run = "markdownlint-cli2"
+
+[tasks.check]
+run = [
+  "dprint check",
+  "markdownlint-cli2",
+  "lefthook validate",
+  "renovate-config-validator --strict renovate.json",
+]
