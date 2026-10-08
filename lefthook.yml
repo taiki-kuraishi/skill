@@ -1,4 +1,18 @@
 pre-commit:
+  parallel: true
   commands:
     dprint-check:
-      run: dprint check --allow-no-files {staged_files}
+      glob: "*.{md,toml,json,jsonc,yml,yaml}"
+      run: mise exec -- dprint check --allow-no-files {staged_files}
+    markdownlint:
+      glob: "*.md"
+      run: mise exec -- markdownlint-cli2 --no-globs {staged_files}
+    markdownlint-config:
+      glob: "{.markdownlint-cli2.yaml,dprint.json,mise.toml,mise.lock}"
+      run: mise exec -- markdownlint-cli2
+    lefthook-validate:
+      glob: "{lefthook.yml,mise.toml,mise.lock}"
+      run: mise exec -- lefthook validate
+    renovate-validate:
+      glob: "{renovate.json,mise.toml,mise.lock}"
+      run: mise exec -- renovate-config-validator --strict renovate.json

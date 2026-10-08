@@ -1,0 +1,122 @@
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  changes:
+    runs-on: ubuntu-slim
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      dprint: ${{ steps.filter.outputs.dprint }}
+      markdownlint: ${{ steps.filter.outputs.markdownlint }}
+      lefthook: ${{ steps.filter.outputs.lefthook }}
+      renovate: ${{ steps.filter.outputs.renovate }}
+    steps:
+      - if: github.event_name == 'push'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      - uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4
+        id: filter
+        with:
+          filters: |
+            dprint:
+              - "**/*.{md,toml,json,jsonc,yml,yaml}"
+              - "mise.lock"
+            markdownlint:
+              - "**/*.md"
+              - ".markdownlint-cli2.yaml"
+              - "dprint.json"
+              - "mise.toml"
+              - "mise.lock"
+              - ".github/workflows/ci.yml"
+            lefthook:
+              - "lefthook.yml"
+              - "mise.toml"
+              - "mise.lock"
+              - ".github/workflows/ci.yml"
+            renovate:
+              - "renovate.json"
+              - "mise.toml"
+              - "mise.lock"
+              - ".github/workflows/ci.yml"
+
+  dprint:
+    needs: changes
+    if: needs.changes.outputs.dprint == 'true'
+    runs-on: ubuntu-slim
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4.3.0
+        with:
+          version: "2026.9.18"
+          install_args: "--locked dprint"
+      - run: dprint check
+
+  markdownlint:
+    needs: changes
+    if: needs.changes.outputs.markdownlint == 'true'
+    runs-on: ubuntu-slim
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4.3.0
+        with:
+          version: "2026.9.18"
+          install_args: "--locked bun node npm:markdownlint-cli2"
+      - run: markdownlint-cli2
+
+  lefthook:
+    needs: changes
+    if: needs.changes.outputs.lefthook == 'true'
+    runs-on: ubuntu-slim
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4.3.0
+        with:
+          version: "2026.9.18"
+          install_args: "--locked lefthook"
+      - run: lefthook validate
+
+  renovate:
+    needs: changes
+    if: needs.changes.outputs.renovate == 'true'
+    runs-on: ubuntu-slim
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4.3.0
+        with:
+          version: "2026.9.18"
+          install_args: "--locked bun node npm:renovate"
+      - run: renovate-config-validator --strict renovate.json
+
+  check:
+    needs:
+      - changes
+      - dprint
+      - markdownlint
+      - lefthook
+      - renovate
+    if: always()
+    runs-on: ubuntu-slim
+    timeout-minutes: 5
+    steps:
+      - if: needs.changes.result != 'success' || contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
+        run: exit 1

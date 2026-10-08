@@ -1,6 +1,6 @@
 ---
 name: tk-stack-drizzle-orm
-description: 'Drizzle ORM を使う TypeScript コードを書く・修正する・レビューするときの規約。Relational Queries（db.query.<table>.findFirst / findMany）の where・orderBy の書き方、drizzle-orm への依存を DB package に閉じ込める方針、テストで drizzle の client を in-memory DB（PGlite、libsql の :memory:）に差し替えて drizzle-kit の pushSchema でスキーマを流すテクニックを扱う。drizzle-orm の import、eq / and などの演算子、repository や DB アクセス層の作成、DB を使うテストの準備（seed スクリプト、ローカル DB、テスト用 auth / repository の組み立て）、レビュー指摘への対応でも発火させる。'
+description: "Drizzle ORM を使う TypeScript コードを書く・修正する・レビューするときの規約。Relational Queries（db.query.<table>.findFirst / findMany）の where・orderBy の書き方、drizzle-orm への依存を DB package に閉じ込める方針、テストで drizzle の client を in-memory DB（PGlite、libsql の :memory:）に差し替えて drizzle-kit の pushSchema でスキーマを流すテクニックを扱う。drizzle-orm の import、eq / and などの演算子、repository や DB アクセス層の作成、DB を使うテストの準備（seed スクリプト、ローカル DB、テスト用 auth / repository の組み立て）、レビュー指摘への対応でも発火させる。"
 ---
 
 # tk-stack-drizzle-orm

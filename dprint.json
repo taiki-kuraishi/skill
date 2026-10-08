@@ -1,9 +1,20 @@
 {
+  "includes": [
+    "**/*.{md,toml,json,jsonc,yml,yaml}",
+    ".github/**/*.{yml,yaml}",
+    ".omp/skills/**/*.md",
+    ".pi/skills/**/*.md"
+  ],
   "excludes": [
     "mise.lock"
   ],
+  "markdown": {
+    "textWrap": "maintain"
+  },
   "plugins": [
     "npm:@dprint/markdown@0.24.0",
-    "npm:@dprint/toml@0.8.0"
+    "npm:@dprint/toml@0.8.0",
+    "npm:@dprint/json@0.23.0",
+    "https://plugins.dprint.dev/g-plane/pretty_yaml-v0.6.0.wasm"
   ]
 }
