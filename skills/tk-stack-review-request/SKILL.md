@@ -41,7 +41,7 @@ Good: 開発フローは tk-stack-review-request に対象と証拠を渡し、�
 2. **session を選ぶ** — 対象の cwd で `crit status --json` の `sessions` を読む。複数あると `daemon.running: false` になるため、その値だけで session が無いとは判断しない。同じ対象の自分が管理する session は `--session <id>` で再利用し、新規起動しない。所有者や対象が不明な session は、停止や重複起動の前に窓口を確認する。新規起動では下の「起動」を使う。完了条件: 対象ごとに管理する session が 1 つに決まっている
 3. **起動して依頼する** — 下の「起動」で `REVIEW_URL` と `PORT` を先に決め、Crit は Finish Review まで待つ CLI のまま、出力と終了を受け取れる tool の background job で `-p "$PORT"` 付きで実行する（omp なら `async: true`・`timeout: 0`）。起動後、`crit status --json` の `sessions` に記録した `PORT` の行が出るまで待ち、その行の `id`・`pid` を控える。出なければ job の出力（omp なら `proc://<job-id>`）の stderr を読んで起動失敗を確認する。`できるようになったこと / 変更ファイル / 検証と証拠 / 未解決事項` と `REVIEW_URL` を本文に書き、「コメントを書き、Finish Review を押してください」と頼む。完了条件: 起動を確認した `REVIEW_URL` と承認対象を user への発言に書き、待っている job と session を記録した
 4. **結果を受け取る** — review 待ちの todo を block にし、turn を終える。同じ対象の変更や次フェーズには進まず、job の終了を待つ。root は別の子からの message には応えられる。終了後に stdout の指摘と stderr の `approved` を読む。Finish Review 以外の終了や、指摘も再開コマンドも無い `approved: false` は中断として user に報告し、修正ループには入らず再開の意思を確認する。再開する場合だけ記録した ID で `crit --session <id>` を起動して手順 4 で待つ。失敗・中断・結果未受領は承認ではない。完了条件: Finish Review の結果、または中断を受領した
-5. **指摘に応える** — `approved: false` なら、すべての未解決指摘を呼び出し元のフローで修正・再検証する。`quote` があれば選択範囲に絞り、`anchor` で位置を探す。file・review 全体の指摘は `body` と対象の差分から扱う。`drifted` があれば古い行番号で直さない。子が実装するフローでは、root が指摘の ID・本文・quote・anchor・drifted・既存の返信を子に送り、子から対応結果と返信文を受け取る。root が `crit comment --session <id> --reply-to <comment-id> --author 'root' '<対応内容>'` で返信する。自分で comment を resolve しない。完了条件: 各指摘に対応結果か、直さない理由・要確認を返信した
+5. **指摘に応える** — `approved: false` なら、すべての未解決指摘を呼び出し元のフローで修正・再検証する。`quote` があれば選択範囲に絞り、`anchor` で位置を探す。file・review 全体の指摘は `body` と対象の差分から扱う。`drifted` があれば古い行番号で直さない。子が実装するフローでは、root が指摘の ID・本文・quote・anchor・drifted・既存の返信を子に送り、子から対応結果と返信文を受け取る。各指摘への返答は下の「返信は Crit に書く」に従い、root が `crit comment --session <id> --reply-to <comment-id> --author 'root' '<対応内容>'` で返信する。自分で comment を resolve しない。完了条件: 各指摘に対応結果か、直さない理由・要確認を Crit 上で返信した
 6. **再レビューする** — 再開前の `http://127.0.0.1:<port>/api/session` の `review_round` を控え、stdout に示された再開コマンド（`crit --session <id>`）を同じ session の background job で実行する。再開しても port と URL は変わらない。接続メッセージだけでは round が更新されていないことがあるため、`review_round` が進んだことを確認してから修正後の検証結果と記録した `REVIEW_URL` を示し、手順 4 に戻る。完了条件: 修正後の状態が次の round に渡り、`REVIEW_URL` を user に再掲した
 7. **承認して閉じる** — Finish Review の `approved: true`（未解決コメント 0 件）を、示した対象の承認として呼び出し元へ返す。Git 操作は呼び出し元で合意した権限に従う。daemon が残っていれば、対象の cwd で `crit status --json` を読み、自分が起動した session の ID・PID・port が `sessions` の行と記録で一致し、そのプロセスが自分の Crit daemon であることを確認して `kill "$PID"` でその PID だけを停止する。再利用した他 session の daemon や、既に終了した PID は止めない。完了条件: 承認結果を反映し、自分の review の後始末だけを終えた
 
@@ -74,6 +74,17 @@ Good: 起動前に REVIEW_URL を決め、status で起動を確認してから�
 ```
 
 なぜ: URL は stderr に出て job の終了まで届かず、user に書き忘れても気づけない。URL の文字列だけを変えても Crit の Host 制限は変わらない。port を固定するのは、URL を事前に確定でき、複数の子の review が同時に動いても衝突しないため。
+
+## 返信は Crit に書く
+
+Crit のコメントへの返答（対応内容・直さない理由・質問）は、そのコメントへの `--reply-to` 返信として Crit に書く。terminal には返信したことと再レビューの URL だけを書き、返答本文を terminal だけに書かない。3 件以上なら `crit comment --session <id> --json --file <path>` でまとめて返信する。
+
+```text
+Bad: terminal に「c_a1b2c3 は null check を追加しました。c_d4e5f6 は仕様どおりなので直しません」と書く
+Good: crit comment --session <id> --reply-to c_a1b2c3 --author 'root' 'null check を追加しました' → terminal「2 件に Crit で返信しました。<REVIEW_URL>」
+```
+
+なぜ: user は Crit の画面で指摘と返答を並べて読み、そこで resolve や追加の指摘をする。terminal だけの返答は Crit に残らず、user は次の round で対応状況を確認できない。
 
 ## session を取り違えない
 
