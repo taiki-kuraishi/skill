@@ -8,7 +8,7 @@ disable-model-invocation: true
 
 root session は repo 本体の checkout の default branch で動き、委任するタスクごとに wt で worktree を作り、root の herdr workspace の下に開いた子 workspace で omp（子）を起動して引き継ぎ prompt を送る。子は作業が止まる疑問を intercom で root に聞き、root は答えられなければ user に聞いて子に返す。子は終わったら default branch への PR を作る。user が PR を review して承認したら、root がそれを子に伝え、子が merge して root に返す。root は自分の checkout を merge 後の default branch に進めて片付け、前提がそろったタスクを起動する。1 タスクは 1 PR にする。root はやり取りと統合を持ち、実装と commit は子に任せる。
 
-`tk-stack-interface-first-development` の「引き継ぐ」から来たら、フェーズごとの引き継ぎ prompt と順序（例: `1 → 2 と 3 を並列 → 4`）をそのまま使う。
+`tk-stack-interface-first-development` の「引き継ぐ」から来たら、今回のフェーズごとの引き継ぎ prompt と、並列に始めるフェーズの組（例: `2 と 3 を並列`）をそのまま使う。後のフェーズは、今回のフェーズがすべて merge された後に、ifd が次の回として渡す。
 
 ## 手順
 
@@ -76,7 +76,7 @@ herdr agent prompt ho-<feature>-<task> "$(cat /tmp/ho-<feature>-<task>.md)" --wa
 - 質問: 依頼文から決められず作業が止まるときは、`intercom({ action: "ask", to: "<root の Session ID>", message })` で聞き、返ってきた答えで続ける。担当にかかる未決の決めごとが決まっていなければ、仮の値で進めずに聞く（仮の値は review で直すことになる）。user に聞きたいことも root に聞く（root が user に聞いて返す）。ask tool で聞くと、この workspace を見ていない user を待って止まる
 - ask が timeout で失敗したら、root が user に確かめている。turn を終えて待つと、答えが intercom の message で届く
 - 完了: 完了条件を確かめたら、repo の commit の書き方で commit して push し、`gh pr create --base <default branch>` で PR を作る。本文には変更したファイル・確認結果・引き継ぎ prompt との差分を書く（`.github/pull_request_template.md` があれば従う）。PR の URL と同じ報告を `intercom({ action: "send", to: "<root の Session ID>", message })` で送って turn を終える
-- review の指摘が root から届いたら、直して commit・push し、直したことを root に send する
+- review の指摘が root から届いたら、直して commit・push し、直したことを root に send する。引き継ぎ prompt に skill-review・drift-review の指示があっても、ここでは回し直さない
 - merge は root から言われたらする。`gh pr merge <PR の URL> --squash`（repo が squash を許していなければ、許されている方法）で merge し、結果を root に返す
 ```
 
