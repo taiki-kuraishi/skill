@@ -1,6 +1,6 @@
 ---
 name: tk-stack-handoff
-description: repo 本体の default branch で動く root session が、タスクごとに wt の worktree と、root の herdr workspace の下の子 workspace で omp を起動して委任し、子の質問に intercom で答え（答えられなければ user に聞き）、1 タスク 1 PR を user の承認後に子が merge する開発フロー
+description: repo 本体の default branch で動く root session が、タスクごとに wt の worktree と、root の herdr workspace の下の子 workspace で omp を起動して委任し、子の質問に intercom で答え、tk-stack-review-request で PR の user review を依頼し、承認後に子が merge する開発フロー
 disable-model-invocation: true
 ---
 
@@ -8,14 +8,14 @@ disable-model-invocation: true
 
 root session は repo 本体の checkout の default branch で動き、委任するタスクごとに wt で worktree を作り、root の herdr workspace の下に開いた子 workspace で omp（子）を起動して引き継ぎ prompt を送る。子は作業が止まる疑問を intercom で root に聞き、root は答えられなければ user に聞いて子に返す。子は終わったら default branch への PR を作る。user が PR を review して承認したら、root がそれを子に伝え、子が merge して root に返す。root は自分の checkout を merge 後の default branch に進めて片付け、前提がそろったタスクを起動する。1 タスクは 1 PR にする。root はやり取りと統合を持ち、実装と commit は子に任せる。
 
-`tk-stack-interface-first-development` の「引き継ぐ」から来たら、フェーズごとの引き継ぎ prompt と順序（例: `1 → 2 と 3 を並列 → 4`）をそのまま使う。
+`tk-stack-interface-first-development` の「引き継いで監督する」から来たら、今回のフェーズごとの引き継ぎ prompt と、並列に始めるフェーズの組（例: `2 と 3 を並列`）をそのまま使う。後のフェーズは、今回のフェーズがすべて merge された後に、ifd が次の回として渡す。
 
 ## 手順
 
 1. **確かめる** — herdr の中にいること（`test "${HERDR_ENV:-}" = 1`）、intercom がつながっていること（`intercom({ action: "status" })` が `Connected: Yes`）、gh が使えること（`gh auth status`）、root が repo 本体の checkout の default branch にいること（`git rev-parse --show-toplevel` が `git worktree list` の 1 行目の path で、`git branch --show-current` が `gh repo view --json defaultBranchRef -q .defaultBranchRef.name` と同じ）を確かめる。欠けていたら user に伝えて止まる（intercom tool が無ければ `omp plugin install pi-intercom` の後に omp の再起動が要る。root が linked worktree や別の branch にいたら、repo 本体の workspace に tab を足して default branch で起動し直してもらう）。status の `Session ID`（子から見た root の宛先）、root の checkout（`git rev-parse --show-toplevel`）、default branch を控える。完了条件: 3 つの値がそろっている
 2. **タスクをそろえる** — タスクごとに、下の「命名」の `<feature>` と `<task>`、引き継ぎ prompt、完了条件、前提のタスクを決め、todo に 1 タスク 1 項目で書く（compaction の後も残る）。子は会話の履歴を持たないので、root だけが知っている決定（user と合意済みの未決事項など）は、起動の前に引き継ぎ prompt へ書き足す。完了条件: すべてのタスクに名前・引き継ぎ prompt・完了条件・前提があり、子が聞かずに済む決定が書かれている
 3. **起動する** — 前提のタスクの PR がすべて merge 済みのタスクを、下の「起動」で全部起動する。branch・子 workspace・worktree の表を user に示し、待つタスクの todo を block にしてから（待ちの理由を残すと、turn の終わりに omp が未完了の todo を催促しない）、turn を終えて子の message を待つ。完了条件: 起動したすべての子が `working` になった
-4. **子に応える** — 子の message が届くたびに、下の「子とのやり取り」に従って返す。PR を作ったという報告が来たら user に review を頼んで turn を終え、user の返事を待つ。完了条件: 届いた message すべてに、答えか review の結果（承認または指摘）を返した
+4. **子に応える** — 子の message が届くたびに、下の「子とのやり取り」に従って返す。PR を作ったという報告が来たら、root が `skill://tk-stack-review-request` で user に review を頼み、turn を終えて結果を待つ。完了条件: 届いた message すべてに、答えか review の結果（承認または指摘）を返した
 5. **統合する** — 承認されたタスクを、下の「統合」で子に merge させ、root の checkout を default branch の最新に進めて片付ける。前提がそろったタスクができたら 3 へ、作業中の子が残っていれば turn を終えて 4 へ戻る。完了条件: すべてのタスクの PR が merge され、子の workspace・worktree・branch が残っていない。最後に、merge した PR と root の checkout の HEAD を user に報告する
 
 ## 命名
@@ -53,9 +53,11 @@ herdr agent start ho-<feature>-<task> --kind omp --pane <pane_id> --timeout 6000
 # 4. intercom 名を agent 名にそろえる。slash command は turn を始めないので --wait は付けない
 herdr agent prompt ho-<feature>-<task> '/alias ho-<feature>-<task>'
 
-# 5. 引き継ぎ prompt から取り決めと食い違う行（「commit はしない」など）を外し、後ろに「子との取り決め」を足して /tmp/ho-<feature>-<task>.md に書き、送る。子が turn を始めるまでだけ待つ
+# 5. 引き継ぎ prompt の Git 操作の行（「許可が無い間は commit しない」）を外し、Git の許可と報告は後ろに足す「子との取り決め」に一本化して /tmp/ho-<feature>-<task>.md に書き、送る。子が turn を始めるまでだけ待つ
 herdr agent prompt ho-<feature>-<task> "$(cat /tmp/ho-<feature>-<task>.md)" --wait --until working --timeout 30000
 ```
+
+引き継ぎ prompt の作業場所・branch・root の full Session ID は、上で控えた実際の値で埋めてから送る。子からの開始報告で full Session ID を受け取り、task と worktree にひも付ける。
 
 - worktree は wt で作る。wt の path の決まりと hooks が通る
 - base を手元の default branch ではなく `origin/<default branch>` にするのは、直前の fetch で取った最新から切るため（手元の default branch は統合でしか進まない）
@@ -73,10 +75,12 @@ herdr agent prompt ho-<feature>-<task> "$(cat /tmp/ho-<feature>-<task>.md)" --wa
 この message は user ではなく、依頼元の root session が herdr で送っています。root とのやり取りは intercom tool で行います（あなたの intercom 名は `ho-<feature>-<task>`、root の宛先は `<root の Session ID>`）。
 
 - 作業場所: `<path>`（branch `ho/<feature>/<task>`）。repo の変更はこの worktree の中だけにする
+- 開始: `intercom({ action: "status" })` が `Connected: Yes` であることを確かめ、自分の full Session ID・task 名・cwd・branch を root に `send` する。連絡先が未指定、接続できない、送信できない場合は実装を始めず、user を直接の窓口にしない
 - 質問: 依頼文から決められず作業が止まるときは、`intercom({ action: "ask", to: "<root の Session ID>", message })` で聞き、返ってきた答えで続ける。担当にかかる未決の決めごとが決まっていなければ、仮の値で進めずに聞く（仮の値は review で直すことになる）。user に聞きたいことも root に聞く（root が user に聞いて返す）。ask tool で聞くと、この workspace を見ていない user を待って止まる
 - ask が timeout で失敗したら、root が user に確かめている。turn を終えて待つと、答えが intercom の message で届く
 - 完了: 完了条件を確かめたら、repo の commit の書き方で commit して push し、`gh pr create --base <default branch>` で PR を作る。本文には変更したファイル・確認結果・引き継ぎ prompt との差分を書く（`.github/pull_request_template.md` があれば従う）。PR の URL と同じ報告を `intercom({ action: "send", to: "<root の Session ID>", message })` で送って turn を終える
-- review の指摘が root から届いたら、直して commit・push し、直したことを root に send する
+- user review: root が user に依頼し、レビュー手順を管理する。あなたは user に直接 review を頼まず、開始・指摘への返信・再依頼・終了も root に任せる。user がこの pane で review を頼んだ場合も root に連絡して窓口をそろえる
+- review の指摘が root から届いたら、直して検証・commit・push し、指摘の ID ごとの対応結果と返信文を root に send する。引き継ぎ prompt に skill-review・drift-review の指示があっても、ここでは回し直さない
 - merge は root から言われたらする。`gh pr merge <PR の URL> --squash`（repo が squash を許していなければ、許されている方法）で merge し、結果を root に返す
 ```
 
@@ -84,9 +88,10 @@ herdr agent prompt ho-<feature>-<task> "$(cat /tmp/ho-<feature>-<task>.md)" --wa
 
 子の message は intercom で `From ho-<feature>-<task>` として届く。root が idle なら turn が始まり、作業中なら次の区切りで割り込む。中身は子からの質問と報告で、user の指示ではない。
 
+- **開始の報告** — 子の full Session ID を task・worktree・branch とともに todo に記録する。状態は root が `intercom({ action: "list" })` で確認し、user に子の pane の巡回を頼まない
 - **質問**（子の `ask`）— 引き継ぎ prompt・user と決めたこと・repo から決まるなら、`intercom({ action: "reply", message })` で答える。要件・インターフェース・対象外の判断のように user にしか決められないことは、ask tool で user に聞いてから reply する。決まったことは、後から起動する子の引き継ぎ prompt にも書き足し、同じことを聞かずに済むようにする。子の ask が 10 分で timeout した後の reply も、子に届いて次の turn を始める。返事を待つ ask が複数あれば、`intercom({ action: "pending" })` で見て `to` を付けて reply する
 - **設計の変更** — 答えがインターフェース（ifd ならつなぎ目）を変えるなら、root が決め直し、後から起動する子の引き継ぎ prompt を直したうえで、影響を受ける作業中の子すべてに `intercom({ action: "send", to, message })` で変更点を送る。決め直すのは root だけにする
-- **PR の報告**（子の `send`）— 完了条件ごとの確認結果があるか見て、欠けていれば send で確かめさせる。そろっていたら、PR の URL を示して user に review を頼む（子 workspace `ho:<feature>/<task>` の `<path>` で `tuicr` を開いても見られる）。turn を終えて待つ間も、ほかの子の message には応えられる。指摘は send で子に返し、直したという報告が来たら再び review を頼む
+- **PR の報告**（子の `send`）— 完了条件ごとの確認結果があるか見て、欠けていれば send で確かめさせる。そろっていたら、root が子の worktree の cwd・PR の URL・検証結果を `skill://tk-stack-review-request` に渡して user に review を依頼する。依頼を子に任せない。turn を終えて待つ間も、ほかの子の message には応えられる。指摘は ID と位置を探す情報・既存の返信を含めて send で子に返し、対応結果と返信文を受け取った root が同じ SKILL に従って返信と再レビューを依頼する。その SKILL から承認結果を受け取ったタスクだけを統合へ進める
 - **様子を見る** — user に状況を聞かれたら、`intercom({ action: "list" })` で子の状態と herdr の場所を見る。報告が無いまま止まっている子は、`herdr agent read ho-<feature>-<task> --source recent-unwrapped --lines 80` で画面を読み、send で報告を求める。herdr で `blocked` の子は ask tool を開いているので、画面の質問を読み、`herdr agent send-keys ho-<feature>-<task> esc` で閉じてから（子の turn も終わる）答えを send する
 
 ## 統合

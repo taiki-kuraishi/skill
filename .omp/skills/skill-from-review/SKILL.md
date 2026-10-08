@@ -1,6 +1,6 @@
 ---
 name: skill-from-review
-description: "コードレビューの指摘（tuicr 形式: file:line + コメント）をライブラリ単位の SKILL に変換して、skills 配布リポジトリに蓄積するための運用手順。レビュー指摘のリストを添付されたとき、コーディング規約を SKILL 化してほしいと言われたときに必ず使用すること。このリポジトリでの SKILL 作成・追記・分類の依頼全般で、skill-creator より先に発火させる（作成・追記はここから skill-creator を呼び出す）。"
+description: "コードレビューの指摘（Crit のレビュー結果・コメント JSON、または file:line + コメント）をライブラリ単位の SKILL に変換して、skills 配布リポジトリに蓄積するための運用手順。レビュー指摘のリストを添付されたとき、コーディング規約を SKILL 化してほしいと言われたときに必ず使用すること。このリポジトリでの SKILL 作成・追記・分類の依頼全般で、skill-creator より先に発火させる（作成・追記はここから skill-creator を呼び出す）。"
 metadata:
   internal: true
 ---
@@ -13,12 +13,25 @@ metadata:
 
 ## 手順
 
-1. **指摘を分類する** — 指摘を 1 件ずつ読み、「どのライブラリ / 言語 / フレームワークを書くときに効く規約か」で分類する。同じ対象に属する指摘は 1 つの SKILL にまとめる。例: 「関数の返型を書かない」「早期 return」→ `tk-stack-typescript`、「Result.gen の書き方」→ `tk-stack-better-result`
+1. **指摘を分類する** — Crit の結果は下の「Crit の指摘を読む」で読み、指摘を 1 件ずつ「どのライブラリ / 言語 / ツールを書くときに効く規約か」で分類する。同じ対象に属する指摘は 1 つの SKILL にまとめる。例: 「関数の返型を書かない」「早期 return」→ `tk-stack-typescript`、「Result.gen の書き方」→ `tk-stack-better-result`
 2. **追記 or 新規作成を決める** — `skills/` 配下に `tk-stack-<対象ライブラリ名>` の SKILL があれば追記、なければ新規作成にする
 3. **skill-creator で書く** — skill-creator を読み込み、対象 SKILL ごとにその手順を回して SKILL.md を書く。新規作成は「Creating a skill」、追記は「Improving the skill」（baseline は追記前の snapshot）として進め、各段階に下の「skill-creator への渡し方」を適用する。完了条件: SKILL.md が書き上がり、テストを回したなら user が結果に満足している。skill-creator の手順を終えたら手順 4 に戻る
 4. **一覧に登録する** — 新規作成したら `skills/tk-stack-skill-review/SKILL.md` の SKILL 一覧と `description` に名前を追記する。一覧に無い SKILL はレビューで読まれない
 5. **検証する** — ユーザーの agent 環境を変えないよう `/tmp` 下の作業ディレクトリで `bunx skills add <repo-path> --agent claude-code -y` を実行し、対象 SKILL が発見・インストールされることを確認する。リポジトリ本体は stage / commit しない（user の指示があるまで）
-6. **user review に回す** — 変更ファイルと検証証拠を示してレビューを依頼する
+6. **user review に回す** — 変更ファイルと検証証拠を示し、`skill://tk-stack-review-request` に従って user にレビューを依頼する
+
+## Crit の指摘を読む
+
+- user が渡した review 結果・JSON を読む。session を指定された場合は `crit comments --session <id> --all --json` で取得する。session が複数あるなら `crit status --json` で対象と照合し、推測で選ばない
+- review JSON では `review_comments` と、`files` の各ファイルの `comments` を両方読む。CLI の一覧 JSON なら各コメントを読む。review 全体やファイル全体の指摘も、行番号が無いだけで規約にできる
+- 規約の根拠は `body` と対象コード、返信で合意した内容に置く。`quote` があれば選択された範囲に絞り、位置は `anchor` で探す。`drifted` があれば古い `start_line` を現在の位置だと思わない。`resolved` や `approved` は規約本文ではない
+
+```text
+Bad: 古い start_line の現在のコードを見て、その書き方を規約にする
+Good: quote・anchor が指すコードと body・返信の合意を読み、他のプロジェクトでも効く規約だけを抜き出す
+```
+
+なぜ: 修正で行番号が動くと、指摘とは別のコードを規約にしてしまう。返信を読まないと、最初の案を user の最終判断だと思って蓄積する。
 
 ## skill-creator への渡し方
 
