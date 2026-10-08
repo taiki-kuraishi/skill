@@ -39,33 +39,41 @@ Good: 開発フローは tk-stack-review-request に対象と証拠を渡し、�
 
 1. **対象を固定する** — cwd、フェーズ、変更ファイル、検証結果、未解決事項をそろえる。未コミット差分は `review_args=()`、PR は `review_args=(--pr "$PR_URL")`、指定ファイルは `review_args=("$FILE")` とする。開始前や承認済みの差分が同じ review に含まれるなら、今回見てほしい範囲と分けて示す。完了条件: user が見る対象と、今回の承認範囲が決まっている
 2. **session を選ぶ** — 対象の cwd で `crit status --json` の `sessions` を読む。複数あると `daemon.running: false` になるため、その値だけで session が無いとは判断しない。同じ対象の自分が管理する session は `--session <id>` で再利用し、新規起動しない。所有者や対象が不明な session は、停止や重複起動の前に窓口を確認する。新規起動では下の「起動」を使う。完了条件: 対象ごとに管理する session が 1 つに決まっている
-3. **起動して依頼する** — Crit は Finish Review まで待つ CLI のまま、出力と終了を受け取れる tool の background job で実行する（omp なら `async: true`・`timeout: 0`）。起動出力の URL・session ID と、`crit status --json` の `sessions` でその ID に一致する行の `port`・`pid` を控える。`できるようになったこと / 変更ファイル / 検証と証拠 / 未解決事項` と URL を示し、「コメントを書き、Finish Review を押してください」と頼む。完了条件: URL と承認対象を user に渡し、待っている job と session を記録した
+3. **起動して依頼する** — 下の「起動」で `REVIEW_URL` と `PORT` を先に決め、Crit は Finish Review まで待つ CLI のまま、出力と終了を受け取れる tool の background job で `-p "$PORT"` 付きで実行する（omp なら `async: true`・`timeout: 0`）。起動後、`crit status --json` の `sessions` に記録した `PORT` の行が出るまで待ち、その行の `id`・`pid` を控える。出なければ job の出力（omp なら `proc://<job-id>`）の stderr を読んで起動失敗を確認する。`できるようになったこと / 変更ファイル / 検証と証拠 / 未解決事項` と `REVIEW_URL` を本文に書き、「コメントを書き、Finish Review を押してください」と頼む。完了条件: 起動を確認した `REVIEW_URL` と承認対象を user への発言に書き、待っている job と session を記録した
 4. **結果を受け取る** — review 待ちの todo を block にし、turn を終える。同じ対象の変更や次フェーズには進まず、job の終了を待つ。root は別の子からの message には応えられる。終了後に stdout の指摘と stderr の `approved` を読む。Finish Review 以外の終了や、指摘も再開コマンドも無い `approved: false` は中断として user に報告し、修正ループには入らず再開の意思を確認する。再開する場合だけ記録した ID で `crit --session <id>` を起動して手順 4 で待つ。失敗・中断・結果未受領は承認ではない。完了条件: Finish Review の結果、または中断を受領した
 5. **指摘に応える** — `approved: false` なら、すべての未解決指摘を呼び出し元のフローで修正・再検証する。`quote` があれば選択範囲に絞り、`anchor` で位置を探す。file・review 全体の指摘は `body` と対象の差分から扱う。`drifted` があれば古い行番号で直さない。子が実装するフローでは、root が指摘の ID・本文・quote・anchor・drifted・既存の返信を子に送り、子から対応結果と返信文を受け取る。root が `crit comment --session <id> --reply-to <comment-id> --author 'root' '<対応内容>'` で返信する。自分で comment を resolve しない。完了条件: 各指摘に対応結果か、直さない理由・要確認を返信した
-6. **再レビューする** — 再開前の `http://127.0.0.1:<port>/api/session` の `review_round` を控え、stdout に示された再開コマンド（`crit --session <id>`）を同じ session の background job で実行する。接続メッセージだけでは round が更新されていないことがあるため、`review_round` が進んだことを確認してから修正後の検証結果と URL を示し、手順 4 に戻る。完了条件: 修正後の状態が次の round に渡った
+6. **再レビューする** — 再開前の `http://127.0.0.1:<port>/api/session` の `review_round` を控え、stdout に示された再開コマンド（`crit --session <id>`）を同じ session の background job で実行する。再開しても port と URL は変わらない。接続メッセージだけでは round が更新されていないことがあるため、`review_round` が進んだことを確認してから修正後の検証結果と記録した `REVIEW_URL` を示し、手順 4 に戻る。完了条件: 修正後の状態が次の round に渡り、`REVIEW_URL` を user に再掲した
 7. **承認して閉じる** — Finish Review の `approved: true`（未解決コメント 0 件）を、示した対象の承認として呼び出し元へ返す。Git 操作は呼び出し元で合意した権限に従う。daemon が残っていれば、対象の cwd で `crit status --json` を読み、自分が起動した session の ID・PID・port が `sessions` の行と記録で一致し、そのプロセスが自分の Crit daemon であることを確認して `kill "$PID"` でその PID だけを停止する。再利用した他 session の daemon や、既に終了した PID は止めない。完了条件: 承認結果を反映し、自分の review の後始末だけを終えた
 
 ## 起動
 
-公開ホストは dotfiles の `CRIT_PUBLIC_URL`（port・path のない base URL）から読む。ホスト名を SKILL に埋め込まない。設定があれば空き port を選び、port 付きの `--public-url` を渡す。公開への同意は既存の `CRIT_ALLOW_UNAUTHENTICATED_NETWORK` を継承する。未許可なら Crit の拒否を user に示し、勝手に許可しない。
+公開ホストは dotfiles の `CRIT_PUBLIC_URL`（port・path のない base URL）から読む。ホスト名を SKILL に埋め込まない。空き port を選び、設定があれば port 付きの `--public-url` を渡す。公開への同意は既存の `CRIT_ALLOW_UNAUTHENTICATED_NETWORK` を継承する。未許可なら Crit の拒否を user に示し、勝手に許可しない。
+
+URL は Crit の出力から拾わず、起動前に自分で組み立てる。Crit は起動 URL を stderr にだけ出し、background job の出力は終了まで自動では届かないため、出力待ちだと URL を渡し損ねる。まず次を同期で実行し、出力された `PORT` と `REVIEW_URL` を控える。
 
 ```bash
-network_args=(--host 127.0.0.1 --no-open)
-if [ -n "${CRIT_PUBLIC_URL:-}" ]; then
-  PORT=$(python3 -c 'import socket; s = socket.socket(); s.bind(("127.0.0.1", 0)); print(s.getsockname()[1]); s.close()')
-  network_args+=(-p "$PORT" --public-url "${CRIT_PUBLIC_URL%/}:$PORT")
-fi
+PORT=$(python3 -c 'import socket; s = socket.socket(); s.bind(("127.0.0.1", 0)); print(s.getsockname()[1]); s.close()')
+REVIEW_URL="${CRIT_PUBLIC_URL:+${CRIT_PUBLIC_URL%/}}"
+REVIEW_URL="${REVIEW_URL:-http://127.0.0.1}:$PORT"
+echo "PORT=$PORT REVIEW_URL=$REVIEW_URL"
+```
+
+次に、控えた値を埋めて background job で起動する。
+
+```bash
+network_args=(--host 127.0.0.1 --no-open -p <PORT>)
+[ -n "${CRIT_PUBLIC_URL:-}" ] && network_args+=(--public-url "<REVIEW_URL>")
 crit "${network_args[@]}" "${review_args[@]}"
 ```
 
 `--public-url` は許可する Host と表示 URL を変えるが、port の転送は作らない。既存の転送経路を使い、listen host は loopback のままにする。Crit は認証を持たず、到達できる人は review を読み、コメントを書ける。port の競合で起動に失敗したら、空き port を選び直す。
 
 ```text
-Bad: localhost の URL の文字列だけを公開ホストに置き換えて user に渡す
-Good: --public-url に実際の公開ホストと port を渡し、Crit が出した URL を渡す
+Bad: 起動して「Crit を起動しました」で終える / job の出力が届くのを待って URL を拾う / localhost の URL の文字列だけを公開ホストに置き換える
+Good: 起動前に REVIEW_URL を決め、status で起動を確認してから本文に書く。--public-url には同じ公開ホストと port を渡す
 ```
 
-なぜ: URL の文字列だけを変えても Crit の Host 制限は変わらない。port を固定しないのは、複数の子の review が同時に動くため。
+なぜ: URL は stderr に出て job の終了まで届かず、user に書き忘れても気づけない。URL の文字列だけを変えても Crit の Host 制限は変わらない。port を固定するのは、URL を事前に確定でき、複数の子の review が同時に動いても衝突しないため。
 
 ## session を取り違えない
 
