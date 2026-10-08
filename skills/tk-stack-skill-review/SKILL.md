@@ -1,6 +1,6 @@
 ---
 name: tk-stack-skill-review
-description: taiki-kuraishi/skill リポジトリの SKILL（tk-stack-agents-md、tk-stack-better-auth、tk-stack-better-result、tk-stack-cloudflare-vite-plugin、tk-stack-code-comment、tk-stack-drizzle-orm、tk-stack-github-actions、tk-stack-hono、tk-stack-layerd-architecture、tk-stack-mise、tk-stack-monorepo、tk-stack-nuqs、tk-stack-playwright、tk-stack-react、tk-stack-tanstack-db、tk-stack-tanstack-router、tk-stack-terraform、tk-stack-testing、tk-stack-typescript、tk-stack-vite、tk-stack-vite-plus、tk-stack-worktree-diff）を読み込み、その規約からズレているコードを指摘するレビュー手順。コードレビュー、diff・PR のレビュー、「SKILL・規約に沿っているか見て」という依頼、実装後の自己レビューで使用すること。
+description: taiki-kuraishi/skill リポジトリの SKILL（tk-stack-agents-md、tk-stack-better-auth、tk-stack-better-result、tk-stack-cloudflare-vite-plugin、tk-stack-code-comment、tk-stack-drizzle-orm、tk-stack-github-actions、tk-stack-hono、tk-stack-layerd-architecture、tk-stack-mise、tk-stack-monorepo、tk-stack-nuqs、tk-stack-playwright、tk-stack-react、tk-stack-tanstack-db、tk-stack-tanstack-query、tk-stack-tanstack-router、tk-stack-terraform、tk-stack-testing、tk-stack-typescript、tk-stack-vite、tk-stack-vite-plus、tk-stack-worktree-diff）を読み込み、その規約からズレているコードを指摘するレビュー手順。コードレビュー、diff・PR のレビュー、「SKILL・規約に沿っているか見て」という依頼、実装後の自己レビューで使用すること。
 ---
 
 # tk-stack-skill-review
@@ -22,6 +22,7 @@ description: taiki-kuraishi/skill リポジトリの SKILL（tk-stack-agents-md�
 - `tk-stack-playwright`
 - `tk-stack-react`
 - `tk-stack-tanstack-db`
+- `tk-stack-tanstack-query`
 - `tk-stack-tanstack-router`
 - `tk-stack-terraform`
 - `tk-stack-testing`

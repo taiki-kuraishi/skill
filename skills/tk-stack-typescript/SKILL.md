@@ -1,6 +1,6 @@
 ---
 name: tk-stack-typescript
-description: TypeScript コードを書く・修正する・レビューするときの規約。ts ファイルや TypeScript の関数を扱う場面すべてで使用すること — return 型アノテーションやそのためだけの interface・type を書かず導出に任せること、else を使わない早期 return など。コード生成、リファクタリング、バグ修正、レビュー指摘への対応でも発火させる。
+description: TypeScript コードを書く・修正する・レビューするときの規約。ts ファイルや TypeScript の関数を扱う場面すべてで使用すること — return 型アノテーションやそのためだけの interface・type を書かず導出に任せること、else を使わない早期 return、if の前の空行など。コード生成、リファクタリング、バグ修正、レビュー指摘への対応でも発火させる。
 disable-model-invocation: false
 ---
 
@@ -47,6 +47,7 @@ function save(user) {
   if (!user) {
     return Result.err("no user");
   }
+
   if (!user.active) {
     return Result.err("inactive");
   }
@@ -55,6 +56,41 @@ function save(user) {
 ```
 
 なぜ: 早期 return は主処理のインデントを浅く保ち、「どの条件でどの処理になるか」を上から読めるようにする。`else` や三項演算子は条件と処理の対応を式やネストの中に埋めてしまう。
+
+## `if` の前には空行を置く
+
+`if` 文の前には、直前の文（別の `if` ブロックを含む）との間に空行を 1 行入れる。ブロックの先頭（`{` の直後）の `if` だけは入れない。`if` にコメントを付けるときはコメントも `if` の一部とみなし、空行はコメントの前に置く。
+
+```ts
+// Bad: 値を用意する文と `if` が詰まっていて、判断の境界が読み取りにくい
+async function update(args: { id: string; patch: Patch }) {
+  if (!args.patch.name) {
+    return Result.err("empty patch");
+  }
+  const user = await findUser(args.id);
+  // 退会済みのユーザーは更新できない
+  if (user.deletedAt) {
+    return Result.err("deleted");
+  }
+  return save(merge(user, args.patch));
+}
+
+// Good: 先頭以外の `if` は前に空行を置く。コメントを付けるなら、空行はコメントの前
+async function update(args: { id: string; patch: Patch }) {
+  if (!args.patch.name) {
+    return Result.err("empty patch");
+  }
+  const user = await findUser(args.id);
+
+  // 退会済みのユーザーは更新できない
+  if (user.deletedAt) {
+    return Result.err("deleted");
+  }
+  return save(merge(user, args.patch));
+}
+```
+
+なぜ: `if` は処理の行き先を変える境界。空行で区切ると、「値を用意する → 判定する → 続きを処理する」の段落が目で追え、分岐を探すときも空行を手がかりにできる。
 
 ## 関数の引数はオブジェクトに構造化する
 
