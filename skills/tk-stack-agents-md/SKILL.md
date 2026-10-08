@@ -1,6 +1,6 @@
 ---
 name: tk-stack-agents-md
-description: AGENTS.md（CLAUDE.md など coding agent 向けの指示ファイルを含む）を書く・修正する・レビューするときの規約 — コードや設定ファイルを読めば分かる実装の事実（ファイル構成と各ファイルの中身、有効にした機能、resource や設定の値）を書かず、コードに現れないリポジトリの規約（terraform apply・デプロイ・DB migration の実行手順と認証、user の承認が要る操作、レビューと commit の運用）を書く。機能の実装やリファクタリング、レビュー指摘への対応のついでに AGENTS.md を更新する場面や、/init などで AGENTS.md を新しく作る場面でも発火させる。
+description: AGENTS.md（CLAUDE.md など coding agent 向けの指示ファイルを含む）を書く・修正する・レビューするときの規約 — コードや設定ファイルを読めば分かる実装の事実（ファイル構成と各ファイルの中身、有効にした機能、resource や設定の値）を書かず、コードに現れないリポジトリの規約（terraform apply・デプロイ・DB migration の実行手順と認証、user の承認が要る操作、レビューと commit の運用）を書く。機能の実装やリファクタリング、レビュー指摘への対応のついでに AGENTS.md を更新する場面や、/init などで AGENTS.md を新しく作る場面、兄弟の app・package を参考に新しい app・package を足して、頼まれていなくても兄弟に倣って AGENTS.md を作る場面でも発火させる。
 ---
 
 # tk-stack-agents-md
