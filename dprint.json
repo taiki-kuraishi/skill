@@ -12,7 +12,7 @@
     "textWrap": "maintain"
   },
   "plugins": [
-    "npm:@dprint/markdown@0.24.0",
+    "npm:@dprint/markdown@0.26.0",
     "npm:@dprint/toml@0.8.0",
     "npm:@dprint/json@0.25.2",
     "https://plugins.dprint.dev/g-plane/pretty_yaml-v0.6.0.wasm"
