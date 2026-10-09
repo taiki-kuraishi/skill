@@ -49,132 +49,143 @@ checksum = "sha256:78c221c2376f79731ccf4e4af0b3bb46d81fefa3296c5abee09ad8a1b21e6
 url = "https://github.com/oven-sh/bun/releases/download/bun-v1.4.2/bun-windows-x64-baseline.zip"
 
 [[tools.dprint]]
-version = "0.56.1"
+version = "0.61.1"
 backend = "aqua:dprint/dprint"
 
 [tools.dprint."platforms.linux-arm64"]
-checksum = "sha256:e9dc29baca00edf30d66b1b7a8de490c3a1bda4091bbc7b69f01f4a88db06c01"
-url = "https://github.com/dprint/dprint/releases/download/0.56.1/dprint-aarch64-unknown-linux-gnu.zip"
-url_api = "https://api.github.com/repos/dprint/dprint/releases/assets/524191407"
+checksum = "sha256:6585c1a475e995cbd3729e039579c6fef9f28202c3b94bf252ab04f8f4177876"
+url = "https://github.com/dprint/dprint/releases/download/0.61.1/dprint-aarch64-unknown-linux-gnu.zip"
+url_api = "https://api.github.com/repos/dprint/dprint/releases/assets/619786296"
+provenance = "github-attestations"
 
 [tools.dprint."platforms.linux-arm64-musl"]
-checksum = "sha256:6f9541637ff47289409d709e4b006eeed84fd11c212dc029c4d26504a2cae0ff"
-url = "https://github.com/dprint/dprint/releases/download/0.56.1/dprint-aarch64-unknown-linux-musl.zip"
-url_api = "https://api.github.com/repos/dprint/dprint/releases/assets/524191400"
+checksum = "sha256:d0658fcc2887fe8ba396f6ef0fec28c97a6d59558835b7b82e573ea923c53b25"
+url = "https://github.com/dprint/dprint/releases/download/0.61.1/dprint-aarch64-unknown-linux-musl.zip"
+url_api = "https://api.github.com/repos/dprint/dprint/releases/assets/619786288"
+provenance = "github-attestations"
 
 [tools.dprint."platforms.linux-x64"]
-checksum = "sha256:51729ee501593c84e2a2e8233f55959edf2bbd95cbb3998e9f8a81ecad942dba"
-url = "https://github.com/dprint/dprint/releases/download/0.56.1/dprint-x86_64-unknown-linux-gnu.zip"
-url_api = "https://api.github.com/repos/dprint/dprint/releases/assets/524191408"
+checksum = "sha256:c33d901d2f5b81af680bce50902e7193e6c169f4f2dd6e1d41d3c5a96d70ecb4"
+url = "https://github.com/dprint/dprint/releases/download/0.61.1/dprint-x86_64-unknown-linux-gnu.zip"
+url_api = "https://api.github.com/repos/dprint/dprint/releases/assets/619786291"
+provenance = "github-attestations"
 
 [tools.dprint."platforms.linux-x64-baseline"]
-checksum = "sha256:51729ee501593c84e2a2e8233f55959edf2bbd95cbb3998e9f8a81ecad942dba"
-url = "https://github.com/dprint/dprint/releases/download/0.56.1/dprint-x86_64-unknown-linux-gnu.zip"
-url_api = "https://api.github.com/repos/dprint/dprint/releases/assets/524191408"
+checksum = "sha256:c33d901d2f5b81af680bce50902e7193e6c169f4f2dd6e1d41d3c5a96d70ecb4"
+url = "https://github.com/dprint/dprint/releases/download/0.61.1/dprint-x86_64-unknown-linux-gnu.zip"
+url_api = "https://api.github.com/repos/dprint/dprint/releases/assets/619786291"
+provenance = "github-attestations"
 
 [tools.dprint."platforms.linux-x64-musl"]
-checksum = "sha256:913032d493340643d6b98ce250a2407c5d0abab8613b3e16a09d92661131425a"
-url = "https://github.com/dprint/dprint/releases/download/0.56.1/dprint-x86_64-unknown-linux-musl.zip"
-url_api = "https://api.github.com/repos/dprint/dprint/releases/assets/524191404"
+checksum = "sha256:b85ad46a2e8e686b4ff1ff1dc1f0a0f947e766df5afb08ce367cb0d152dff616"
+url = "https://github.com/dprint/dprint/releases/download/0.61.1/dprint-x86_64-unknown-linux-musl.zip"
+url_api = "https://api.github.com/repos/dprint/dprint/releases/assets/619786294"
+provenance = "github-attestations"
 
 [tools.dprint."platforms.linux-x64-musl-baseline"]
-checksum = "sha256:913032d493340643d6b98ce250a2407c5d0abab8613b3e16a09d92661131425a"
-url = "https://github.com/dprint/dprint/releases/download/0.56.1/dprint-x86_64-unknown-linux-musl.zip"
-url_api = "https://api.github.com/repos/dprint/dprint/releases/assets/524191404"
+checksum = "sha256:b85ad46a2e8e686b4ff1ff1dc1f0a0f947e766df5afb08ce367cb0d152dff616"
+url = "https://github.com/dprint/dprint/releases/download/0.61.1/dprint-x86_64-unknown-linux-musl.zip"
+url_api = "https://api.github.com/repos/dprint/dprint/releases/assets/619786294"
+provenance = "github-attestations"
 
 [tools.dprint."platforms.macos-arm64"]
-checksum = "sha256:c9af77af134987fada60344e8b9f23b2238081f7eea94a7bcd53ec49369354f6"
-url = "https://github.com/dprint/dprint/releases/download/0.56.1/dprint-aarch64-apple-darwin.zip"
-url_api = "https://api.github.com/repos/dprint/dprint/releases/assets/524191394"
+checksum = "sha256:3fbf19db032dea2e8eb6e52eebbc8c328954a46d52ffd97d99a95b9c9b81414f"
+url = "https://github.com/dprint/dprint/releases/download/0.61.1/dprint-aarch64-apple-darwin.zip"
+url_api = "https://api.github.com/repos/dprint/dprint/releases/assets/619786284"
+provenance = "github-attestations"
 
 [tools.dprint."platforms.macos-x64"]
-checksum = "sha256:f944e33a1bf8f6125eaa5ea77ee8a01db96093a6fb80df127b390f2a106774f7"
-url = "https://github.com/dprint/dprint/releases/download/0.56.1/dprint-x86_64-apple-darwin.zip"
-url_api = "https://api.github.com/repos/dprint/dprint/releases/assets/524191392"
+checksum = "sha256:9b38610df23417c5cce6daa7d9fb43d9960a5f859fa91cbe7c12f11198074900"
+url = "https://github.com/dprint/dprint/releases/download/0.61.1/dprint-x86_64-apple-darwin.zip"
+url_api = "https://api.github.com/repos/dprint/dprint/releases/assets/619786293"
+provenance = "github-attestations"
 
 [tools.dprint."platforms.macos-x64-baseline"]
-checksum = "sha256:f944e33a1bf8f6125eaa5ea77ee8a01db96093a6fb80df127b390f2a106774f7"
-url = "https://github.com/dprint/dprint/releases/download/0.56.1/dprint-x86_64-apple-darwin.zip"
-url_api = "https://api.github.com/repos/dprint/dprint/releases/assets/524191392"
+checksum = "sha256:9b38610df23417c5cce6daa7d9fb43d9960a5f859fa91cbe7c12f11198074900"
+url = "https://github.com/dprint/dprint/releases/download/0.61.1/dprint-x86_64-apple-darwin.zip"
+url_api = "https://api.github.com/repos/dprint/dprint/releases/assets/619786293"
+provenance = "github-attestations"
 
 [tools.dprint."platforms.windows-x64"]
-checksum = "sha256:d2c5ee170ff88c0b16ea1f5f214e4d74877c7edb9ca701da5c9851c0c1ef9338"
-url = "https://github.com/dprint/dprint/releases/download/0.56.1/dprint-x86_64-pc-windows-msvc.zip"
-url_api = "https://api.github.com/repos/dprint/dprint/releases/assets/524191393"
+checksum = "sha256:f259df6beed31a7242a613cf1ff948637ca17d1b385f8effa2cfbf6a056ff84c"
+url = "https://github.com/dprint/dprint/releases/download/0.61.1/dprint-x86_64-pc-windows-msvc.zip"
+url_api = "https://api.github.com/repos/dprint/dprint/releases/assets/619786297"
+provenance = "github-attestations"
 
 [tools.dprint."platforms.windows-x64-baseline"]
-checksum = "sha256:d2c5ee170ff88c0b16ea1f5f214e4d74877c7edb9ca701da5c9851c0c1ef9338"
-url = "https://github.com/dprint/dprint/releases/download/0.56.1/dprint-x86_64-pc-windows-msvc.zip"
-url_api = "https://api.github.com/repos/dprint/dprint/releases/assets/524191393"
+checksum = "sha256:f259df6beed31a7242a613cf1ff948637ca17d1b385f8effa2cfbf6a056ff84c"
+url = "https://github.com/dprint/dprint/releases/download/0.61.1/dprint-x86_64-pc-windows-msvc.zip"
+url_api = "https://api.github.com/repos/dprint/dprint/releases/assets/619786297"
+provenance = "github-attestations"
 
 [[tools.lefthook]]
-version = "2.1.12"
+version = "2.2.1"
 backend = "aqua:evilmartians/lefthook"
 
 [tools.lefthook."platforms.linux-arm64"]
-checksum = "sha256:d96ac16753f6d3d69b92098621c2a2427522a9c2c3e78cd7c9b4a9790b0b8f17"
-url = "https://github.com/evilmartians/lefthook/releases/download/v2.1.12/lefthook_2.1.12_Linux_aarch64.gz"
-url_api = "https://api.github.com/repos/evilmartians/lefthook/releases/assets/533627819"
+checksum = "sha256:90af157cb1f2c6194498cd88aacee9d86c71e09f194bfbf68da2f1d24aa8ae01"
+url = "https://github.com/evilmartians/lefthook/releases/download/v2.2.1/lefthook_2.2.1_Linux_aarch64.gz"
+url_api = "https://api.github.com/repos/evilmartians/lefthook/releases/assets/621507793"
 provenance = "github-attestations"
 
 [tools.lefthook."platforms.linux-arm64-musl"]
-checksum = "sha256:d96ac16753f6d3d69b92098621c2a2427522a9c2c3e78cd7c9b4a9790b0b8f17"
-url = "https://github.com/evilmartians/lefthook/releases/download/v2.1.12/lefthook_2.1.12_Linux_aarch64.gz"
-url_api = "https://api.github.com/repos/evilmartians/lefthook/releases/assets/533627819"
+checksum = "sha256:90af157cb1f2c6194498cd88aacee9d86c71e09f194bfbf68da2f1d24aa8ae01"
+url = "https://github.com/evilmartians/lefthook/releases/download/v2.2.1/lefthook_2.2.1_Linux_aarch64.gz"
+url_api = "https://api.github.com/repos/evilmartians/lefthook/releases/assets/621507793"
 provenance = "github-attestations"
 
 [tools.lefthook."platforms.linux-x64"]
-checksum = "sha256:dad908593c859d139b886c14913a44401d95288aa7642d9bdf6f3bd36bd788ff"
-url = "https://github.com/evilmartians/lefthook/releases/download/v2.1.12/lefthook_2.1.12_Linux_x86_64.gz"
-url_api = "https://api.github.com/repos/evilmartians/lefthook/releases/assets/533627780"
+checksum = "sha256:1b0ff33209fb31c5da73a6b860c5077ad83b1d8a99e46f5031fc14ee96caf9fe"
+url = "https://github.com/evilmartians/lefthook/releases/download/v2.2.1/lefthook_2.2.1_Linux_x86_64.gz"
+url_api = "https://api.github.com/repos/evilmartians/lefthook/releases/assets/621507663"
 provenance = "github-attestations"
 
 [tools.lefthook."platforms.linux-x64-baseline"]
-checksum = "sha256:dad908593c859d139b886c14913a44401d95288aa7642d9bdf6f3bd36bd788ff"
-url = "https://github.com/evilmartians/lefthook/releases/download/v2.1.12/lefthook_2.1.12_Linux_x86_64.gz"
-url_api = "https://api.github.com/repos/evilmartians/lefthook/releases/assets/533627780"
+checksum = "sha256:1b0ff33209fb31c5da73a6b860c5077ad83b1d8a99e46f5031fc14ee96caf9fe"
+url = "https://github.com/evilmartians/lefthook/releases/download/v2.2.1/lefthook_2.2.1_Linux_x86_64.gz"
+url_api = "https://api.github.com/repos/evilmartians/lefthook/releases/assets/621507663"
 provenance = "github-attestations"
 
 [tools.lefthook."platforms.linux-x64-musl"]
-checksum = "sha256:dad908593c859d139b886c14913a44401d95288aa7642d9bdf6f3bd36bd788ff"
-url = "https://github.com/evilmartians/lefthook/releases/download/v2.1.12/lefthook_2.1.12_Linux_x86_64.gz"
-url_api = "https://api.github.com/repos/evilmartians/lefthook/releases/assets/533627780"
+checksum = "sha256:1b0ff33209fb31c5da73a6b860c5077ad83b1d8a99e46f5031fc14ee96caf9fe"
+url = "https://github.com/evilmartians/lefthook/releases/download/v2.2.1/lefthook_2.2.1_Linux_x86_64.gz"
+url_api = "https://api.github.com/repos/evilmartians/lefthook/releases/assets/621507663"
 provenance = "github-attestations"
 
 [tools.lefthook."platforms.linux-x64-musl-baseline"]
-checksum = "sha256:dad908593c859d139b886c14913a44401d95288aa7642d9bdf6f3bd36bd788ff"
-url = "https://github.com/evilmartians/lefthook/releases/download/v2.1.12/lefthook_2.1.12_Linux_x86_64.gz"
-url_api = "https://api.github.com/repos/evilmartians/lefthook/releases/assets/533627780"
+checksum = "sha256:1b0ff33209fb31c5da73a6b860c5077ad83b1d8a99e46f5031fc14ee96caf9fe"
+url = "https://github.com/evilmartians/lefthook/releases/download/v2.2.1/lefthook_2.2.1_Linux_x86_64.gz"
+url_api = "https://api.github.com/repos/evilmartians/lefthook/releases/assets/621507663"
 provenance = "github-attestations"
 
 [tools.lefthook."platforms.macos-arm64"]
-checksum = "sha256:f23eac328ca50c7b775dc24dc275cdeacb65e16cf8bd1745d18e3c563f704f94"
-url = "https://github.com/evilmartians/lefthook/releases/download/v2.1.12/lefthook_2.1.12_MacOS_arm64.gz"
-url_api = "https://api.github.com/repos/evilmartians/lefthook/releases/assets/533627758"
+checksum = "sha256:c58acbd9fab211b6291a0c31d96d7f12e0b420e12989212af2193e7bc7f4a319"
+url = "https://github.com/evilmartians/lefthook/releases/download/v2.2.1/lefthook_2.2.1_MacOS_arm64.gz"
+url_api = "https://api.github.com/repos/evilmartians/lefthook/releases/assets/621507714"
 provenance = "github-attestations"
 
 [tools.lefthook."platforms.macos-x64"]
-checksum = "sha256:83c8591d338b1b789944480d9effe2807adc903cf27e4a16ab013e39d7723c31"
-url = "https://github.com/evilmartians/lefthook/releases/download/v2.1.12/lefthook_2.1.12_MacOS_x86_64.gz"
-url_api = "https://api.github.com/repos/evilmartians/lefthook/releases/assets/533627775"
+checksum = "sha256:654c41fa4f4490823eea4950beaf72889eae0e9acca0385700c381fce2ec54ae"
+url = "https://github.com/evilmartians/lefthook/releases/download/v2.2.1/lefthook_2.2.1_MacOS_x86_64.gz"
+url_api = "https://api.github.com/repos/evilmartians/lefthook/releases/assets/621507613"
 provenance = "github-attestations"
 
 [tools.lefthook."platforms.macos-x64-baseline"]
-checksum = "sha256:83c8591d338b1b789944480d9effe2807adc903cf27e4a16ab013e39d7723c31"
-url = "https://github.com/evilmartians/lefthook/releases/download/v2.1.12/lefthook_2.1.12_MacOS_x86_64.gz"
-url_api = "https://api.github.com/repos/evilmartians/lefthook/releases/assets/533627775"
+checksum = "sha256:654c41fa4f4490823eea4950beaf72889eae0e9acca0385700c381fce2ec54ae"
+url = "https://github.com/evilmartians/lefthook/releases/download/v2.2.1/lefthook_2.2.1_MacOS_x86_64.gz"
+url_api = "https://api.github.com/repos/evilmartians/lefthook/releases/assets/621507613"
 provenance = "github-attestations"
 
 [tools.lefthook."platforms.windows-x64"]
-checksum = "sha256:c642d9ad8818faff1379e1b72321b4baddd0d6f20ffd7303f59386bb6abfd6e9"
-url = "https://github.com/evilmartians/lefthook/releases/download/v2.1.12/lefthook_2.1.12_Windows_x86_64.gz"
-url_api = "https://api.github.com/repos/evilmartians/lefthook/releases/assets/533627801"
+checksum = "sha256:5707ebee91376f9a5ea0b09a93105f4532630739c71e53f3ce0f80e4df1fd2c9"
+url = "https://github.com/evilmartians/lefthook/releases/download/v2.2.1/lefthook_2.2.1_Windows_x86_64.gz"
+url_api = "https://api.github.com/repos/evilmartians/lefthook/releases/assets/621507782"
 provenance = "github-attestations"
 
 [tools.lefthook."platforms.windows-x64-baseline"]
-checksum = "sha256:c642d9ad8818faff1379e1b72321b4baddd0d6f20ffd7303f59386bb6abfd6e9"
-url = "https://github.com/evilmartians/lefthook/releases/download/v2.1.12/lefthook_2.1.12_Windows_x86_64.gz"
-url_api = "https://api.github.com/repos/evilmartians/lefthook/releases/assets/533627801"
+checksum = "sha256:5707ebee91376f9a5ea0b09a93105f4532630739c71e53f3ce0f80e4df1fd2c9"
+url = "https://github.com/evilmartians/lefthook/releases/download/v2.2.1/lefthook_2.2.1_Windows_x86_64.gz"
+url_api = "https://api.github.com/repos/evilmartians/lefthook/releases/assets/621507782"
 provenance = "github-attestations"
 
 [[tools.node]]
