@@ -19,7 +19,7 @@ root から実装を委任された子は、起動方式にかかわらず、完
 
 ```text
 Bad: root → 子「user に review を頼んで」→ root と子が別々の Crit を起動
-Good: 子 → root「PR と検証結果」→ root → user「Crit の URL」
+Good: 子 → root「差分と検証結果」→ root → user「Crit の URL」
 ```
 
 なぜ: 窓口が分かれると、user はどちらに指摘するか迷い、別 session の daemon を止める事故が起きる。子はこの SKILL を読まないので、呼び出し元の引き継ぎ prompt にも報告先を書く。
