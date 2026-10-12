@@ -136,6 +136,7 @@ jobs:
       - run: bun vp run fmt-check
       - run: bun vp run type-check
       - run: bun vp run -r build
+      - run: bun vp run -r test
       - if: success()
         uses: ./.github/actions/vite-task-cache
         with:

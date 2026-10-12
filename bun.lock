@@ -4,6 +4,7 @@
   "workspaces": {
     "": {
       "devDependencies": {
+        "@taiki-kuraishi/oxlint-config": "workspace:*",
         "typescript": "^7.0.2",
         "vite-plus": "^1.1.0",
       },
@@ -18,6 +19,9 @@
     "packages/oxlint-config": {
       "name": "@taiki-kuraishi/oxlint-config",
       "version": "0.0.0",
+      "dependencies": {
+        "@oxlint/plugins": "^1.87.0",
+      },
       "peerDependencies": {
         "oxlint": "^1.87.0",
       },
@@ -130,7 +134,7 @@
 
     "@oxlint/binding-win32-x64-msvc": ["@oxlint/binding-win32-x64-msvc@1.87.0", "", { "os": "win32", "cpu": "x64" }, "sha512-k+m/EShyXE29J/r1fjk0HlAzhN5JhIvj044oSJkXTEkCLrWZQgXb/3r4q5LTw/eaKW/4GuMXG2xmiJs3s5rPNw=="],
 
-    "@oxlint/plugins": ["@oxlint/plugins@1.79.0", "", {}, "sha512-S0uyoxakDINJ4DPgqxGlEEvrdSMeQb7Z2lKVjxoY2gwsbZbfg2Xr8Klfeo5ZeraHmmdBCELFUHkSe6KEmBpMvg=="],
+    "@oxlint/plugins": ["@oxlint/plugins@1.87.0", "", {}, "sha512-OtSZ6NxNkS7bkVy7zk9zGnajz2hVIu0uRPP/dJvJesGRaXtimpA4lpxap7FaIJndG2UIoKhnBU4DxyDQIWv6yg=="],
 
     "@polka/url": ["@polka/url@1.0.0-next.29", "", {}, "sha512-wwQAWhWSuHaag8c4q/KN/vCoeOJYshAIvMQwD4GpSb3OiZklFfvAgmj0VCBBImRpuF/aFgIRzllXlVX93Jevww=="],
 
@@ -429,6 +433,8 @@
     "yuku-codegen": ["yuku-codegen@0.9.5", "", { "dependencies": { "@yuku-toolchain/types": "^0.9.5" }, "optionalDependencies": { "@yuku-codegen/binding-android-arm64": "0.9.5", "@yuku-codegen/binding-darwin-arm64": "0.9.5", "@yuku-codegen/binding-darwin-x64": "0.9.5", "@yuku-codegen/binding-freebsd-x64": "0.9.5", "@yuku-codegen/binding-linux-arm-gnu": "0.9.5", "@yuku-codegen/binding-linux-arm-musl": "0.9.5", "@yuku-codegen/binding-linux-arm64-gnu": "0.9.5", "@yuku-codegen/binding-linux-arm64-musl": "0.9.5", "@yuku-codegen/binding-linux-x64-gnu": "0.9.5", "@yuku-codegen/binding-linux-x64-musl": "0.9.5", "@yuku-codegen/binding-win32-arm64": "0.9.5", "@yuku-codegen/binding-win32-x64": "0.9.5" } }, "sha512-zGUVyDpSK4b6c9B0yyxi2P0wujn1XZTbG9dCb7d6gyAoP63EMgyLzUwPUvwxPG5jgYqhlI7w+S3oCyapqGr4PA=="],
 
     "yuku-parser": ["yuku-parser@0.9.5", "", { "dependencies": { "@yuku-toolchain/types": "^0.9.5", "yuku-ast": "^0.9.5" }, "optionalDependencies": { "@yuku-parser/binding-android-arm64": "0.9.5", "@yuku-parser/binding-darwin-arm64": "0.9.5", "@yuku-parser/binding-darwin-x64": "0.9.5", "@yuku-parser/binding-freebsd-x64": "0.9.5", "@yuku-parser/binding-linux-arm-gnu": "0.9.5", "@yuku-parser/binding-linux-arm-musl": "0.9.5", "@yuku-parser/binding-linux-arm64-gnu": "0.9.5", "@yuku-parser/binding-linux-arm64-musl": "0.9.5", "@yuku-parser/binding-linux-x64-gnu": "0.9.5", "@yuku-parser/binding-linux-x64-musl": "0.9.5", "@yuku-parser/binding-win32-arm64": "0.9.5", "@yuku-parser/binding-win32-x64": "0.9.5" } }, "sha512-IBnAdNVMswWbJcM7woPluOudectJzFjJ1N8jVRxP9Uq4CIv5hZdBIcdmtRbFDYF/Ph2j2gVup4YJ4N9mh0jYFA=="],
+
+    "vite-plus/@oxlint/plugins": ["@oxlint/plugins@1.79.0", "", {}, "sha512-S0uyoxakDINJ4DPgqxGlEEvrdSMeQb7Z2lKVjxoY2gwsbZbfg2Xr8Klfeo5ZeraHmmdBCELFUHkSe6KEmBpMvg=="],
 
     "vitest/vite": ["vite@8.3.4", "", { "dependencies": { "lightningcss": "^1.33.0", "picomatch": "^4.0.7", "postcss": "^8.5.29", "rolldown": "~1.2.12", "tinyglobby": "^0.2.17" }, "optionalDependencies": { "fsevents": "~2.3.3" }, "peerDependencies": { "@types/node": "^20.19.0 || >=22.12.0", "@vitejs/devtools": "^0.7.1", "esbuild": "^0.27.0 || ^0.28.0", "jiti": ">=1.21.0", "less": "^4.0.0", "sass": "^1.70.0", "sass-embedded": "^1.70.0", "stylus": ">=0.54.8", "sugarss": "^5.0.0", "terser": "^5.16.0", "tsx": "^4.8.1", "yaml": "^2.4.2" }, "optionalPeers": ["@types/node", "@vitejs/devtools", "esbuild", "jiti", "less", "sass", "sass-embedded", "stylus", "sugarss", "terser", "tsx", "yaml"], "bin": { "vite": "bin/vite.js" } }, "sha512-IftLE8phJhdNRIGNEV4JCCvfNScoZQVfcXaN8TQropWGJtOHcu+iAB9pHcuGvmEb/kddw0LBe/jS8ztdC6xdiQ=="],
   }

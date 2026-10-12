@@ -3,6 +3,7 @@
   "type": "module",
   "workspaces": ["packages/*"],
   "devDependencies": {
+    "@taiki-kuraishi/oxlint-config": "workspace:*",
     "typescript": "^7.0.2",
     "vite-plus": "^1.1.0"
   }

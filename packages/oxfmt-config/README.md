@@ -13,4 +13,4 @@ export する設定は SKILL の名前から `kstack-` を除いた名前にす�
 
 ### kstack-typescript
 
-oxfmt で表せる規約は無い。`if` の前の空行は、oxfmt が既存の空行を保つだけで挿入しないため表せない。
+oxfmt で表せる規約は無い。`if` の前の空行も、oxfmt が既存の空行を保つだけで挿入しないため、`@taiki-kuraishi/oxlint-config` の `kstack/blank-line-before-if` で検出する。

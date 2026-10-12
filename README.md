@@ -39,21 +39,23 @@ npmのCLIはBunで導入し、開発機のglobal mise設定とCIの既定値に�
 mise run format
 mise run lint
 mise run build
+mise run test
 mise run check
 ```
 
 - `format`: dprintでMarkdown・TOML・JSON・YAMLを、oxfmt（`vp run fmt`）でTypeScriptを整形する。
-- `lint`: markdownlintでMarkdownを、oxlint（`vp run lint`）でTypeScriptを検査する。
+- `lint`: markdownlintでMarkdownを、oxlint（`vp run lint`）でTypeScriptを検査する。TypeScriptには `@taiki-kuraishi/oxlint-config` の設定を当てるため、先にそのpackageをbuildする。
 - `build`: `packages/*` を `vp pack` でbuildする（`vp run -r build`）。
-- `check`: 整形、Markdown lint、TypeScriptのlint・整形・型検査・build、Lefthook設定、Renovate設定を変更せずに検査する。
+- `test`: `packages/*` のテストを `vp test` で実行する（`vp run -r test`）。
+- `check`: 整形、Markdown lint、TypeScriptのlint・整形・型検査・build・テスト、Lefthook設定、Renovate設定を変更せずに検査する。
 
-TypeScriptのlint・整形・型検査・buildは、root と各packageの `vite.config.ts` の `run.tasks` に定義し、`vp run` 経由で実行する。
+TypeScriptのlint・整形・型検査・build・テストは、root と各packageの `vite.config.ts` の `run.tasks` に定義し、`vp run` 経由で実行する。
 
 MarkdownはREADME、`skills/`、`.omp/skills/`、`.pi/skills/`を含めて検査する。SKILLの説明文と表は文意の区切りを優先するため、dprintの`textWrap`を`maintain`にし、markdownlintの行長制限（MD013）を無効にしている。
 
 pre-commitではstaged fileの整形とMarkdown lintを検査し、TypeScriptが変わった場合はlint・整形・型検査も行う。関連する設定やツールpinが変わった場合はMarkdown全体と設定ファイルも検査する。hookは自動修正・自動stageを行わない。
 
-GitHub ActionsはPRとmainへのpushで`ci.yml`を起動する。`changes`がpathを判定し、dprint・Markdown lint・Lefthook検証・Renovate検証・Vite+（TypeScriptのlint・整形・型検査・build）をそれぞれ独立したjobとして実行する。対象外のjobは省き、各jobに必要なツールだけ導入する。reusable workflowは使わない。依存のinstall（`setup-bun`）とVite+のtask-cacheの復元・保存（`vite-task-cache`）は`.github/actions/`のcomposite actionに置き、`jdx/mise-action`はjobのstepsでその前に呼ぶ。
+GitHub ActionsはPRとmainへのpushで`ci.yml`を起動する。`changes`がpathを判定し、dprint・Markdown lint・Lefthook検証・Renovate検証・Vite+（TypeScriptのlint・整形・型検査・build・テスト）をそれぞれ独立したjobとして実行する。対象外のjobは省き、各jobに必要なツールだけ導入する。reusable workflowは使わない。依存のinstall（`setup-bun`）とVite+のtask-cacheの復元・保存（`vite-task-cache`）は`.github/actions/`のcomposite actionに置き、`jdx/mise-action`はjobのstepsでその前に呼ぶ。
 
 `check`は検査jobの結果を集約して常時報告する。`changes`がsuccess以外、またはいずれかの検査がfailure/cancelledなら失敗し、対象外の検査によるskipは許可する。workflow自体を`on.paths`で省かず、required checkがPendingのまま残ることを防ぐ。
 

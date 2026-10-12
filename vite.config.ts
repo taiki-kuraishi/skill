@@ -12,7 +12,11 @@ export default defineConfig({
   },
   run: {
     tasks: {
-      lint: "vp lint --deny-warnings",
+      lint: {
+        command: "vp lint --deny-warnings",
+        // jsPlugins loads the plugin from the package's dist, which only exists after a build
+        dependsOn: ["@taiki-kuraishi/oxlint-config#build"],
+      },
       fmt: "vp fmt",
       "fmt-check": "vp fmt --check",
       "type-check": "tsc --noEmit",

@@ -12,11 +12,18 @@
     ".": {
       "types": "./dist/index.d.mts",
       "import": "./dist/index.mjs"
+    },
+    "./plugin": {
+      "types": "./dist/plugin.d.mts",
+      "import": "./dist/plugin.mjs"
     }
   },
   "files": [
     "dist"
   ],
+  "dependencies": {
+    "@oxlint/plugins": "^1.87.0"
+  },
   "peerDependencies": {
     "oxlint": "^1.87.0"
   },

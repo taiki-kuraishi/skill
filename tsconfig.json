@@ -10,5 +10,5 @@
     "verbatimModuleSyntax": true,
     "types": []
   },
-  "include": ["vite.config.ts", "packages/*/src", "packages/*/vite.config.ts"]
+  "include": ["vite.config.ts", "packages/*/src", "packages/*/test", "packages/*/vite.config.ts"]
 }

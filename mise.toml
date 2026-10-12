@@ -29,6 +29,9 @@ run = ["markdownlint-cli2", "bun vp run lint"]
 [tasks.build]
 run = "bun vp run -r build"
 
+[tasks.test]
+run = "bun vp run -r test"
+
 [tasks.check]
 run = [
   "dprint check",
@@ -37,6 +40,7 @@ run = [
   "bun vp run fmt-check",
   "bun vp run type-check",
   "bun vp run -r build",
+  "bun vp run -r test",
   "lefthook validate",
   "renovate-config-validator --strict renovate.json",
 ]
