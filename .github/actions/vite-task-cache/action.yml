@@ -1,0 +1,31 @@
+name: Vite+ task-cache
+description: Restore or save Vite+'s task-cache (node_modules/.vite/task-cache) (call with mode restore after setup-bun, and again with mode save under if success() after the checks)
+
+inputs:
+  mode:
+    description: restore or save
+    required: true
+
+runs:
+  using: composite
+  steps:
+    # composite actions cannot have a post step, so the caller invokes restore and save separately.
+    # The key is new per run because a cache key cannot be overwritten; restore-keys picks up the latest one.
+    - if: inputs.mode == 'restore'
+      uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        path: node_modules/.vite/task-cache
+        key: vite-task-${{ runner.os }}-${{ runner.arch }}-${{ github.run_id }}-${{ github.run_attempt }}
+        restore-keys: vite-task-${{ runner.os }}-${{ runner.arch }}-
+    - if: inputs.mode == 'save'
+      uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        path: node_modules/.vite/task-cache
+        key: vite-task-${{ runner.os }}-${{ runner.arch }}-${{ github.run_id }}-${{ github.run_attempt }}
+    - if: inputs.mode != 'restore' && inputs.mode != 'save'
+      shell: bash
+      env:
+        MODE: ${{ inputs.mode }}
+      run: |
+        echo "::error::vite-task-cache: mode must be restore or save (got '$MODE')"
+        exit 1

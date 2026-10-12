@@ -29,7 +29,7 @@ mise run install
 bunx skills ls
 ```
 
-ツールのバージョンは `mise.toml` と `mise.lock` で管理する。手動でpinを変更した場合は `mise lock` でlockfileも更新する。
+ツールのバージョンは `mise.toml` と `mise.lock` で管理する。手動でpinを変更した場合は `mise lock` でlockfileも更新する。TypeScriptの依存（Vite+・TypeScript）は `package.json` と `bun.lock` で管理する。
 
 npmのCLIはBunで導入し、開発機のglobal mise設定とCIの既定値によるinstaller差を排除する。
 
@@ -38,24 +38,28 @@ npmのCLIはBunで導入し、開発機のglobal mise設定とCIの既定値に�
 ```bash
 mise run format
 mise run lint
+mise run build
 mise run check
 ```
 
-- `format`: dprintでMarkdown・TOML・JSON・YAMLを整形する。
-- `lint`: markdownlintでMarkdownを検査する。
-- `check`: 整形、Markdown lint、Lefthook設定、Renovate設定を変更せずに検査する。
+- `format`: dprintでMarkdown・TOML・JSON・YAMLを、oxfmt（`vp run fmt`）でTypeScriptを整形する。
+- `lint`: markdownlintでMarkdownを、oxlint（`vp run lint`）でTypeScriptを検査する。
+- `build`: `packages/*` を `vp pack` でbuildする（`vp run -r build`）。
+- `check`: 整形、Markdown lint、TypeScriptのlint・整形・型検査・build、Lefthook設定、Renovate設定を変更せずに検査する。
+
+TypeScriptのlint・整形・型検査・buildは、root と各packageの `vite.config.ts` の `run.tasks` に定義し、`vp run` 経由で実行する。
 
 MarkdownはREADME、`skills/`、`.omp/skills/`、`.pi/skills/`を含めて検査する。SKILLの説明文と表は文意の区切りを優先するため、dprintの`textWrap`を`maintain`にし、markdownlintの行長制限（MD013）を無効にしている。
 
-pre-commitではstaged fileの整形とMarkdown lintを検査する。関連する設定やツールpinが変わった場合はMarkdown全体と設定ファイルも検査する。hookは自動修正・自動stageを行わない。
+pre-commitではstaged fileの整形とMarkdown lintを検査し、TypeScriptが変わった場合はlint・整形・型検査も行う。関連する設定やツールpinが変わった場合はMarkdown全体と設定ファイルも検査する。hookは自動修正・自動stageを行わない。
 
-GitHub ActionsはPRとmainへのpushで`ci.yml`を起動する。`changes`がpathを判定し、dprint・Markdown lint・Lefthook検証・Renovate検証をそれぞれ独立したjobとして実行する。対象外のjobは省き、各jobに必要なツールだけ導入する。reusable workflowやcomposite actionによるローカル呼び出しは使わない。
+GitHub ActionsはPRとmainへのpushで`ci.yml`を起動する。`changes`がpathを判定し、dprint・Markdown lint・Lefthook検証・Renovate検証・Vite+（TypeScriptのlint・整形・型検査・build）をそれぞれ独立したjobとして実行する。対象外のjobは省き、各jobに必要なツールだけ導入する。reusable workflowは使わない。依存のinstall（`setup-bun`）とVite+のtask-cacheの復元・保存（`vite-task-cache`）は`.github/actions/`のcomposite actionに置き、`jdx/mise-action`はjobのstepsでその前に呼ぶ。
 
 `check`は検査jobの結果を集約して常時報告する。`changes`がsuccess以外、またはいずれかの検査がfailure/cancelledなら失敗し、対象外の検査によるskipは許可する。workflow自体を`on.paths`で省かず、required checkがPendingのまま残ることを防ぐ。
 
 ## Renovate
 
-miseのツール、GitHub Actions、dprintプラグインを更新対象にする。
+miseのツール、npmの依存（`package.json`・`bun.lock`）、GitHub Actions、dprintプラグインを更新対象にする。
 
 | 更新                      | PR         | マージ                           |
 | ------------------------- | ---------- | -------------------------------- |

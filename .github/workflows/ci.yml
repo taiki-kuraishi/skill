@@ -25,6 +25,7 @@ jobs:
       markdownlint: ${{ steps.filter.outputs.markdownlint }}
       lefthook: ${{ steps.filter.outputs.lefthook }}
       renovate: ${{ steps.filter.outputs.renovate }}
+      vite-plus: ${{ steps.filter.outputs.vite-plus }}
     steps:
       - if: github.event_name == 'push'
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -54,6 +55,15 @@ jobs:
               - "mise.toml"
               - "mise.lock"
               - ".github/workflows/ci.yml"
+            vite-plus:
+              - "**/*.{ts,tsx,js,mjs,cjs}"
+              - "**/package.json"
+              - "**/tsconfig.json"
+              - "bun.lock"
+              - "mise.toml"
+              - "mise.lock"
+              - ".github/workflows/ci.yml"
+              - ".github/actions/**"
 
   dprint:
     needs: changes
@@ -107,6 +117,30 @@ jobs:
           install_args: "--locked bun node npm:renovate"
       - run: renovate-config-validator --strict renovate.json
 
+  vite-plus:
+    needs: changes
+    if: needs.changes.outputs.vite-plus == 'true'
+    runs-on: ubuntu-slim
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: jdx/mise-action@2d8d4cafcbd33be2ea37d2b6f5ad595363d1f1ca # v5.1.1
+        with:
+          version: "2026.10.5"
+          install_args: "--locked bun node"
+      - uses: ./.github/actions/setup-bun
+      - uses: ./.github/actions/vite-task-cache
+        with:
+          mode: restore
+      - run: bun vp run lint
+      - run: bun vp run fmt-check
+      - run: bun vp run type-check
+      - run: bun vp run -r build
+      - if: success()
+        uses: ./.github/actions/vite-task-cache
+        with:
+          mode: save
+
   check:
     needs:
       - changes
@@ -114,6 +148,7 @@ jobs:
       - markdownlint
       - lefthook
       - renovate
+      - vite-plus
     if: always()
     runs-on: ubuntu-slim
     timeout-minutes: 5

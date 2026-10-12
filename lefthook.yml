@@ -16,3 +16,12 @@ pre-commit:
     renovate-validate:
       glob: "{renovate.json,mise.toml,mise.lock}"
       run: mise exec -- renovate-config-validator --strict renovate.json
+    vp-lint:
+      glob: "*.{ts,tsx,js,mjs,cjs}"
+      run: mise exec -- bun vp run lint
+    vp-fmt-check:
+      glob: "*.{ts,tsx,js,mjs,cjs}"
+      run: mise exec -- bun vp run fmt-check
+    vp-type-check:
+      glob: "{*.{ts,tsx},tsconfig.json,package.json,bun.lock}"
+      run: mise exec -- bun vp run type-check

@@ -13,18 +13,30 @@ node = "24.21.0"
 "npm:renovate" = "44.151.0"
 
 [tasks.install]
-run = ["mise trust --all", "mise install --locked", "lefthook install"]
+run = [
+  "mise trust --all",
+  "mise install --locked",
+  "bun install --frozen-lockfile",
+  "lefthook install",
+]
 
 [tasks.format]
-run = "dprint fmt"
+run = ["dprint fmt", "bun vp run fmt"]
 
 [tasks.lint]
-run = "markdownlint-cli2"
+run = ["markdownlint-cli2", "bun vp run lint"]
+
+[tasks.build]
+run = "bun vp run -r build"
 
 [tasks.check]
 run = [
   "dprint check",
   "markdownlint-cli2",
+  "bun vp run lint",
+  "bun vp run fmt-check",
+  "bun vp run type-check",
+  "bun vp run -r build",
   "lefthook validate",
   "renovate-config-validator --strict renovate.json",
 ]

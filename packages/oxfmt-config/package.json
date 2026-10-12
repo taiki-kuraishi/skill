@@ -1,0 +1,26 @@
+{
+  "name": "@taiki-kuraishi/oxfmt-config",
+  "version": "0.0.0",
+  "description": "SKILL の規約を表す oxfmt の共有設定。",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/taiki-kuraishi/skill.git",
+    "directory": "packages/oxfmt-config"
+  },
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "import": "./dist/index.mjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "peerDependencies": {
+    "oxfmt": "^0.72.0"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  }
+}

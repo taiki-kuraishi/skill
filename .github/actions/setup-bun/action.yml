@@ -1,0 +1,13 @@
+name: Setup Bun dependencies
+description: Restore bun's package cache and install dependencies with bun ci (run jdx/mise-action with install_args "bun node" before this action)
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        path: ~/.bun/install/cache
+        key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
+        restore-keys: bun-${{ runner.os }}-
+    - shell: bash
+      run: bun ci

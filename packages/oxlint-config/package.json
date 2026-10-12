@@ -1,0 +1,26 @@
+{
+  "name": "@taiki-kuraishi/oxlint-config",
+  "version": "0.0.0",
+  "description": "SKILL の規約を表す oxlint の共有設定と、自作ルールの JS plugin。",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/taiki-kuraishi/skill.git",
+    "directory": "packages/oxlint-config"
+  },
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "import": "./dist/index.mjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "peerDependencies": {
+    "oxlint": "^1.87.0"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  }
+}
