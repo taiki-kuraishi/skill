@@ -21,6 +21,7 @@ kstack-* SKILL の規約を、配布する lint 設定に写す手順。設定�
 4. **テストを書く** — `packages/oxlint-config/test/<rule>.test.ts` に `vite-plus/lint/plugins-dev` の `RuleTester` で、SKILL の Bad / Good と、判定で見つかった誤検知・例外の形を valid / invalid に入れる。完了条件: 自作ルールごとにテストがあり、判定で見つかった形がすべてケースに入っている
 5. **対応表を更新する** — 各 package の README の「SKILL と設定の対応」に、規約ごとのルール、または表せない理由を書く。検出しない形・disable コメントで扱う例外もここに書く。完了条件: SKILL のすべての規約が表に載っている
 6. **検証する** — subagent に `mise run check` を回させ、さらに `bun pm pack` した tarball を `/tmp` の利用側 project に入れ、`extends` した設定で Bad に指摘が出て Good に出ないことを確かめさせる。repo 自身のコードに出た指摘は直すか、直さない理由を示す。完了条件: check が通り、利用側で Bad / Good の結果が判定どおりである
+7. **version を上げる** — 設定・ルールを変えた package の `package.json` の version を上げる（ルールの追加は minor、誤検知の修正は patch）。main に merge されると `publish.yml` が GitHub Packages へ publish する。完了条件: 変えた package の version が上がっている
 
 ```text
 Bad: 既存ルールの名前が近いので、試さずに当てはまると判定する

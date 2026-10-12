@@ -59,6 +59,8 @@ GitHub ActionsはPRとmainへのpushで`ci.yml`を起動する。`changes`がpat
 
 `check`は検査jobの結果を集約して常時報告する。`changes`がsuccess以外、またはいずれかの検査がfailure/cancelledなら失敗し、対象外の検査によるskipは許可する。workflow自体を`on.paths`で省かず、required checkがPendingのまま残ることを防ぐ。
 
+`publish.yml`はmainへのpushで`packages/*/package.json`が変わったときに起動し、各packageをbuild・テストしてGitHub Packagesへ`bun publish`する。publish済みのversionは`--tolerate-republish`で飛ばすので、publishしたいpackageは`version`を上げてmergeする。`bun publish`は`publishConfig.registry`を読まないため、registryとtokenは環境変数で渡す。
+
 ## Renovate
 
 miseのツール、npmの依存（`package.json`・`bun.lock`）、GitHub Actions、dprintプラグインを更新対象にする。

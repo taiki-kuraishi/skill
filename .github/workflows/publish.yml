@@ -1,0 +1,51 @@
+name: publish
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "packages/*/package.json"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-slim
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: jdx/mise-action@2d8d4cafcbd33be2ea37d2b6f5ad595363d1f1ca # v5.1.1
+        with:
+          version: "2026.10.5"
+          install_args: "--locked bun node"
+      - uses: ./.github/actions/setup-bun
+      - uses: ./.github/actions/vite-task-cache
+        with:
+          mode: restore
+      - run: bun vp run -r build
+      - run: bun vp run -r test
+      - if: success()
+        uses: ./.github/actions/vite-task-cache
+        with:
+          mode: save
+      # bun publish ignores publishConfig.registry, so the registry comes from the environment.
+      # Scoped to these steps so dependency installs keep using the default registry.
+      - run: bun publish --tolerate-republish
+        working-directory: packages/oxlint-config
+        env:
+          NPM_CONFIG_REGISTRY: https://npm.pkg.github.com
+          NPM_CONFIG_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - run: bun publish --tolerate-republish
+        working-directory: packages/oxfmt-config
+        env:
+          NPM_CONFIG_REGISTRY: https://npm.pkg.github.com
+          NPM_CONFIG_TOKEN: ${{ secrets.GITHUB_TOKEN }}
