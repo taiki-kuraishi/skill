@@ -1,13 +1,13 @@
 ---
 name: skill-from-review
-description: "コードレビューの指摘（Crit のレビュー結果・コメント JSON、または file:line + コメント）をライブラリ単位の SKILL に変換して、skills 配布リポジトリに蓄積するための運用手順。レビュー指摘のリストを添付されたとき、コーディング規約を SKILL 化してほしいと言われたときに必ず使用すること。このリポジトリでの SKILL 作成・追記・分類の依頼全般で、skill-creator より先に発火させる（作成・追記はここから skill-creator を呼び出す）。"
+description: "コードレビューの指摘（Crit のレビュー結果・コメント JSON、または file:line + コメント）をライブラリ単位の SKILL に変換して、skills 配布リポジトリに蓄積するための運用手順。レビュー指摘のリストを添付されたとき、コーディング規約を SKILL 化してほしいと言われたときに必ず使用すること。このリポジトリでの SKILL 作成・追記・分類の依頼全般で、skill-creator より先に発火させる（作成・追記はここから skill-creator を呼び出し、書いた規約の linter 化は skill-to-linter を呼び出す）。"
 metadata:
   internal: true
 ---
 
 # skill-from-review
 
-コードレビューの指摘を、ライブラリ単位の SKILL として SKILL 配布リポジトリに蓄積する手順。SKILL.md を書く作業は skill-creator に任せ、この SKILL はその前後（指摘の分類、リポジトリ規約の受け渡し、一覧への登録、検証）を受け持つ。
+コードレビューの指摘を、ライブラリ単位の SKILL として SKILL 配布リポジトリに蓄積する手順。SKILL.md を書く作業は skill-creator に、規約の linter 化は skill-to-linter に任せ、この SKILL はその前後（指摘の分類、リポジトリ規約の受け渡し、一覧への登録、検証）を受け持つ。
 
 このリポジトリは vercel-labs/skills 互換の SKILL 配布リポジトリ（`skills/kstack/kstack-<name>/SKILL.md` 規約）。レビュー指摘は「特定ライブラリ・言語を書くときに今後も効く規約」に変換して蓄える。1 回限りの修正指示は SKILL 化しない。
 
@@ -17,8 +17,9 @@ metadata:
 2. **追記 or 新規作成を決める** — `skills/` 配下に `kstack-<対象ライブラリ名>` の SKILL があれば追記、なければ新規作成にする
 3. **skill-creator で書く** — skill-creator を読み込み、対象 SKILL ごとにその手順を回して SKILL.md を書く。新規作成は「Creating a skill」、追記は「Improving the skill」（baseline は追記前の snapshot）として進め、各段階に下の「skill-creator への渡し方」を適用する。完了条件: SKILL.md が書き上がり、テストを回したなら user が結果に満足している。skill-creator の手順を終えたら手順 4 に戻る
 4. **一覧に登録する** — 新規作成したら `skills/kstack/kstack-skill-review/SKILL.md` の SKILL 一覧と `description` に名前を追記する。一覧に無い SKILL はレビューで読まれない
-5. **検証する** — ユーザーの agent 環境を変えないよう `/tmp` 下の作業ディレクトリで `bunx skills add <repo-path> --agent claude-code -y` を実行し、対象 SKILL が発見・インストールされることを確認する。リポジトリ本体は stage / commit しない（user の指示があるまで）
-6. **user review に回す** — 変更ファイルと検証証拠を示し、`skill://kstack-review-request` に従って user にレビューを依頼する
+5. **linter 化する** — 作成・追記した SKILL について `skill-to-linter` を読み込み、その手順を回して規約を oxlint / oxfmt のルール・設定に写す。完了条件: `skill-to-linter` の手順をすべて終え、package の README の対応表にその SKILL の全規約が載っている
+6. **検証する** — ユーザーの agent 環境を変えないよう `/tmp` 下の作業ディレクトリで `bunx skills add <repo-path> --agent claude-code -y` を実行し、対象 SKILL が発見・インストールされることを確認する。リポジトリ本体は stage / commit しない（user の指示があるまで）
+7. **user review に回す** — 変更ファイルと検証証拠を示し、`skill://kstack-review-request` に従って user にレビューを依頼する
 
 ## Crit の指摘を読む
 
