@@ -139,3 +139,5 @@ Renovateの承認bypassは更新種別を区別しない。majorを自動マー�
 ## License
 
 [Apache License 2.0](LICENSE)
+
+著作権の表示は [NOTICE](NOTICE) にあり、publish する各 package にも同梱する。
