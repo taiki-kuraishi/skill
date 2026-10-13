@@ -57,7 +57,7 @@ export default defineConfig({
 
 ## user review
 
-実装後の user review は [kstack-review-request](skills/kstack/kstack-review-request/SKILL.md) に共通化する。root-driven-development・interface-first-development・handoff から呼び出し、レビュー用ツール・操作・承認の判定方法はこの SKILL に集約する。
+実装後の user review は [kstack-review-request](skills/kstack/kstack-review-request/SKILL.md) に共通化する。root-driven-development・interface-first-development・handoff・skill-from-review から呼び出し、レビュー用ツール・操作・承認の判定方法はこの SKILL に集約する。
 
 root と子で進める場合、起動方式にかかわらず user への依頼とレビュー手順の管理は root に集約する。子の質問・進捗・完了報告・指摘への対応結果は intercom で root に届く。[手動引き継ぎ](skills/kstack/kstack-interface-first-development/references/manual-handoff.md)でも root は監督を続ける。user の子への操作は最初の起動と prompt の貼り付けだけで、以後の pane の巡回や報告の転送は不要。
 

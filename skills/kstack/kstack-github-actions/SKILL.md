@@ -1,6 +1,6 @@
 ---
 name: kstack-github-actions
-description: GitHub Actions の workflow（.github/workflows/*.yml）や composite action を書く・修正する・レビューするときの規約。job の runs-on は ubuntu-slim を既定にし、Docker を使う job や slim で 15 分以内に終わらない job だけを ubuntu-latest にすること、actions/cache の restore・save と key の組み立てを composite action に切り出すことを扱う。CI の job の追加、lint・テスト・build の job の新設、キャッシュの追加、runner の見直し、レビュー指摘への対応でも発火させる。
+description: GitHub Actions の workflow（.github/workflows/*.yml）や composite action を書く・修正する・レビューするときの規約。job の runs-on は ubuntu-slim を既定にし、Docker を使う job、slim で 15 分以内に終わらない job、5 GB の RAM に収まらない job だけを ubuntu-latest にすること、actions/cache の restore・save と key の組み立てを composite action に切り出すことを扱う。CI の job の追加、lint・テスト・build の job の新設、キャッシュの追加、runner の見直し、レビュー指摘への対応でも発火させる。
 ---
 
 # kstack-github-actions
