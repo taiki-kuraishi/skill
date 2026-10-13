@@ -16,7 +16,8 @@ concurrency:
 
 jobs:
   publish:
-    runs-on: ubuntu-slim
+    # oxlint's RuleTester reserves a 6 GiB ArrayBuffer, which fails on ubuntu-slim
+    runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
       contents: read
