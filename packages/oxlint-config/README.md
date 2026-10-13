@@ -23,6 +23,16 @@ export する設定は SKILL の名前から `kstack-` を除いた名前にす�
 | 小さすぎる処理を関数化しない                        | 表せない。「小さい」「名前に意味がある」を構文から決められない                                                                                                                |
 | 各メソッドで繰り返す依存の生成は constructor に置く | 表せない。依存の生成と同じ関数の呼び出しを構文から区別できない                                                                                                                |
 
+### kstack-layerd-architecture（`layerdArchitecture`）
+
+「use case の処理は step 番号付きの doc と step コメントで書く」で入った規約だけを載せる。`kstack/use-case-steps` は、class 名が `UseCase` で終わり、本体を持つ `execute` を持つ class だけを見る。
+
+| 規約                                                                      | ルール / 表せない理由                                                                                                                                                                                                                                        |
+| ------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `execute` の doc comment に、要約の 1 行と番号付きの step を並べる        | `kstack/use-case-steps`（messageId `missingDoc`・`missingSteps`・`missingSummary`）。doc comment が無い、`1. ...` の行が無い、番号付き step の前に要約行が無い形を指す。class 名が `UseCase` で終わらない use case、宣言だけの `execute` は検出しない        |
+| 本文の各 step の先頭に、doc と同じ番号・同じ文言で `// stepN: ...` を書く | `kstack/use-case-steps`（messageId `mismatch`・`missingBodyStep`）。doc に無い番号の step コメント、文言の違う step コメント、本文に無い doc の step を指す。文言は trim 後の完全一致で見る。`// step 1:` のように空白を入れた形と、番号の順序・連番は見ない |
+| step の間を空行で区切る                                                   | `kstack/use-case-steps`（messageId `missingBlankLine`）。2 つ目以降の step コメントの直前の行が空行でない形を指す。1 つ目の step は本体の先頭に来るので要求しない                                                                                            |
+
 ### kstack-react（`react`）
 
 `useQuery` を既定にする変更（`useSuspenseQuery` をやめる）で入った規約だけを載せる。
@@ -51,3 +61,27 @@ export する設定は SKILL の名前から `kstack-` を除いた名前にす�
 ### kstack-tanstack-router
 
 loader の結果をコンポーネントの hook が `useQuery` で読む、という文言の変更だけで、新しい規約は無い。設定は作らない（`useSuspenseQuery` を使わないことは `react` の `no-restricted-imports` が見る）。
+
+### kstack-monorepo
+
+「root README は見出しと概要だけにする」で入った規約だけを載せる。
+
+| 規約                                                                                            | ルール / 表せない理由                                                                                                                                                         |
+| ----------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| root README は見出しと概要だけにし、構成表・セットアップ・テスト手順は package の README に置く | 表せない。Markdown は oxlint の lint 対象外（`oxlint README.md` は `No files found to lint` になる）。oxfmt は整形だけを扱い、root の README に何を書くかは構文から決まらない |
+
+### kstack-gdscript
+
+5 規約すべてを載せる。oxlint は `.gd` を lint せず（`oxlint src/player.gd` は `No files found to lint` になる）、oxfmt も `.gd` を整形しない（`oxfmt --check src/player.gd` は `Expected at least one target file` になる）。
+
+| 規約                                                                 | ルール / 表せない理由                                                                                                      |
+| -------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| 宣言すべてに日本語の `##` doc comment を書く                         | 表せない。oxlint / oxfmt は `.gd` を扱わない                                                                               |
+| 型アノテーションを明示し、`:=` で推論させない                        | 表せない。同上                                                                                                             |
+| 型チェックは project.godot の warning を error にして強制する        | 表せない。SKILL 自身が Godot 側（`project.godot` の `gdscript/warnings/*`）の設定で強制する。oxlint / oxfmt の設定ではない |
+| 複数の段を持つ関数は step 番号付きの doc と `# stepN` コメントで書く | 表せない。同上（GDScript 版の `kstack/use-case-steps` は書けない）                                                         |
+| GdUnit4 のテスト関数の上に、テスト内容を日本語で書く                 | 表せない。同上                                                                                                             |
+
+### kstack-code-comment
+
+例外の列挙（use case の step 番号付き doc、GDScript の宣言の `##` doc comment）を広げただけで、新しい規約は無い。設定は作らない。

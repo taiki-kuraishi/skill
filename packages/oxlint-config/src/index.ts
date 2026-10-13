@@ -12,6 +12,13 @@ export const typescript = {
   },
 } satisfies OxlintConfig;
 
+export const layerdArchitecture = {
+  jsPlugins: ["@taiki-kuraishi/oxlint-config/plugin"],
+  rules: {
+    "kstack/use-case-steps": "error",
+  },
+} satisfies OxlintConfig;
+
 export const react = {
   jsPlugins: ["@taiki-kuraishi/oxlint-config/plugin"],
   rules: {
