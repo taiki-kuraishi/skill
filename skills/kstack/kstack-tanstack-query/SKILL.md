@@ -1,31 +1,31 @@
 ---
 name: kstack-tanstack-query
-description: TanStack Query（@tanstack/react-query）の hooks を書く・修正する・レビューするときの規約。API を呼ぶ useQuery・useSuspenseQuery・useMutation を app に直書きせず、hooks を配る専用 package（api-query など）に置き、app はそれを呼んで表示の形に整えるだけにする構成を扱う。queryKey・queryFn・mutationFn を書く場面、monorepo で hooks を共有する package の新設と構成（client を運ぶ Provider、1 route 1 file、index.ts の公開面、peerDependencies）、QueryClientProvider の置き場所、mutation hook の options と invalidateQueries、レビュー指摘への対応では必ず使用すること。
+description: TanStack Query（@tanstack/react-query）の hooks を書く・修正する・レビューするときの規約。API を呼ぶ useQuery・useMutation を app に直書きせず、hooks を配る専用 package（api-query など）に置き、app はそれを呼んで表示の形に整えるだけにする構成を扱う。queryKey・queryFn・mutationFn を書く場面、monorepo で hooks を共有する package の新設と構成（client を運ぶ Provider、1 route 1 file、index.ts の公開面、peerDependencies）、QueryClientProvider の置き場所、QueryClient の既定（throwOnError で失敗を Error Boundary に投げる）、mutation hook の options と invalidateQueries、レビュー指摘への対応では必ず使用すること。
 ---
 
 # kstack-tanstack-query
 
-[TanStack Query](https://tanstack.com/query/latest) の hooks を書くときの規約。理由を理解した上で適用すること。package の新設と責務の書き方は kstack-monorepo、`useSuspenseQuery` と `useQuery` の使い分けは kstack-react、Hono の型付きクライアントは kstack-hono の SKILL を参照。
+[TanStack Query](https://tanstack.com/query/latest) の hooks を書くときの規約。理由を理解した上で適用すること。package の新設と責務の書き方は kstack-monorepo、`useQuery` の読み込み中の判定（`useSuspenseQuery` を使わない理由）は kstack-react、Hono の型付きクライアントは kstack-hono の SKILL を参照。
 
 ## API を呼ぶ hooks は app に書かず、hooks を配る package に置く
 
-API を呼ぶ `useQuery`・`useSuspenseQuery`・`useMutation` と、その `queryKey`・`queryFn`・`mutationFn` は app に書かない。API の package ごとに hooks を配る package（`@acme/api` なら `@acme/api-query`）を作り、API の route 1 つにつき hook を 1 つ置く。app の hook はそれを呼んで、結果を表示の形に整えるだけにする。
+API を呼ぶ `useQuery`・`useMutation` と、その `queryKey`・`queryFn`・`mutationFn` は app に書かない。API の package ごとに hooks を配る package（`@acme/api` なら `@acme/api-query`）を作り、API の route 1 つにつき hook を 1 つ置く。app の hook はそれを呼んで、結果を表示の形に整えるだけにする。
 
 ```ts
 // Bad: app の hook が queryKey と route の呼び出しを持っている
 export function useTodoList() {
-  const { data } = useSuspenseQuery({
+  const { data } = useQuery({
     queryKey: ["todos"],
     queryFn: () => apiClient.api.todos.$get().then((res) => res.json()),
   });
   // ...data を表示の形に整えて返す
 }
 
-// Good: package の query hook は queryKey と queryFn だけを持つ
+// Good: package の query hook は queryKey と queryFn だけを持ち、useQuery の結果をそのまま返す
 export const useTodosQuery = () => {
   const client = useApi();
 
-  return useSuspenseQuery({
+  return useQuery({
     queryKey: ["todos"],
     queryFn: () => parseResponse(client.api.todos.$get()),
   });
@@ -46,15 +46,20 @@ export const useCreateTodo = (options?: Options) => {
   });
 };
 
-// Good: app の hook は package の hook を呼び、表示の形に整えるだけ
+// Good: app の hook は package の hook を呼び、読み込み中の判定と表示の形への整形だけをする
 export function useTodoList() {
   const { data } = useTodosQuery();
 
-  return data.todos.map((todo) => ({ id: todo.id, label: todo.title ?? "Untitled" }));
+  if (data === undefined) {
+    return { status: "loading" } as const;
+  }
+  const todos = data.todos.map((todo) => ({ id: todo.id, label: todo.title ?? "Untitled" }));
+  return { status: "ready", todos } as const;
 }
 ```
 
-- package の hook に入れるのは `queryKey` と `queryFn`（mutation なら `mutationFn`）だけ。非 2xx は `parseResponse` が `DetailedError` を投げるので、エラーの変換・retry・整形は入れない。整形は画面ごとに違うので app の hook が持つ
+- package の hook に入れるのは `queryKey` と `queryFn`（mutation なら `mutationFn`）だけ。非 2xx は `parseResponse` が `DetailedError` を投げるので、エラーの変換・retry・整形は入れない。整形は画面ごとに違うので app の hook が持つ。`placeholderData` のように画面ごとに変わる query の options は、mutation hook と同じく `options` で受けて展開する
+- query hook の `data` は 200 の body か、読み込み中の `undefined` になる。`undefined` は読み込み中だけを表すので、見つからないことを値で返す route は `null` を返す（`data` は body | `null` | `undefined`）。queryFn が `undefined` で解決すると TanStack Query はエラーにする
 - `invalidateQueries` は呼び出し側が `onSuccess` で行う。どの query を無効化すべきかは画面ごとに違い、package は知らない
 - 型は手書きしない（kstack-typescript）。`Variables` と `Data` は `InferRequestType` / `InferResponseType` から導出し、hc の引数（`{ param, json }`）を `{ id, body }` のように平らにしない
 
@@ -75,6 +80,24 @@ hook は client を import や生成で得ず、`useApi()` で context から受
 ```
 
 なぜ: origin・認証（credentials や `Authorization`）・QueryClient の設定（retry、staleTime）は app ごとに違う。それらを app が決めれば、package は app を知らずに hooks を配るだけで済み、どの app からも同じ hooks を使える。
+
+## data が無いまま失敗した query は、QueryClient の既定で Error Boundary に投げる
+
+`useQuery` は既定で失敗を `error` に入れて返すだけで、`data` は `undefined` のまま残る。app の `QueryClient` の `defaultOptions.queries.throwOnError` に、`data` が無いときだけ投げる関数を渡す。package の hook や app の hook には `throwOnError` を書かない。
+
+```ts
+// Bad: true だと、表示済みのデータがある再取得の失敗でも投げ、表示中の内容を Error Boundary で置き換える
+new QueryClient({ defaultOptions: { queries: { throwOnError: true } } });
+
+// Good: data が無いときの失敗だけを Error Boundary（route の errorComponent など）へ投げる
+new QueryClient({
+  defaultOptions: {
+    queries: { throwOnError: (_error, query) => query.state.data === undefined },
+  },
+});
+```
+
+なぜ: 投げなければ、view の hook は `data === undefined` を読み込み中と判定するので、失敗した画面は読み込み中のまま止まる。境界に任せれば hook は `error` を分岐せずに済み、再取得が失敗しても表示済みの内容は残る（`useSuspenseQuery` の既定と同じ振る舞い）。エラーの扱いは retry と同じく app ごとに決めるので、package ではなく QueryClient に置く。
 
 ## 1 route = 1 file にし、index.ts に公開する名前を列挙する
 
