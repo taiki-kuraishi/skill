@@ -2,6 +2,5 @@ config:
   MD013: false
 globs:
   - "**/*.md"
-  - ".omp/skills/**/*.md"
-  - ".pi/skills/**/*.md"
+  - ".agents/skills/**/*.md"
 gitignore: true

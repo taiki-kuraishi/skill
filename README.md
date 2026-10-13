@@ -96,7 +96,7 @@ mise run check
 
 TypeScriptのlint・整形・型検査・build・テストは、root と各packageの `vite.config.ts` の `run.tasks` に定義し、`vp run` 経由で実行する。
 
-MarkdownはREADME、`skills/`、`.omp/skills/`、`.pi/skills/`を含めて検査する。SKILLの説明文と表は文意の区切りを優先するため、dprintの`textWrap`を`maintain`にし、markdownlintの行長制限（MD013）を無効にしている。
+MarkdownはREADME、`skills/`、`.agents/skills/`を含めて検査する。SKILLの説明文と表は文意の区切りを優先するため、dprintの`textWrap`を`maintain`にし、markdownlintの行長制限（MD013）を無効にしている。
 
 pre-commitではstaged fileの整形とMarkdown lintを検査し、TypeScriptが変わった場合はlint・整形・型検査も行う。関連する設定やツールpinが変わった場合はMarkdown全体と設定ファイルも検査する。hookは自動修正・自動stageを行わない。
 

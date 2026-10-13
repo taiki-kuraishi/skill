@@ -2,8 +2,7 @@
   "includes": [
     "**/*.{md,toml,json,jsonc,yml,yaml}",
     ".github/**/*.{yml,yaml}",
-    ".omp/skills/**/*.md",
-    ".pi/skills/**/*.md"
+    ".agents/skills/**/*.md"
   ],
   "excludes": [
     "mise.lock"
