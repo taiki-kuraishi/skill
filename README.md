@@ -25,7 +25,7 @@ SKILL の規約のうち lint で表せるものは、GitHub Packages の `@taik
 bun add -D @taiki-kuraishi/oxlint-config
 ```
 
-`NODE_AUTH_TOKEN` には、手元では `read:packages` を持つ PAT を、GitHub Actions では `packages: read` を付けた `GITHUB_TOKEN` を渡す。この repo は private なので、package の設定（Manage Actions access）で利用側の repo に読み取りを許可する。
+package は public だが、GitHub Packages は install にも token を求める。`NODE_AUTH_TOKEN` には、手元では `read:packages` を持つ classic の PAT を、GitHub Actions では `packages: read` を付けた `GITHUB_TOKEN` を渡す。
 
 Vite+ を使う repo では `vite.config.ts` の `lint` に、oxlint を単体で使う repo では `oxlint.config.ts` に、設定を `extends` で渡す。
 
