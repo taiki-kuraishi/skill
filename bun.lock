@@ -11,14 +11,14 @@
     },
     "packages/oxfmt-config": {
       "name": "@taiki-kuraishi/oxfmt-config",
-      "version": "0.0.0",
+      "version": "0.1.2",
       "peerDependencies": {
-        "oxfmt": "^0.72.0",
+        "oxfmt": "^0.72.0 || ^0.73.0",
       },
     },
     "packages/oxlint-config": {
       "name": "@taiki-kuraishi/oxlint-config",
-      "version": "0.0.0",
+      "version": "0.3.0",
       "dependencies": {
         "@oxlint/plugins": "^1.87.0",
       },
