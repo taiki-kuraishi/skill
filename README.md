@@ -51,7 +51,7 @@ export default defineConfig({
 });
 ```
 
-設定に `plugins` を書くと既定の plugin（`unicorn`・`typescript`・`oxc`）が上書きされ、そのルールが無効になる。足すときは既定の 3 つも並べる。
+`extends` を使わない設定に `plugins` を書くと、既定の plugin（`unicorn`・`typescript`・`oxc`）が上書きされ、そのルールが無効になる。その場合は既定の 3 つも並べる。上の例のように `extends` で設定を渡していれば、`plugins` を書いても既定の 3 つは残る（`plugins` を持たない設定が既定の 3 つを補うため。oxlint 1.87.0・Vite+ 1.1.0 で確認）。
 
 `@taiki-kuraishi/oxfmt-config` も同じ registry で配布するが、oxfmt で表せる規約がまだ無いため、export する設定は無い。
 

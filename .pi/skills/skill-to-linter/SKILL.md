@@ -39,7 +39,7 @@ Good: Bad / Good を lint して、見逃し（例: return しない else）と�
 
 ## 落とし穴
 
-- 設定に `plugins` を書くと既定の plugin（`unicorn`・`typescript`・`oxc`）が上書きされ、そのルールが黙って無効になる。既定のもので足りるなら書かない
+- `plugins` は設定ごとに扱われる。`extends` を使わない設定に書くと既定の plugin（`unicorn`・`typescript`・`oxc`）が上書きされ、そのルールが黙って無効になる。`plugins` を持たない設定は既定の 3 つを補うので、`extends` で渡す設定に書いても既定は消えない。既定のもので足りるなら書かない
 - `no-restricted-syntax` と `padding-line-between-statements` は oxlint に無い。AST の形で決まる規約は自作ルールにする
 - `extends` で配る設定の `jsPlugins` は package 名（`@taiki-kuraishi/oxlint-config/plugin`）で書く。相対パスはエラーになる
 - repo 自身の lint で plugin を解決するには、root の devDependencies に `workspace:*` のリンクと、lint task から build への `dependsOn` が要る
