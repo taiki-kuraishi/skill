@@ -5,11 +5,11 @@ description: TanStack Router（@tanstack/react-router）のルートを書く・
 
 # kstack-tanstack-router
 
-[TanStack Router](https://tanstack.com/router/latest) を書くときの規約。理由を理解した上で適用すること。コンポーネントの中でのデータの待ち方（Suspense、楽観的な表示）は kstack-react の SKILL を参照。
+[TanStack Router](https://tanstack.com/router/latest) を書くときの規約。理由を理解した上で適用すること。コンポーネントの中でのデータの待ち方（`useQuery` の読み込み中を view の hook で判定する、楽観的な表示）は kstack-react の SKILL を参照。
 
 ## beforeLoad・loader で await しない
 
-`beforeLoad`・`loader` は Promise を待たずに返す。loader はデータ取得を始めるだけにし（`prefetchQuery` を await しない）、結果はコンポーネントが `useSuspenseQuery` で読む。認証ガードも `beforeLoad` で確認を待たない。レイアウトは `<Outlet />` を先に描画し、セッションが無いと確定したときだけサインインへ送る（楽観的な表示）。
+`beforeLoad`・`loader` は Promise を待たずに返す。loader はデータ取得を始めるだけにし（`prefetchQuery` を await しない）、結果はコンポーネントの hook が `useQuery` で読む。認証ガードも `beforeLoad` で確認を待たない。レイアウトは `<Outlet />` を先に描画し、セッションが無いと確定したときだけサインインへ送る（楽観的な表示）。
 
 ```tsx
 // Bad: セッションの確認が返るまで、このルートと子孫は何も描画されない
