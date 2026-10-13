@@ -10,6 +10,51 @@ bunx skills add taiki-kuraishi/skill
 
 SKILL は `skills/kstack/kstack-<name>/SKILL.md` の構成で追加する。`name` にも同じ `kstack-` prefix を付ける（`skills/kstack/` 内で `bunx skills init kstack-<name>` を実行、または SKILL.md を直接作成）。フロントマターの必須項目は `name` と `description`。
 
+## lint 設定の利用
+
+SKILL の規約のうち lint で表せるものは、GitHub Packages の `@taiki-kuraishi/oxlint-config` として配布する。SKILL ごとに `kstack-` を除いた名前の設定（`kstack-typescript` → `typescript`）を export する。対応する規約と表せない規約は [packages/oxlint-config/README.md](packages/oxlint-config/README.md) の対応表にある。
+
+利用側の repo root の `.npmrc` に registry と token を書き、install する。
+
+```ini
+@taiki-kuraishi:registry=https://npm.pkg.github.com
+//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}
+```
+
+```bash
+bun add -D @taiki-kuraishi/oxlint-config
+```
+
+`NODE_AUTH_TOKEN` には、手元では `read:packages` を持つ PAT を、GitHub Actions では `packages: read` を付けた `GITHUB_TOKEN` を渡す。この repo は private なので、package の設定（Manage Actions access）で利用側の repo に読み取りを許可する。
+
+Vite+ を使う repo では `vite.config.ts` の `lint` に、oxlint を単体で使う repo では `oxlint.config.ts` に、設定を `extends` で渡す。
+
+```ts
+// vite.config.ts
+import { typescript } from "@taiki-kuraishi/oxlint-config";
+import { defineConfig } from "vite-plus";
+
+export default defineConfig({
+  lint: {
+    extends: [typescript],
+  },
+});
+```
+
+```ts
+// oxlint.config.ts
+import { typescript } from "@taiki-kuraishi/oxlint-config";
+import { defineConfig } from "oxlint";
+
+export default defineConfig({
+  extends: [typescript],
+});
+```
+
+設定に `plugins` を書くと既定の plugin（`unicorn`・`typescript`・`oxc`）が上書きされ、そのルールが無効になる。足すときは既定の 3 つも並べる。
+
+`@taiki-kuraishi/oxfmt-config` も同じ registry で配布するが、oxfmt で表せる規約がまだ無いため、export する設定は無い。
+
 ## user review
 
 実装後の user review は [kstack-review-request](skills/kstack/kstack-review-request/SKILL.md) に共通化する。root-driven-development・interface-first-development・handoff から呼び出し、レビュー用ツール・操作・承認の判定方法はこの SKILL に集約する。
