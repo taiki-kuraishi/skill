@@ -1,6 +1,6 @@
 ---
 name: kstack-skill-review
-description: taiki-kuraishi/skill リポジトリの SKILL（kstack-agents-md、kstack-better-auth、kstack-better-result、kstack-cloudflare-vite-plugin、kstack-code-comment、kstack-drift-review、kstack-drizzle-orm、kstack-github-actions、kstack-handoff、kstack-hono、kstack-interface-first-development、kstack-layerd-architecture、kstack-mise、kstack-monorepo、kstack-nuqs、kstack-playwright、kstack-react、kstack-review-request、kstack-root-driven-development、kstack-tanstack-db、kstack-tanstack-query、kstack-tanstack-router、kstack-terraform、kstack-testing、kstack-typescript、kstack-vite、kstack-vite-plus、kstack-worktree-diff）を読み込み、その規約からズレているコードを指摘するレビュー手順。コードレビュー、diff・PR のレビュー、「SKILL・規約に沿っているか見て」という依頼、実装後の自己レビューで使用すること。
+description: taiki-kuraishi/skill リポジトリの SKILL（kstack-agents-md、kstack-better-auth、kstack-better-result、kstack-cloudflare-vite-plugin、kstack-code-comment、kstack-drift-review、kstack-drizzle-orm、kstack-gdscript、kstack-github-actions、kstack-handoff、kstack-hono、kstack-interface-first-development、kstack-layerd-architecture、kstack-mise、kstack-monorepo、kstack-nuqs、kstack-playwright、kstack-react、kstack-review-request、kstack-root-driven-development、kstack-tanstack-db、kstack-tanstack-query、kstack-tanstack-router、kstack-terraform、kstack-testing、kstack-typescript、kstack-vite、kstack-vite-plus、kstack-worktree-diff）を読み込み、その規約からズレているコードを指摘するレビュー手順。コードレビュー、diff・PR のレビュー、「SKILL・規約に沿っているか見て」という依頼、実装後の自己レビューで使用すること。
 ---
 
 # kstack-skill-review
@@ -14,6 +14,7 @@ description: taiki-kuraishi/skill リポジトリの SKILL（kstack-agents-md、
 - `kstack-code-comment`
 - `kstack-drift-review`
 - `kstack-drizzle-orm`
+- `kstack-gdscript`
 - `kstack-github-actions`
 - `kstack-handoff`
 - `kstack-hono`

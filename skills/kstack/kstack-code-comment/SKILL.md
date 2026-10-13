@@ -32,7 +32,7 @@ set -euo pipefail
 
 なぜ: what はコード自身が正確に示しているので、言い換えたコメントは読む量を増やすうえ、コードを変えたときに古い説明が残って嘘になる。ライブラリや設定オプションの挙動の解説も what にあたり、ドキュメントに任せる。
 
-例外: 処理の区切りに見出しコメントを付けるよう別の SKILL が定めている箇所は、その SKILL に従う。関数を合成する `Result.gen` のステップ（kstack-better-result）や、テストの Arrange / Act / Assert（kstack-testing）がこれにあたる。これらの見出しは個々の行の言い換えではなく、複数のステップを繋ぐ流れを上から読むための目次として働く。
+例外: 処理の区切りや宣言にコメントを付けるよう別の SKILL が定めている箇所は、その SKILL に従う。関数を合成する `Result.gen` のステップ（kstack-better-result）、テストの Arrange / Act / Assert（kstack-testing）、use case の step 番号付き doc と `stepN` コメント（kstack-layerd-architecture）、GDScript の宣言の `##` doc comment とテスト関数の内容コメント（kstack-gdscript）がこれにあたる。これらは個々の行の言い換えではなく、複数のステップを繋ぐ流れや API の契約を上から読むための目次として働く。
 
 例外: インデックス計算でまとまりを処理するループ（チャンク分割、ウィンドウ走査など）は、ループの前に「何を何単位でどうするか」を 1 行の見出しで書く。ループ本体を読み解かないと目的が分からないため、見出しが目次として働く。
 

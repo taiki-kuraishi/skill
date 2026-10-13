@@ -10,6 +10,7 @@ import { noUnspreadOptions } from "./rules/no-unspread-options.ts";
 import { noUseQueryDestructure } from "./rules/no-use-query-destructure.ts";
 import { objectParams } from "./rules/object-params.ts";
 import { throwOnErrorPlacement } from "./rules/throw-on-error-placement.ts";
+import { useCaseSteps } from "./rules/use-case-steps.ts";
 
 export default eslintCompatPlugin(
   definePlugin({
@@ -26,6 +27,7 @@ export default eslintCompatPlugin(
       "no-use-query-destructure": noUseQueryDestructure,
       "object-params": objectParams,
       "throw-on-error-placement": throwOnErrorPlacement,
+      "use-case-steps": useCaseSteps,
     },
   }),
 );

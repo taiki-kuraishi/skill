@@ -1,6 +1,6 @@
 ---
 name: kstack-monorepo
-description: monorepo の workspace package（packages/* など）にコードを足す・package を新設する・修正する・レビューするときの規約。package の README に責務 section（実装すること / 実装しないこと）を置くこと、コードを足す前に責務と照らすこと、責務に合わない処理を既存 package に相乗りさせず package を新設すること、責務の変更に user の承認を取ることを扱う。app 間で共有したい関数・型の置き場所に迷う場面、DB package などの共有 package への export や dependencies の追加、レビュー指摘への対応でも発火させる。
+description: monorepo の workspace package（packages/* など）にコードを足す・package を新設する・修正する・レビューするときの規約。package の README に責務 section（実装すること / 実装しないこと）を置くこと、root README は見出しと概要だけにして構成表・テスト手順を package の README に置くこと、コードを足す前に責務と照らすこと、責務に合わない処理を既存 package に相乗りさせず package を新設すること、責務の変更に user の承認を取ることを扱う。app 間で共有したい関数・型の置き場所に迷う場面、README の作成・修正、DB package などの共有 package への export や dependencies の追加、レビュー指摘への対応でも発火させる。
 ---
 
 # kstack-monorepo
@@ -29,6 +29,34 @@ DB のスキーマと migration。
 ```
 
 なぜ: 「実装しないこと」が無いと、共有 package は app をまたいで import できる置き場として何でも受け入れ、責務と依存が膨らんでいく。
+
+## root README は見出しと概要だけにする
+
+root の README には repository の名前と数行の概要だけを書く。構成表・セットアップ・テスト手順は、それを持つ app / package の README に置く。
+
+```md
+<!-- Bad: package の中身や手順を root に写している -->
+
+# acme
+
+## 構成
+
+| path          | 内容 |
+| ------------- | ---- |
+| packages/core | ...  |
+
+## テスト
+
+cd packages/core && ...
+
+<!-- Good: 概要だけ。詳細は各 package の README へ -->
+
+# acme
+
+ブラウザで遊ぶクリッカーゲーム。
+```
+
+なぜ: 構成や手順は package ごとに変わるので、root に写すと package の README と二重管理になり、片方だけ更新されて食い違う。
 
 ## 責務に合わない処理は package を新設して置く
 
