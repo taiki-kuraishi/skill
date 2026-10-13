@@ -135,3 +135,7 @@ miseの更新PRでは、`mise.lock`も更新されていることを確認する
 2. **CIルール**: `check`をrequired status checkにし、bypass対象を設けない。
 
 Renovateの承認bypassは更新種別を区別しない。majorを自動マージしない制御はRenovate設定が担い、手動マージ時のApproveは承認ルールが要求する。CIが未報告の状態でrequired checksを有効にするとPRがマージできなくなるため、設定の順序を守る。
+
+## License
+
+[Apache License 2.0](LICENSE)

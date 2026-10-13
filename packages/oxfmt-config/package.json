@@ -7,6 +7,7 @@
     "url": "git+https://github.com/taiki-kuraishi/skill.git",
     "directory": "packages/oxfmt-config"
   },
+  "license": "Apache-2.0",
   "type": "module",
   "exports": {
     ".": {
