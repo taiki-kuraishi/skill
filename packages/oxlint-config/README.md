@@ -62,6 +62,20 @@ export する設定は SKILL の名前から `kstack-` を除いた名前にす�
 
 loader の結果をコンポーネントの hook が `useQuery` で読む、という文言の変更だけで、新しい規約は無い。設定は作らない（`useSuspenseQuery` を使わないことは `react` の `no-restricted-imports` が見る）。
 
+### kstack-terraform
+
+設定は作らない。oxlint は JavaScript / TypeScript だけを lint するので、HCL（`.tf`・`.tflint.hcl`）の規約はどれも表せない。root の output 禁止は SKILL に載せた tflint-ruleset-opa のポリシーで lint し、それ以外はレビューで確かめる。
+
+| 規約                                                                   | ルール / 表せない理由                                                                                                                                                         |
+| ---------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| リテラル値に名前を付けるときは locals ではなく default 付きの variable | 表せない。HCL は oxlint の対象外                                                                                                                                              |
+| module はサービス単位で切り、root に resource を残さない               | 表せない。HCL は oxlint の対象外                                                                                                                                              |
+| root に output を書かず、module の output は呼び出し側で使うものだけ   | 表せない。HCL は oxlint の対象外。root の output は tflint-ruleset-opa の Rego（SKILL に記載）で lint できる。module の未参照 output は既存の tflint ruleset に検出手段が無い |
+| module の中は主リソースごとにファイルを分ける                          | 表せない。HCL は oxlint の対象外                                                                                                                                              |
+| resource 名は種類ではなく個体を指す                                    | 表せない。HCL は oxlint の対象外                                                                                                                                              |
+| secret の名前に使う側の都合を入れない                                  | 表せない。HCL は oxlint の対象外                                                                                                                                              |
+| tflint に provider 公式の ruleset を入れ、deep_check を有効にする      | 表せない。`.tflint.hcl` は oxlint の対象外                                                                                                                                    |
+
 ### kstack-monorepo
 
 「root README は見出しと概要だけにする」で入った規約だけを載せる。
