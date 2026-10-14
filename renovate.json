@@ -1,27 +1,35 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["config:recommended"],
+  "extends": ["config:recommended", ":dependencyDashboardApproval"],
+  "timezone": "Asia/Tokyo",
   "platformAutomerge": false,
   "ignoreTests": false,
-  "automerge": false,
   "reviewers": ["taiki-kuraishi"],
-  "assignAutomerge": false,
+  "assignAutomerge": true,
   "osvVulnerabilityAlerts": true,
   "vulnerabilityAlerts": {
     "enabled": true
   },
+  "lockFileMaintenance": {
+    "enabled": true,
+    "automerge": true
+  },
   "packageRules": [
     {
-      "matchUpdateTypes": ["major"],
-      "automerge": false
-    },
-    {
-      "matchUpdateTypes": ["minor"],
+      "description": "Dashboard承認後のminor・digest更新は全CI成功後に自動マージする",
+      "matchUpdateTypes": ["minor", "digest"],
       "automerge": true
     },
     {
+      "description": "通常patchは作らない。vulnerabilityAlertsで再有効化されたsecurity patchは自動マージする",
       "matchUpdateTypes": ["patch"],
-      "enabled": false
+      "enabled": false,
+      "automerge": true
+    },
+    {
+      "description": "majorはsecurity修正でも手動マージにする",
+      "matchUpdateTypes": ["major"],
+      "automerge": false
     }
   ],
   "customManagers": [

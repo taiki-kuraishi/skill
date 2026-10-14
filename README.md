@@ -110,18 +110,19 @@ GitHub ActionsはPRとmainへのpushで`ci.yml`を起動する。`changes`がpat
 
 miseのツール、npmの依存（`package.json`・`bun.lock`）、GitHub Actions、dprintプラグインを更新対象にする。
 
-| 更新                      | PR         | マージ                           |
-| ------------------------- | ---------- | -------------------------------- |
-| major                     | 作成する   | Approve後に手動マージ            |
-| minor                     | 作成する   | 全CI成功後にRenovateが自動マージ |
-| 通常patch                 | 作成しない | —                                |
-| 検知したセキュリティpatch | 作成する   | レビュー後に手動マージ           |
+CIの実行回数とPRの数を抑えるため、自動で作るPRはセキュリティ修正だけにする。それ以外の更新はDependency DashboardのIssueで承認したものだけPRを作る。lock file maintenanceの既定スケジュール（月曜4時前）は`Asia/Tokyo`で解釈する。
 
-レビューが必要なPRは`taiki-kuraishi`へレビューを依頼する。自動マージ対象のPRには通常レビューを依頼せず、CI失敗時にはRenovateの標準動作で依頼する。
+| 更新                     | PR                        | マージ                           |
+| ------------------------ | ------------------------- | -------------------------------- |
+| major                    | Dashboard承認後に作成する | Approve後に手動マージ            |
+| minor・digest            | Dashboard承認後に作成する | 全CI成功後にRenovateが自動マージ |
+| lock file maintenance    | Dashboard承認後に作成する | 全CI成功後にRenovateが自動マージ |
+| 通常patch                | 作成しない                | —                                |
+| 検知したセキュリティ修正 | 承認なしで作成する        | 更新種別のマージ条件に従う       |
 
-セキュリティ修正がmajor/minorで提供される場合も、その更新種別のマージ条件に従う。
+検知したセキュリティpatchは全CI成功後に自動マージし、majorで提供されるセキュリティ修正は手動マージする。自動マージ対象を含むすべてのPRで`taiki-kuraishi`へレビューを依頼する。
 
-セキュリティ修正の検知はGitHubの脆弱性アラートとOSVの対応範囲に限られる。OSVはnpm依存を検査できるが、GitHub Releases由来のツールを網羅しない。GitHub Actionsのdigest更新など、major/minor/patch以外の更新は既定の手動レビュー対象になる。
+セキュリティ修正の検知はGitHubの脆弱性アラートとOSVの対応範囲に限られる。OSVはnpm依存を検査できるが、GitHub Releases由来のツールを網羅しない。
 
 Renovate CLIの導入はbotの稼働を意味しない。[Renovate App](https://github.com/apps/renovate)にこのrepoへのアクセスを許可し、GitHubのDependency graphとDependabot alertsを有効にする。AppのDependabot alertsへのread権限も確認する。
 
