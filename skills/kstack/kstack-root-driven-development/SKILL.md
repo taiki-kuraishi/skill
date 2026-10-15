@@ -10,11 +10,11 @@ root が会話・判断・すべての編集を持ち、subagent は判断材料
 
 ## 責務
 
-| 担当     | 責務                                                                                                                             |
-| -------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| root     | user との会話、要件整理、やることの整理、次のフェーズの設計、source / test / docs の実装と指摘修正、user review の依頼・承認管理 |
-| subagent | 必要になった調査・探索・検証コマンドの実行と gate 前の skill-review・drift-review を read-only で行い、証拠を root へ返す        |
-| user     | 要件・やること・各フェーズの合意、user review、フェーズ承認、Git 操作の判断                                                      |
+| 担当     | 責務                                                                                                                                        |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| root     | user との会話、要件整理、やることの整理、次のフェーズの設計、source / test / docs の実装と指摘修正、user review の依頼・承認管理            |
+| subagent | 必要になった調査・探索・検証コマンドの実行と、gate 前の skill-review・drift-review・ponytail-review を read-only で行い、証拠を root へ返す |
+| user     | 要件・やること・各フェーズの合意、user review、フェーズ承認、Git 操作の判断                                                                 |
 
 この Skill の実行中はこの役割分担を優先する。`orchestrating-development`、`delegating-small-tasks`、`subagent-driven-development`、`executing-plans` に実装を渡さない。TDD などの技法は root が使い、テスト実行のような検証は下記の分担に従う。
 
@@ -45,19 +45,19 @@ root が会話・判断・すべての編集を持ち、subagent は判断材料
    - 検証が必要だと判断した後は、短い test / build / lint / 再現コマンドでも subagent が実行する。root は先に試さず、並行して同じ確認をせず、結果だけを解釈する。
    - subagent の報告を判断材料にし、必要な変更は root が行う。
 
-5. **skill-review と drift-review でズレを直す**
-   - フェーズの実装が終わったら、user review gate に初めて出す前に 1 回だけ、`kstack-skill-review` を使う subagent と `kstack-drift-review` を使う subagent に、並行して現在のフェーズの変更をレビューさせる。規約のズレと、変更で古くなった文書（AGENTS.md・README.md・docs/）を先に直しておけば、user は review を挙動と設計の確認に使える。手順 4 の検証と違い、未知事項の有無に関わらず行う。
-   - どちらにも、現在のフェーズで変えたファイルと範囲を明示する。既定の対象（未 commit の差分すべて）では、開始前の差分や承認済みフェーズの変更が混ざる。
-   - 指摘は判断材料で、直すのは root。drift-review の指摘は、文書と実装のどちらに合わせるかをフェーズの要件で決め、要件で決まらないものは gate で user に聞く。「既存」に分けられた指摘や、フェーズの要件に照らして直さない指摘は、理由を gate で示す。
+5. **skill-review・drift-review・ponytail-review でズレを直す**
+   - フェーズの実装が終わったら、user review gate に初めて出す前に 1 回だけ、`kstack-skill-review` を使う subagent、`kstack-drift-review` を使う subagent、`ponytail-review` を使う subagent に、並行して現在のフェーズの変更をレビューさせる（以下、手順 5 の review）。規約のズレ、変更で古くなった文書（AGENTS.md・README.md・docs/）、要らないコードを先に直しておけば、user は review を挙動と設計の確認に使える。手順 4 の検証と違い、未知事項の有無に関わらず行う。
+   - どれにも、現在のフェーズで変えたファイルと範囲を明示する。既定の対象（未 commit の差分すべて）では、開始前の差分や承認済みフェーズの変更が混ざる。
+   - 指摘は判断材料で、直すのは root。drift-review の指摘は、文書と実装のどちらに合わせるかをフェーズの要件で決め、要件で決まらないものは gate で user に聞く。ponytail-review の指摘のうち、直すと合意した要件を削る・既存パターンから外れるもの（責務の移動など）は、直さずに gate で user に聞く。「既存」に分けられた指摘や、フェーズの要件に照らして直さない指摘は、理由を gate で示す。
    - 修正で挙動が変わり得るなら検証を subagent に出し直し、gate で示す証拠を修正後の状態にそろえる。
 
 6. **user review gate で止める**
    - 開始状態との差分を確認し、現在のフェーズに属する変更だけを報告する。
    - 変更は unstaged のまま保つ。
    - root が `skill://kstack-review-request` に従い、repository root の未コミット差分について user に review を依頼する。レビューの範囲は現在のフェーズとし、開始前や承認済みの差分が表示に含まれる場合は分けて示す。
-   - skill-review・drift-review で直した指摘は `検証と証拠` に、直さなかった指摘・要確認・SKILL 同士の食い違いは理由を添えて `未解決事項` に入れる。
+   - 手順 5 の review で直した指摘は `検証と証拠` に、直さなかった指摘・要確認・SKILL 同士の食い違いは理由を添えて `未解決事項` に入れる。
    - 承認待ちとして応答を終える。`kstack-review-request` から承認結果を受け取るまでは次フェーズのコードに触れない。
-   - 指摘は同じフェーズ内で root が修正し、gate に戻る。skill-review・drift-review は回し直さない（手順 5 は 1 フェーズに 1 回）。修正で挙動が変わり得るなら、検証を subagent に出し直し、証拠を修正後の状態にそろえる。
+   - 指摘は同じフェーズ内で root が修正し、gate に戻る。手順 5 の review は回し直さない（1 フェーズに 1 回）。修正で挙動が変わり得るなら、検証を subagent に出し直し、証拠を修正後の状態にそろえる。
    - 承認後に現在の todo を完了し、手順 3 に戻って次のフェーズを切り出す。一覧に残りが無ければ終わる。
 
 Git の stage / commit / push はこの Workflow の外に置く。フェーズ承認から Git 操作の許可を推測せず、別の明示指示に従う。
@@ -84,26 +84,26 @@ Good: 書く前に止め、「スキーマの内部構造に依存する / カ�
 
 ## Subagent contract
 
-| 目的                             | Pi                                                 | Claude Code                         |
-| -------------------------------- | -------------------------------------------------- | ----------------------------------- |
-| コードベース探索                 | `scout`                                            | `Explore`                           |
-| 外部・ライブラリ調査             | `researcher`                                       | 調査可能な read-only agent          |
-| テスト・挙動検証                 | `worker` に no-edit を明示 / 静的確認は `reviewer` | `general-purpose` に no-edit を明示 |
-| 規約・ドリフトレビュー（手順 5） | `reviewer`                                         | `general-purpose` に no-edit を明示 |
+| 目的                 | Pi                                                 | Claude Code                         |
+| -------------------- | -------------------------------------------------- | ----------------------------------- |
+| コードベース探索     | `scout`                                            | `Explore`                           |
+| 外部・ライブラリ調査 | `researcher`                                       | 調査可能な read-only agent          |
+| テスト・挙動検証     | `worker` に no-edit を明示 / 静的確認は `reviewer` | `general-purpose` に no-edit を明示 |
+| 手順 5 の review     | `reviewer`                                         | `general-purpose` に no-edit を明示 |
 
-各依頼に `目的 / cwd / 対象範囲 / read-only 境界 / 完了条件 / 必要な証拠 / 報告形式` を含める。手順 5 の依頼では `kstack-skill-review` か `kstack-drift-review` を使うよう指示し（SKILL として呼べない subagent には SKILL.md の path を渡す）、報告形式はその SKILL の形式にする。`worker` / `general-purpose` は編集 tool を持ち得るため、read-only は agent 名でなく dispatch の権限境界として明示する。subagent は編集、stage、commit、user への質問を行わない。独立した依頼だけを並列化する。subagent 経路が使えない場合は exact failure を user に報告し、root が黙って代行しない。
+各依頼に `目的 / cwd / 対象範囲 / read-only 境界 / 完了条件 / 必要な証拠 / 報告形式` を含める。手順 5 の依頼では `kstack-skill-review`・`kstack-drift-review`・`ponytail-review` のどれを使うかを指示し（SKILL として呼べない subagent には SKILL.md の path を渡す）、報告形式はその SKILL の形式にする。`ponytail-review` が環境に入っていなければ、root が代わりに review せず、入っていないことを gate の `未解決事項` に書く。`worker` / `general-purpose` は編集 tool を持ち得るため、read-only は agent 名でなく dispatch の権限境界として明示する。subagent は編集、stage、commit、user への質問を行わない。独立した依頼だけを並列化する。subagent 経路が使えない場合は exact failure を user に報告し、root が黙って代行しない。
 
 ## Red flags
 
-| 誘惑                                                                                 | この Workflow の判断                                                                                                               |
-| ------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------- |
-| 「root-driven は指揮だけ。worker が実装してよい」                                    | root が全編集を行う。subagent は証拠だけを返す                                                                                     |
-| 「checkpoint commit なら review を保てる」                                           | user は unstaged diff を見る。Git 操作は別の明示指示を待つ                                                                         |
-| 「緊急なので review 中に次へ進む」                                                   | 緊急性を user へ伝え、現在の gate で止まる                                                                                         |
-| 「20秒のテストなら root が直接回す方が速い」                                         | 必要性を決めるのは root、検証コマンドを実行するのは subagent。速さ・root の最終責任・併用を理由にした hybrid も不可                |
-| 「未 commit なら次フェーズを始めてもよい」                                           | 同じ working tree の review 対象を変えない                                                                                         |
-| 「全フェーズを先に決めた方が見通しが良い」                                           | 切り出すのは次の 1 フェーズだけ。前のフェーズを実装すると状況が変わり、先に決めた後のフェーズは古くなる                            |
-| 「小さい変更なので skill-review・drift-review は省く」                               | 規約や文書のズレは変更の大きさと関係なく user の review に混ざる。gate に初めて出す前に 1 回 subagent に review させる             |
-| 「user の指摘を直したので skill-review・drift-review を回し直す」                    | 回し直さない。review は gate に初めて出す前の 1 回で、指摘の修正は user が次の gate で確かめる                                     |
-| 「文書を触っていないので drift-review は要らない」                                   | コマンド・パス・設定・挙動を変えれば、触っていない文書が古くなる                                                                   |
-| 「規約や文書は root が自分で見れば足りる / review した subagent に直させる方が速い」 | review は subagent、直す判断と編集は root。書いた本人の見直しはズレを見落とし、SKILL や文書の一式を読むと root の context が埋まる |
+| 誘惑                                                                                 | この Workflow の判断                                                                                                                   |
+| ------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------- |
+| 「root-driven は指揮だけ。worker が実装してよい」                                    | root が全編集を行う。subagent は証拠だけを返す                                                                                         |
+| 「checkpoint commit なら review を保てる」                                           | user は unstaged diff を見る。Git 操作は別の明示指示を待つ                                                                             |
+| 「緊急なので review 中に次へ進む」                                                   | 緊急性を user へ伝え、現在の gate で止まる                                                                                             |
+| 「20秒のテストなら root が直接回す方が速い」                                         | 必要性を決めるのは root、検証コマンドを実行するのは subagent。速さ・root の最終責任・併用を理由にした hybrid も不可                    |
+| 「未 commit なら次フェーズを始めてもよい」                                           | 同じ working tree の review 対象を変えない                                                                                             |
+| 「全フェーズを先に決めた方が見通しが良い」                                           | 切り出すのは次の 1 フェーズだけ。前のフェーズを実装すると状況が変わり、先に決めた後のフェーズは古くなる                                |
+| 「小さい変更なので手順 5 の review は省く」                                          | 規約や文書のズレ、要らないコードは変更の大きさと関係なく user の review に混ざる。gate に初めて出す前に 1 回 subagent に review させる |
+| 「user の指摘を直したので手順 5 の review を回し直す」                               | 回し直さない。review は gate に初めて出す前の 1 回で、指摘の修正は user が次の gate で確かめる                                         |
+| 「文書を触っていないので drift-review は要らない」                                   | コマンド・パス・設定・挙動を変えれば、触っていない文書が古くなる                                                                       |
+| 「規約や文書は root が自分で見れば足りる / review した subagent に直させる方が速い」 | review は subagent、直す判断と編集は root。書いた本人の見直しはズレを見落とし、SKILL や文書の一式を読むと root の context が埋まる     |
