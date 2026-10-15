@@ -24,7 +24,8 @@ metadata:
 ## Crit の指摘を読む
 
 - user が渡した review 結果・JSON を読む。session を指定された場合は `crit comments --session <id> --all --json` で取得する。session が複数あるなら `crit status --json` で対象と照合し、推測で選ばない
-- review JSON では `review_comments` と、`files` の各ファイルの `comments` を両方読む。CLI の一覧 JSON なら各コメントを読む。review 全体やファイル全体の指摘も、行番号が無いだけで規約にできる
+- `review-inbox` が保存した JSON（crit のフックの payload）では、コメントは `comments_json`（全件）から読む。`comments_unresolved_json` もあるが、approve では空になる。対象コードは `repo_root` の repo で読む。approve された review は crit が review ファイルを消すので、`crit comments --session` で取り直さない
+- review JSON では `review_comments` と、`files` の各ファイルの `comments` を両方読む。CLI の一覧 JSON と `comments_json` なら各コメントを読む。review 全体やファイル全体の指摘も、行番号が無いだけで規約にできる
 - 規約の根拠は `body` と対象コード、返信で合意した内容に置く。`quote` があれば選択された範囲に絞り、位置は `anchor` で探す。`drifted` があれば古い `start_line` を現在の位置だと思わない。`resolved` や `approved` は規約本文ではない
 
 ```text
