@@ -80,7 +80,7 @@ herdr agent prompt ho-<feature>-<task> "$(cat /tmp/ho-<feature>-<task>.md)" --wa
 - ask が timeout で失敗したら、root が user に確かめている。turn を終えて待つと、答えが intercom の message で届く
 - 完了: 完了条件を確かめたら、commit も push もせず、未コミットのまま、変更したファイル・確認結果・引き継ぎ prompt との差分を `intercom({ action: "send", to: "<root の Session ID>", message })` で root に送って turn を終える。push と PR は user の承認後にだけ行う（push のたびに hook と CI が回るため）
 - user review: root が user に依頼し、レビュー手順を管理する。あなたは user に直接 review を頼まず、開始・指摘への返信・再依頼・終了も root に任せる。user がこの pane で review を頼んだ場合も root に連絡して窓口をそろえる
-- review の指摘が root から届いたら、直して検証し（commit・push はしない）、指摘の ID ごとの対応結果と返信文を root に send する。引き継ぎ prompt に skill-review・drift-review の指示があっても、ここでは回し直さない
+- review の指摘が root から届いたら、直して検証し（commit・push はしない）、指摘の ID ごとの対応結果と返信文を root に send する。引き継ぎ prompt に skill-review・drift-review・ponytail-review の指示があっても、ここでは回し直さない
 - 統合: root から承認を伝えられたら、repo の commit の書き方で commit して push し、`gh pr create --base <default branch>` で PR を作る（本文は変更したファイル・確認結果・引き継ぎ prompt との差分。`.github/pull_request_template.md` があれば従う）。`gh pr checks <PR の URL> --watch` で CI を待ち、通ったら `gh pr merge <PR の URL> --squash`（repo が squash を許していなければ、許されている方法）で merge して結果を root に返す。CI が落ちたら直さずに、原因と修正案を root に返す
 ```
 
