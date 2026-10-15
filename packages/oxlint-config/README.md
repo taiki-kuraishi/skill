@@ -66,15 +66,17 @@ loader の結果をコンポーネントの hook が `useQuery` で読む、と�
 
 設定は作らない。oxlint は JavaScript / TypeScript だけを lint するので、HCL（`.tf`・`.tflint.hcl`）の規約はどれも表せない。root の output 禁止は SKILL に載せた tflint-ruleset-opa のポリシーで lint し、それ以外はレビューで確かめる。
 
-| 規約                                                                   | ルール / 表せない理由                                                                                                                                                         |
-| ---------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| リテラル値に名前を付けるときは locals ではなく default 付きの variable | 表せない。HCL は oxlint の対象外                                                                                                                                              |
-| module はサービス単位で切り、root に resource を残さない               | 表せない。HCL は oxlint の対象外                                                                                                                                              |
-| root に output を書かず、module の output は呼び出し側で使うものだけ   | 表せない。HCL は oxlint の対象外。root の output は tflint-ruleset-opa の Rego（SKILL に記載）で lint できる。module の未参照 output は既存の tflint ruleset に検出手段が無い |
-| module の中は主リソースごとにファイルを分ける                          | 表せない。HCL は oxlint の対象外                                                                                                                                              |
-| resource 名は種類ではなく個体を指す                                    | 表せない。HCL は oxlint の対象外                                                                                                                                              |
-| secret の名前に使う側の都合を入れない                                  | 表せない。HCL は oxlint の対象外                                                                                                                                              |
-| tflint に provider 公式の ruleset を入れ、deep_check を有効にする      | 表せない。`.tflint.hcl` は oxlint の対象外                                                                                                                                    |
+| 規約                                                                                | ルール / 表せない理由                                                                                                                                                         |
+| ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| リテラル値に名前を付けるときは locals ではなく default 付きの variable              | 表せない。HCL は oxlint の対象外                                                                                                                                              |
+| module はサービス単位で切り、root に resource を残さない                            | 表せない。HCL は oxlint の対象外                                                                                                                                              |
+| root module の分け方は user と相談して決める                                        | 表せない。HCL は oxlint の対象外。agent の作業手順で、ディレクトリの分け方の正否も構文から決まらない                                                                          |
+| provider ブロックは provider.tf に置き、versions.tf は terraform ブロックだけにする | 表せない。HCL は oxlint の対象外（`oxlint provider.tf` は `No files found to lint` になる）                                                                                   |
+| root に output を書かず、module の output は呼び出し側で使うものだけ                | 表せない。HCL は oxlint の対象外。root の output は tflint-ruleset-opa の Rego（SKILL に記載）で lint できる。module の未参照 output は既存の tflint ruleset に検出手段が無い |
+| module の中は主リソースごとにファイルを分ける                                       | 表せない。HCL は oxlint の対象外                                                                                                                                              |
+| resource 名は種類ではなく個体を指す                                                 | 表せない。HCL は oxlint の対象外                                                                                                                                              |
+| secret の名前に使う側の都合を入れない                                               | 表せない。HCL は oxlint の対象外                                                                                                                                              |
+| tflint に provider 公式の ruleset を入れ、deep_check を有効にする                   | 表せない。`.tflint.hcl` は oxlint の対象外                                                                                                                                    |
 
 ### kstack-monorepo
 
@@ -119,3 +121,11 @@ loader の結果をコンポーネントの hook が `useQuery` で読む、と�
 | user への質問は質問 tool で聞き、チャットに並べて終えない                                                                          | 表せない。agent の対話手順なので、コードの AST や整形からは判定できない |
 | gate 前に skill-review・drift-review・ponytail-review を並行で 1 回 subagent に走らせる                                            | 表せない。agent の作業手順なので、コードの AST や整形からは判定できない |
 | ponytail-review の指摘で、合意した要件を削る・既存パターンから外れる修正は直さず gate で聞く。入っていなければ `未解決事項` に書く | 表せない。agent の作業手順なので、コードの AST や整形からは判定できない |
+
+### kstack-git
+
+設定は作らない。oxlint・oxfmt は `.gitignore` を扱わない（`oxlint .gitignore` は `No files found to lint`、`oxfmt --check .gitignore` は `Expected at least one target file` になる）。
+
+| 規約                                    | ルール / 表せない理由                                                                  |
+| --------------------------------------- | -------------------------------------------------------------------------------------- |
+| .gitignore は repo root に 1 つだけ置く | 表せない。`.gitignore` は oxlint の対象外で、ファイルの置き場所は AST から判定できない |

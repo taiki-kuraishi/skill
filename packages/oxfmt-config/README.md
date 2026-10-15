@@ -30,3 +30,7 @@ oxfmt で表せる規約は無い。`.gd` は oxfmt の整形対象ではない�
 ### kstack-code-comment
 
 例外の列挙を広げただけで、新しい規約は無い。oxfmt の設定は作らない。
+
+### kstack-git
+
+oxfmt で表せる規約は無い。`.gitignore` は oxfmt の整形対象ではない（`oxfmt --check .gitignore` は `Expected at least one target file` になる）。
