@@ -1,6 +1,6 @@
 ---
 name: kstack-terraform
-description: Terraform（.tf ファイル、HCL）と tflint 設定（.tflint.hcl、tflint-ruleset-opa の Rego ポリシー）を書く・修正する・レビューするときの規約。リテラル値に名前を付けるときは locals ではなく default 付きの variable にすること、resource を S3・KMS・IAM のようにサービス名の module にまとめて root に resource を残さないこと、root に output を書かず module の output を呼び出し側で参照するものだけにすること、module 内を bucket などの主リソースごとのファイルに分けること、同じ種類の resource が増えても衝突しない名前を付けること、Secret Manager などの secret 名に tf-var のような使う側の prefix を入れないこと、tflint に provider 公式の ruleset plugin を version・source 付きで入れ deep_check を有効にすることを扱う。AWS・GCP などのインフラの追加、module 化やファイル分割のリファクタリング、lint 設定、レビュー指摘への対応でも発火させる。
+description: Terraform（.tf ファイル、HCL）と tflint 設定（.tflint.hcl、tflint-ruleset-opa の Rego ポリシー）を書く・修正する・レビューするときの規約。リテラル値に名前を付けるときは locals ではなく default 付きの variable にすること、resource を S3・KMS・IAM のようにサービス名の module にまとめて root に resource を残さないこと、root module（state の単位）の分け方とディレクトリ名を agent が決めずに user と相談すること、provider ブロックを provider.tf に置き versions.tf を terraform ブロックだけにすること、root に output を書かず module の output を呼び出し側で参照するものだけにすること、module 内を bucket などの主リソースごとのファイルに分けること、同じ種類の resource が増えても衝突しない名前を付けること、Secret Manager などの secret 名に tf-var のような使う側の prefix を入れないこと、tflint に provider 公式の ruleset plugin を version・source 付きで入れ deep_check を有効にすることを扱う。AWS・GCP・Cloudflare などのインフラや root module（stack）の追加、module 化やファイル分割のリファクタリング、lint 設定、レビュー指摘への対応でも発火させる。
 ---
 
 # kstack-terraform
@@ -45,6 +45,47 @@ modules/
 ```
 
 なぜ: resource type から置き場所が一つに決まるので、探すときも足すときも迷わない。用途や「どのサービスの関心か」で切ると境界の引き方が人によって変わり、root に残った resource から置き場所の規則が崩れる。
+
+## root module の分け方は user と相談して決める
+
+root module（state の単位）を新しく作る・分ける・改名するときは、agent が決めずに案を示して user に決めてもらう。既定の案は provider 別（`infra/aws`、`infra/cloudflare`）とし、用途やプロジェクトで分ける案があれば並べて示す。
+
+```text
+# Bad: 相談せずに root module を作り、backend の key も決めて進める
+infra/events/    # key = "events/terraform.tfstate"
+
+# Good: 案を示して決めてもらう
+「root module は provider 別（infra/aws、infra/cloudflare）を既定に考えています。
+  用途で分けるなら infra/events/ です。どちらにしますか？」
+```
+
+なぜ: root module は state・backend の key・apply の単位を決め、後から改名や分割をすると state の移行（`init -migrate-state` など）が要る。provider 別が多くの場合に合うが、どの単位で分けるかは運用で変わり、コードからは決まらない。
+
+## provider ブロックは provider.tf に置き、versions.tf は terraform ブロックだけにする
+
+```hcl
+# Bad: versions.tf に provider の設定が混ざる
+# versions.tf
+terraform {
+  required_providers {
+    cloudflare = { source = "cloudflare/cloudflare", version = "5.27.0" }
+  }
+}
+provider "cloudflare" {}
+
+# Good: versions.tf は required_version・backend・required_providers だけ
+# versions.tf
+terraform {
+  required_providers {
+    cloudflare = { source = "cloudflare/cloudflare", version = "5.27.0" }
+  }
+}
+
+# provider.tf
+provider "cloudflare" {}
+```
+
+なぜ: versions.tf は「どの版で動かすか」、provider.tf は認証・region・assume_role など「どこに対して動かすか」で、変える理由が違う。分けておけば、provider を足す・region を変えるときに見るファイルが 1 つに決まる。
 
 ## root に output を書かず、module の output は呼び出し側で使うものだけにする
 
