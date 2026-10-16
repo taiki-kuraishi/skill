@@ -10,7 +10,7 @@ dprint = "0.63.0"
 lefthook = "2.2.1"
 node = "24.21.0"
 "npm:markdownlint-cli2" = "0.23.3"
-"npm:renovate" = "44.155.1"
+"npm:renovate" = "44.164.7"
 
 [tasks.install]
 run = [
