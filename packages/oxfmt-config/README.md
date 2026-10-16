@@ -34,3 +34,7 @@ oxfmt で表せる規約は無い。`.gd` は oxfmt の整形対象ではない�
 ### kstack-git
 
 oxfmt で表せる規約は無い。`.gitignore` は oxfmt の整形対象ではない（`oxfmt --check .gitignore` は `Expected at least one target file` になる）。
+
+### kstack-rest-api
+
+oxfmt で表せる規約は無い。整形の選択肢しか持たず、route が返すリソースの範囲、URL の形、request の値をどこで変換するかは決められない（3 規約の Bad / Good に `oxfmt --check` は差分を出さない）。
