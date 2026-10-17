@@ -78,6 +78,12 @@ oxfmt で表せる規約は無い。
 
 oxfmt で表せる規約は無い。`.gitignore` は oxfmt の整形対象ではない（`oxfmt --check .gitignore` は `Expected at least one target file` になる）。
 
+| 規約                                    | 設定 / 表せない理由                                                                                |
+| --------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| .gitignore は repo root に 1 つだけ置く | 表せない。`.gitignore` は整形対象ではなく、ファイルの置き場所も整形の選択肢に無い                  |
+| commit の書き方                         | 表せない。commit message と stage する範囲は整形対象のファイルに現れない                           |
+| PR の作り方                             | 表せない。PR の title・body・assignee と作成後の subagent による確認は整形対象のファイルに現れない |
+
 ### kstack-rest-api
 
 oxfmt で表せる規約は無い。整形の選択肢しか持たず、route が返すリソースの範囲、URL の形、request の値をどこで変換するかは決められない（3 規約の Bad / Good に `oxfmt --check` は差分を出さない）。

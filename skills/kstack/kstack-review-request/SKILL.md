@@ -39,7 +39,7 @@ Good: 開発フローは kstack-review-request に対象と証拠を渡し、そ
 
 ## 手順
 
-1. **対象を固定する** — cwd、フェーズ、変更ファイル、検証結果、未解決事項をそろえる。開始前や承認済みの差分が同じ review に含まれるなら、今回見てほしい範囲と分けて示す
+1. **対象を固定する** — cwd、フェーズ、変更ファイル、検証結果、未解決事項をそろえる。承認済みのフェーズは呼び出し元が commit しているので、未コミット差分の review は下の「公開 URL で起動する」のとおり `HEAD` を基点にする。開始前の差分が同じ review に含まれるなら、今回見てほしい範囲と分けて示す
 2. **session を選ぶ** — 同じ対象で自分が管理する session があれば `--session <id>` で再利用する。所有者や対象が不明な session は、停止や重複起動の前に窓口を確認する
 3. **起動して依頼する** — 下の「公開 URL で起動する」で起動し、`できるようになったこと / 変更ファイル / 検証と証拠 / 未解決事項` と `REVIEW_URL` を書いて、コメントを書き Finish Review を押すよう頼む
 4. **結果を受け取る** — review 待ちの todo を block にして turn を終え、job の終了を待つ。結果は `skill://crit` の手順で読む。Finish Review 以外の終了は中断として user に報告し、再開の意思を確認する。失敗・中断・結果未受領は承認ではない
@@ -67,6 +67,8 @@ network_args=(--host 127.0.0.1 --no-open -p <PORT>)
 [ -n "${CRIT_PUBLIC_URL:-}" ] && network_args+=(--public-url "<REVIEW_URL>")
 crit "${network_args[@]}" <対象の引数>
 ```
+
+`<対象の引数>` は、未コミット差分を review するとき `--base-branch HEAD` にする。引数なしの `crit` は topic branch で default branch との branch diff を既定にするので、承認後に commit した前のフェーズの変更まで review に出る。`HEAD` を基点にすると、未コミットの今回のフェーズだけが出る。PR を review するときは呼び出し元から受け取った PR の対象を渡す。
 
 ```text
 Bad: user に http://127.0.0.1:<port> や localhost の URL を渡す / job の出力から URL を拾おうとして待つ / --host を Tailscale の IP にする

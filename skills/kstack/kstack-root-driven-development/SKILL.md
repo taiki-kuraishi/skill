@@ -14,15 +14,15 @@ root が会話・判断・すべての編集を持ち、subagent は判断材料
 | -------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
 | root     | user との会話、要件整理、やることの整理、次のフェーズの設計、source / test / docs の実装と指摘修正、user review の依頼・承認管理            |
 | subagent | 必要になった調査・探索・検証コマンドの実行と、gate 前の skill-review・drift-review・ponytail-review を read-only で行い、証拠を root へ返す |
-| user     | 要件・やること・各フェーズの合意、user review、フェーズ承認、Git 操作の判断                                                                 |
+| user     | 要件・やること・各フェーズの合意、user review、フェーズ承認（承認済みフェーズの commit の許可を兼ねる）、push・PR・merge の判断             |
 
 この Skill の実行中はこの役割分担を優先する。`orchestrating-development`、`delegating-small-tasks`、`subagent-driven-development`、`executing-plans` に実装を渡さない。TDD などの技法は root が使い、テスト実行のような検証は下記の分担に従う。
 
 ## Workflow
 
 1. **開始状態を固定する**
-   - repository の status を読み、開始前からある差分を記録する。
-   - 既存差分を今回の成果として扱わない。
+   - repository の status を読み、開始前からある差分を記録する。現在の branch が default branch かも記録する。
+   - 既存差分を今回の成果として扱わず、フェーズの commit にも含めない。
    - `status` / `diff` など read-only の VCS 確認と、`kstack-review-request` に従う user review の依頼・結果受領は workflow 管理なので root が直接実行してよい。test / build / lint / 再現 / 動作確認は検証として subagent へ委譲する。
 
 2. **要件を合意する**
@@ -47,20 +47,20 @@ root が会話・判断・すべての編集を持ち、subagent は判断材料
 
 5. **skill-review・drift-review・ponytail-review でズレを直す**
    - フェーズの実装が終わったら、user review gate に初めて出す前に 1 回だけ、`kstack-skill-review` を使う subagent、`kstack-drift-review` を使う subagent、`ponytail-review` を使う subagent に、並行して現在のフェーズの変更をレビューさせる（以下、手順 5 の review）。規約のズレ、変更で古くなった文書（AGENTS.md・README.md・docs/）、要らないコードを先に直しておけば、user は review を挙動と設計の確認に使える。手順 4 の検証と違い、未知事項の有無に関わらず行う。
-   - どれにも、現在のフェーズで変えたファイルと範囲を明示する。既定の対象（未 commit の差分すべて）では、開始前の差分や承認済みフェーズの変更が混ざる。
+   - どれにも、現在のフェーズで変えたファイルと範囲を明示する。承認済みのフェーズは commit 済みだが、既定の対象（未 commit の差分すべて）では開始前の差分が混ざる。
    - 指摘は判断材料で、直すのは root。drift-review の指摘は、文書と実装のどちらに合わせるかをフェーズの要件で決め、要件で決まらないものは gate で user に聞く。ponytail-review の指摘のうち、直すと合意した要件を削る・既存パターンから外れるもの（責務の移動など）は、直さずに gate で user に聞く。「既存」に分けられた指摘や、フェーズの要件に照らして直さない指摘は、理由を gate で示す。
    - 修正で挙動が変わり得るなら検証を subagent に出し直し、gate で示す証拠を修正後の状態にそろえる。
 
 6. **user review gate で止める**
    - 開始状態との差分を確認し、現在のフェーズに属する変更だけを報告する。
-   - 変更は unstaged のまま保つ。
-   - root が `skill://kstack-review-request` に従い、repository root の未コミット差分について user に review を依頼する。レビューの範囲は現在のフェーズとし、開始前や承認済みの差分が表示に含まれる場合は分けて示す。
+   - 変更は unstaged のまま保ち、承認前に commit しない。
+   - root が `skill://kstack-review-request` に従い、repository root の未コミット差分について user に review を依頼する。承認済みのフェーズは commit 済みなので、その SKILL の取り決めどおり `HEAD` を基点にすると表示に混ざらない。レビューの範囲は現在のフェーズとし、開始前の差分が表示に含まれる場合は分けて示す。
    - 手順 5 の review で直した指摘は `検証と証拠` に、直さなかった指摘・要確認・SKILL 同士の食い違いは理由を添えて `未解決事項` に入れる。
    - 承認待ちとして応答を終える。`kstack-review-request` から承認結果を受け取るまでは次フェーズのコードに触れない。
    - 指摘は同じフェーズ内で root が修正し、gate に戻る。手順 5 の review は回し直さない（1 フェーズに 1 回）。修正で挙動が変わり得るなら、検証を subagent に出し直し、証拠を修正後の状態にそろえる。
-   - 承認後に現在の todo を完了し、手順 3 に戻って次のフェーズを切り出す。一覧に残りが無ければ終わる。
+   - 承認後、現在のフェーズに属する変更だけを stage し（開始前からある差分は含めない）、`skill://kstack-git` の「commit の書き方」で commit する。branch が default branch なら、最初の commit の前に `skill://kstack-git` の「PR の作り方」の手順 1 と同じ形で topic branch を切る。commit してから現在の todo を完了し、手順 3 に戻って次のフェーズを切り出す。一覧に残りが無ければ終わる。
 
-Git の stage / commit / push はこの Workflow の外に置く。フェーズ承認から Git 操作の許可を推測せず、別の明示指示に従う。
+フェーズの commit は手順 6 の承認後に root が行う（承認を commit の許可とみなす）。次のフェーズの review に承認済みの差分を混ぜないため。push・PR・merge はこの Workflow の外に置き、承認から許可を推測せず、別の明示指示に従う。
 
 ## 既存パターンから外れる実装
 
@@ -98,10 +98,10 @@ Good: 書く前に止め、「スキーマの内部構造に依存する / カ�
 | 誘惑                                                                                 | この Workflow の判断                                                                                                                   |
 | ------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------- |
 | 「root-driven は指揮だけ。worker が実装してよい」                                    | root が全編集を行う。subagent は証拠だけを返す                                                                                         |
-| 「checkpoint commit なら review を保てる」                                           | user は unstaged diff を見る。Git 操作は別の明示指示を待つ                                                                             |
+| 「承認前に checkpoint commit しておけば安全」                                        | 承認前に commit しない。user は未 commit の差分を review し、commit は承認後に現在のフェーズの変更だけで行う                           |
 | 「緊急なので review 中に次へ進む」                                                   | 緊急性を user へ伝え、現在の gate で止まる                                                                                             |
 | 「20秒のテストなら root が直接回す方が速い」                                         | 必要性を決めるのは root、検証コマンドを実行するのは subagent。速さ・root の最終責任・併用を理由にした hybrid も不可                    |
-| 「未 commit なら次フェーズを始めてもよい」                                           | 同じ working tree の review 対象を変えない                                                                                             |
+| 「承認済みフェーズは commit せずに次フェーズを始めてもよい」                         | 承認済みの変更を commit してから次のフェーズに触れる。未 commit のまま進めると、次の review に承認済みの差分が混ざる                   |
 | 「全フェーズを先に決めた方が見通しが良い」                                           | 切り出すのは次の 1 フェーズだけ。前のフェーズを実装すると状況が変わり、先に決めた後のフェーズは古くなる                                |
 | 「小さい変更なので手順 5 の review は省く」                                          | 規約や文書のズレ、要らないコードは変更の大きさと関係なく user の review に混ざる。gate に初めて出す前に 1 回 subagent に review させる |
 | 「user の指摘を直したので手順 5 の review を回し直す」                               | 回し直さない。review は gate に初めて出す前の 1 回で、指摘の修正は user が次の gate で確かめる                                         |
