@@ -38,14 +38,14 @@ ifd が今回の回として合意したフェーズだけを、1 フェーズ 1
 
 ## user review
 
-完了の報告がそろったフェーズだけ、root が `skill://kstack-review-request` に従って user に review を依頼する。渡すのは子の worktree の cwd・変更ファイル・検証結果・未解決事項で、対象は未コミット差分にする。指摘は ID・本文・位置・既存の返信を添えて子に `send` し、対応結果と返信文を受け取って root が返信し、再レビューまで同じ SKILL で扱う。子に review を起動させない。承認は次のフェーズへ進む条件の 1 つで、Git 操作の許可ではない。
+完了の報告がそろったフェーズだけ、root が `skill://kstack-review-request` に従って user に review を依頼する。渡すのは子の worktree の cwd・変更ファイル・検証結果・未解決事項で、対象は未コミット差分にする。指摘は ID・本文・位置・既存の返信を添えて子に `send` し、対応結果と返信文を受け取って root が返信し、再レビューまで同じ SKILL で扱う。子に review を起動させない。承認は次のフェーズへ進む条件の 1 つで、承認済みフェーズの commit の許可を兼ねるが、push・PR・merge の許可ではない。
 
 ## Git と統合
 
-review の承認から Git の許可を推測しない。
+承認は commit の許可を兼ねる。push・PR・merge の許可は review の承認から推測しない。
 
-1. **許可を確かめる** — root が user から明示された Git 操作の範囲を確かめ、足りない操作だけ許可を求める。commit・push・PR・merge の許可をレビュー承認から推測しない
-2. **子に渡す** — 許可された操作と対象 branch を子に `send` する。子は自分の worktree でその範囲だけを実行し、commit hash や PR の merge commit など、統合先を確認できる結果を root に報告する
+1. **commit させる** — 承認が出たら、root が子に承認を `send` する。子は担当の変更だけを `skill://kstack-git` の「commit の書き方」で自分の worktree の branch に commit し、commit hash を root に報告する
+2. **許可を確かめて子に渡す** — root が user から明示された push・PR・merge の範囲を確かめ、足りない操作だけ許可を求める。許可された操作と対象 branch を子に `send` する。子は自分の worktree でその範囲だけを実行し（PR は `skill://kstack-git` の「PR の作り方」で作る）、PR の URL や merge commit など、統合先を確認できる結果を root に報告する
 3. **統合する** — ローカル統合を許可された場合、子が作った commit を root の checkout で `git merge --ff-only ho/<feature>/<task>` により取り込む（root は commit を作らない）。PR 経由なら許可範囲で子に merge させ、root は default branch の checkout を `pull --ff-only` で進める。失敗したら root で止まり、reset や force push に切り替えない
 4. **証拠を確かめる** — root が read-only の VCS 確認で、報告された統合 commit が default branch の HEAD に含まれることを確かめる。確認後だけ統合済みとして記録する。今回のフェーズがすべて統合済みなら ifd の手順 2 に戻り、一覧の残りから次の回を設計・合意してから渡す
 5. **待ちを残す** — 許可が無い、統合できない、証拠が無いフェーズは root の todo を block にして user に伝える。未統合のフェーズを前提にする次のフェーズは始めない。手動起動された子 session と worktree は自動で停止・削除せず、完了報告に残存一覧を添える

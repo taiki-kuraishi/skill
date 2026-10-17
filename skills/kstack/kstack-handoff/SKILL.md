@@ -1,12 +1,12 @@
 ---
 name: kstack-handoff
-description: repo 本体の default branch で動く root session が、タスクごとに wt の worktree と、root の herdr workspace の下の子 workspace で omp を起動して委任し、子の質問に intercom で答え、kstack-review-request で未コミット差分の user review を依頼し、承認後に子が commit・push・PR 作成・merge する開発フロー
+description: repo 本体の default branch で動く root session が、タスクごとに wt の worktree と、root の herdr workspace の下の子 workspace で omp を起動して委任し、子の質問に intercom で答え、kstack-review-request で未コミット差分の user review を依頼し、承認後に子が commit し、push・PR 作成・merge は user が明示したときだけ子が行う開発フロー
 disable-model-invocation: true
 ---
 
 # kstack-handoff
 
-root session は repo 本体の checkout の default branch で動き、委任するタスクごとに wt で worktree を作り、root の herdr workspace の下に開いた子 workspace で omp（子）を起動して引き継ぎ prompt を送る。子は作業が止まる疑問を intercom で root に聞き、root は答えられなければ user に聞いて子に返す。子は終わったら commit せずに root に報告し、root が未コミット差分の user review を依頼する。user が承認したら、root がそれを子に伝え、子が commit・push・PR 作成・CI 待ち・merge をして root に返す。root は自分の checkout を merge 後の default branch に進めて片付け、前提がそろったタスクを起動する。1 タスクは 1 PR にする。root はやり取りと統合を持ち、実装と commit は子に任せる。
+root session は repo 本体の checkout の default branch で動き、委任するタスクごとに wt で worktree を作り、root の herdr workspace の下に開いた子 workspace で omp（子）を起動して引き継ぎ prompt を送る。子は作業が止まる疑問を intercom で root に聞き、root は答えられなければ user に聞いて子に返す。子は終わったら commit せずに root に報告し、root が未コミット差分の user review を依頼する。user が承認したら、root がそれを子に伝え、子が commit して commit hash を root に返す。push・PR 作成・merge は、root が user に確かめ、user が明示した操作だけを子に指示する。repo によっては merge の前に approve が要り、review の承認は merge の許可ではないため。merge されたら、root は自分の checkout を merge 後の default branch に進めて片付け、前提がそろったタスクを起動する。1 タスクは 1 PR にする。root はやり取りと統合を持ち、実装と commit は子に任せる。
 
 `kstack-interface-first-development` の「引き継いで監督する」から来たら、今回のフェーズごとの引き継ぎ prompt と、並列に始めるフェーズの組（例: `2 と 3 を並列`）をそのまま使う。後のフェーズは、今回のフェーズがすべて merge された後に、ifd が次の回として渡す。
 
@@ -15,8 +15,8 @@ root session は repo 本体の checkout の default branch で動き、委任�
 1. **確かめる** — herdr の中にいること（`test "${HERDR_ENV:-}" = 1`）、intercom がつながっていること（`intercom({ action: "status" })` が `Connected: Yes`）、gh が使えること（`gh auth status`）、root が repo 本体の checkout の default branch にいること（`git rev-parse --show-toplevel` が `git worktree list` の 1 行目の path で、`git branch --show-current` が `gh repo view --json defaultBranchRef -q .defaultBranchRef.name` と同じ）を確かめる。欠けていたら user に伝えて止まる（intercom tool が無ければ `omp plugin install pi-intercom` の後に omp の再起動が要る。root が linked worktree や別の branch にいたら、repo 本体の workspace に tab を足して default branch で起動し直してもらう）。status の `Session ID`（子から見た root の宛先）、root の checkout（`git rev-parse --show-toplevel`）、default branch を控える。完了条件: 3 つの値がそろっている
 2. **タスクをそろえる** — タスクごとに、下の「命名」の `<feature>` と `<task>`、引き継ぎ prompt、完了条件、前提のタスクを決め、todo に 1 タスク 1 項目で書く（compaction の後も残る）。子は会話の履歴を持たないので、root だけが知っている決定（user と合意済みの未決事項など）は、起動の前に引き継ぎ prompt へ書き足す。完了条件: すべてのタスクに名前・引き継ぎ prompt・完了条件・前提があり、子が聞かずに済む決定が書かれている
 3. **起動する** — 前提のタスクの PR がすべて merge 済みのタスクを、下の「起動」で全部起動する。branch・子 workspace・worktree の表を user に示し、待つタスクの todo を block にしてから（待ちの理由を残すと、turn の終わりに omp が未完了の todo を催促しない）、turn を終えて子の message を待つ。完了条件: 起動したすべての子が `working` になった
-4. **子に応える** — 子の message が届くたびに、下の「子とのやり取り」に従って返す。完了の報告が来たら、root が `skill://kstack-review-request` で子の worktree の未コミット差分の review を user に頼み、turn を終えて結果を待つ。完了条件: 届いた message すべてに、答えか review の結果（承認または指摘）を返した
-5. **統合する** — 承認されたタスクを、下の「統合」で子に merge させ、root の checkout を default branch の最新に進めて片付ける。前提がそろったタスクができたら 3 へ、作業中の子が残っていれば turn を終えて 4 へ戻る。完了条件: すべてのタスクの PR が merge され、子の workspace・worktree・branch が残っていない。最後に、merge した PR と root の checkout の HEAD を user に報告する
+4. **子に応える** — 子の message が届くたびに、下の「子とのやり取り」に従って返す。完了の報告が来たら、root が `skill://kstack-review-request` で子の worktree の未コミット差分の review を user に頼み、turn を終えて結果を待つ。承認されたら、下の「統合」の手順 1 で子に commit させる。完了条件: 届いた message すべてに、答えか review の結果（承認または指摘）を返し、承認されたタスクの commit hash を受け取った
+5. **統合する** — commit 済みのタスクについて、push・PR 作成・merge のどれを行うかを user に確かめ、下の「統合」で user が明示した操作だけを子にさせる。merge されたら root の checkout を default branch の最新に進めて片付ける。前提がそろったタスクができたら 3 へ、作業中の子が残っていれば turn を終えて 4 へ戻る。完了条件: すべてのタスクが commit され、user が明示した操作の結果（PR の URL・merge）を受け取り、merge したタスクの子の workspace・worktree・branch が残っていない。merge の指示が無い・approve 待ちのタスクは todo を block にして user に伝える。最後に、commit・PR・merge の結果と root の checkout の HEAD を user に報告する
 
 ## 命名
 
@@ -53,7 +53,7 @@ herdr agent start ho-<feature>-<task> --kind omp --pane <pane_id> --timeout 6000
 # 4. intercom 名を agent 名にそろえる。slash command は turn を始めないので --wait は付けない
 herdr agent prompt ho-<feature>-<task> '/alias ho-<feature>-<task>'
 
-# 5. 引き継ぎ prompt の Git 操作の行（「許可が無い間は commit しない」）を外し、Git の許可と報告は後ろに足す「子との取り決め」に一本化して /tmp/ho-<feature>-<task>.md に書き、送る。子が turn を始めるまでだけ待つ
+# 5. 引き継ぎ prompt の Git 操作の行（commit と push・PR・merge の 2 行）を外し、Git の許可と報告は後ろに足す「子との取り決め」に一本化して /tmp/ho-<feature>-<task>.md に書き、送る。子が turn を始めるまでだけ待つ
 herdr agent prompt ho-<feature>-<task> "$(cat /tmp/ho-<feature>-<task>.md)" --wait --until working --timeout 30000
 ```
 
@@ -78,10 +78,11 @@ herdr agent prompt ho-<feature>-<task> "$(cat /tmp/ho-<feature>-<task>.md)" --wa
 - 開始: `intercom({ action: "status" })` が `Connected: Yes` であることを確かめ、自分の full Session ID・task 名・cwd・branch を root に `send` する。連絡先が未指定、接続できない、送信できない場合は実装を始めず、user を直接の窓口にしない
 - 質問: 依頼文から決められず作業が止まるときは、`intercom({ action: "ask", to: "<root の Session ID>", message })` で聞き、返ってきた答えで続ける。担当にかかる未決の決めごとが決まっていなければ、仮の値で進めずに聞く（仮の値は review で直すことになる）。user に聞きたいことも root に聞く（root が user に聞いて返す）。ask tool で聞くと、この workspace を見ていない user を待って止まる
 - ask が timeout で失敗したら、root が user に確かめている。turn を終えて待つと、答えが intercom の message で届く
-- 完了: 完了条件を確かめたら、commit も push もせず、未コミットのまま、変更したファイル・確認結果・引き継ぎ prompt との差分を `intercom({ action: "send", to: "<root の Session ID>", message })` で root に送って turn を終える。push と PR は user の承認後にだけ行う（push のたびに hook と CI が回るため）
+- 完了: 完了条件を確かめたら、commit も push もせず、未コミットのまま、変更したファイル・確認結果・引き継ぎ prompt との差分を `intercom({ action: "send", to: "<root の Session ID>", message })` で root に送って turn を終える。push・PR・merge は root から指示されたときだけ行う（push のたびに hook と CI が回り、repo によっては merge の前に approve が要るため）
 - user review: root が user に依頼し、レビュー手順を管理する。あなたは user に直接 review を頼まず、開始・指摘への返信・再依頼・終了も root に任せる。user がこの pane で review を頼んだ場合も root に連絡して窓口をそろえる
 - review の指摘が root から届いたら、直して検証し（commit・push はしない）、指摘の ID ごとの対応結果と返信文を root に send する。引き継ぎ prompt に skill-review・drift-review・ponytail-review の指示があっても、ここでは回し直さない
-- 統合: root から承認を伝えられたら、repo の commit の書き方で commit して push し、`gh pr create --base <default branch>` で PR を作る（本文は変更したファイル・確認結果・引き継ぎ prompt との差分。`.github/pull_request_template.md` があれば従う）。`gh pr checks <PR の URL> --watch` で CI を待ち、通ったら `gh pr merge <PR の URL> --squash`（repo が squash を許していなければ、許されている方法）で merge して結果を root に返す。CI が落ちたら直さずに、原因と修正案を root に返す
+- commit: root から user の承認を伝えられたら、担当の変更だけを `skill://kstack-git` の「commit の書き方」で commit し、commit hash を root に返す。push はしない
+- push・PR・merge: root から指示された操作だけを行い、結果（PR の URL・merge commit）を root に返す。PR は push してから、`skill://kstack-git` の「PR の作り方」の書き方で `gh pr create --base <default branch>` により作る（本文は変更したファイル・確認結果・引き継ぎ prompt との差分。`.github/pull_request_template.md` があれば従う）。merge を指示されたら、draft なら `gh pr ready <PR の URL>` し、`gh pr checks <PR の URL> --watch` で CI を待ち、`gh pr view <PR の URL> --json reviewDecision,mergeStateStatus` で required review の approve がそろい merge できる状態かを確かめてから、`gh pr merge <PR の URL> --squash`（repo が squash を許していなければ、許されている方法）で merge する。approve がそろっていない・merge できない状態なら merge せずに root に返す（`--admin` などで branch protection を迂回しない）。CI が落ちたら直さずに、原因と修正案を root に返す
 ```
 
 ## 子とのやり取り
@@ -91,15 +92,16 @@ herdr agent prompt ho-<feature>-<task> "$(cat /tmp/ho-<feature>-<task>.md)" --wa
 - **開始の報告** — 子の full Session ID を task・worktree・branch とともに todo に記録する。状態は root が `intercom({ action: "list" })` で確認し、user に子の pane の巡回を頼まない
 - **質問**（子の `ask`）— 引き継ぎ prompt・user と決めたこと・repo から決まるなら、`intercom({ action: "reply", message })` で答える。要件・インターフェース・対象外の判断のように user にしか決められないことは、ask tool で user に聞いてから reply する。決まったことは、後から起動する子の引き継ぎ prompt にも書き足し、同じことを聞かずに済むようにする。子の ask が 10 分で timeout した後の reply も、子に届いて次の turn を始める。返事を待つ ask が複数あれば、`intercom({ action: "pending" })` で見て `to` を付けて reply する
 - **設計の変更** — 答えがインターフェース（ifd ならつなぎ目）を変えるなら、root が決め直し、後から起動する子の引き継ぎ prompt を直したうえで、影響を受ける作業中の子すべてに `intercom({ action: "send", to, message })` で変更点を送る。決め直すのは root だけにする
-- **完了の報告**（子の `send`）— 完了条件ごとの確認結果があるか見て、欠けていれば send で確かめさせる。そろっていたら、root が子の worktree の cwd・未コミット差分（`review_args=()`）・検証結果を `skill://kstack-review-request` に渡して user に review を依頼する。依頼を子に任せない。turn を終えて待つ間も、ほかの子の message には応えられる。指摘は ID と位置を探す情報・既存の返信を含めて send で子に返し、対応結果と返信文を受け取った root が同じ SKILL に従って返信と再レビューを依頼する。その SKILL から承認結果を受け取ったタスクだけを統合へ進める
+- **完了の報告**（子の `send`）— 完了条件ごとの確認結果があるか見て、欠けていれば send で確かめさせる。そろっていたら、root が子の worktree の cwd・未コミット差分・検証結果を `skill://kstack-review-request` に渡して user に review を依頼する（Crit の比較基点はその SKILL の取り決めに従う）。依頼を子に任せない。turn を終えて待つ間も、ほかの子の message には応えられる。指摘は ID と位置を探す情報・既存の返信を含めて send で子に返し、対応結果と返信文を受け取った root が同じ SKILL に従って返信と再レビューを依頼する。その SKILL から承認結果を受け取ったタスクだけを統合へ進める
 - **様子を見る** — user に状況を聞かれたら、`intercom({ action: "list" })` で子の状態と herdr の場所を見る。報告が無いまま止まっている子は、`herdr agent read ho-<feature>-<task> --source recent-unwrapped --lines 80` で画面を読み、send で報告を求める。herdr で `blocked` の子は ask tool を開いているので、画面の質問を読み、`herdr agent send-keys ho-<feature>-<task> esc` で閉じてから（子の turn も終わる）答えを send する
 
 ## 統合
 
 user が承認したタスクごとに、次を順に行う。
 
-1. `intercom({ action: "ask", to: "ho-<feature>-<task>", message: "user が承認しました。commit・push・PR 作成・CI 待ちをして merge し、結果を reply してください" })` で、子に統合させる
-2. merge したと返ったら、root の checkout を merge 後の default branch に進め、片付ける
+1. `intercom({ action: "ask", to: "ho-<feature>-<task>", message: "user が review を承認しました。担当の変更を commit し、commit hash を reply してください。push はしないでください" })` で、子に commit させる
+2. push・PR 作成・merge のどれを行うかを ask tool で user に確かめる。review の承認から推測しない。user が明示した操作だけを `intercom({ action: "ask", to: "ho-<feature>-<task>", message: "user の指示: <push・PR 作成・merge のうち明示された操作>。結果を reply してください" })` で子に指示する。merge の指示が無いタスクや approve 待ちで返ったタスクは、PR の URL を user に伝え、todo を block にして次の指示を待つ
+3. merge したと返ったら、root の checkout を merge 後の default branch に進め、片付ける
 
 ```bash
 git -C <root の checkout> fetch --prune origin
@@ -111,7 +113,7 @@ wt -C <root の checkout> remove ho/<feature>/<task> --foreground
 rm -f /tmp/ho-<feature>-<task>.md
 ```
 
-- 子が merge できなかったら（CI の失敗・衝突・branch protection など）、子が返した理由を user に伝えて止まる。CI を通す修正は承認後の未 review の変更なので、直すかどうかと再 review の要否を user に聞く
+- 子が merge できなかったら（CI の失敗・衝突・required review の approve 不足・branch protection など）、子が返した理由を user に伝えて止まる。CI を通す修正は承認後の未 review の変更なので、直すかどうかと再 review の要否を user に聞く
 - 並列の root は、repo 本体の workspace の tab で同じ checkout を共有する。`rebase --autostash` で進めるとほかの root の手元の変更まで stash に巻き込むので、`merge --ff-only` で進め、branch の切り替えも stash もしない。`merge --ff-only` が失敗したら、理由を user に伝えて止まる
 - `wt remove` は、branch の中身が default branch に入っていれば（squash merge でも）branch も消す。branch が残ったら、`gh pr view <PR の URL> --json state` で merge 済みかを確かめて user に報告する
 - remote の branch は、merge 後に自動で消す設定の repo なら GitHub が消す。残っていれば `git -C <root の checkout> push origin --delete ho/<feature>/<task>` で消す

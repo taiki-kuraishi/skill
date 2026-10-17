@@ -34,7 +34,7 @@ root は repo 本体の checkout（linked worktree ではない）の default br
 
    なぜ: チャットに並べた問いは、user が一部にしか答えなくても turn が進み、答えの漏れと催促が往復を増やす。質問 tool なら全問に答えるまで先へ進まない。
 
-5. **引き継いで監督する** — 切り出した項目はフェーズごとの todo に置き換える。root の `intercom({ action: "status" })` が `Connected: Yes` であることを確かめ、`Session ID` を控える。接続できなければ root で user に必要な設定を伝えて止まり、子へ窓口を移さない。今回のフェーズだけを、作業場所と root の連絡先を埋めた引き継ぎ prompt で始め、フェーズが複数なら並列に始めると添える。herdr の中（`HERDR_ENV=1`）なら、`skill://kstack-handoff` で子を起動し、質問・user review・PR の merge まで root が管理する。それ以外は「[手動で引き継ぐ](references/manual-handoff.md)」に従い、user が子を起動した後も root が報告と質問を受け、`skill://kstack-review-request` で user review を依頼する。子の状況は root が確認し、user に子の pane の巡回や報告の転送を頼まない。子から既存パターンから外れる実装の承認を求められたら、root は自分で決めずに user に聞き、結論を子に返す。今回のフェーズがすべて merge されたら、一覧に残りがあれば手順 2 に戻り、無ければ終わる。完了条件: 今回のフェーズの承認と明示許可された統合が確認できている。許可待ち・未統合のフェーズがあれば root に待ちの状態を残す
+5. **引き継いで監督する** — 切り出した項目はフェーズごとの todo に置き換える。root の `intercom({ action: "status" })` が `Connected: Yes` であることを確かめ、`Session ID` を控える。接続できなければ root で user に必要な設定を伝えて止まり、子へ窓口を移さない。今回のフェーズだけを、作業場所と root の連絡先を埋めた引き継ぎ prompt で始め、フェーズが複数なら並列に始めると添える。herdr の中（`HERDR_ENV=1`）なら、`skill://kstack-handoff` で子を起動し、質問・user review・承認後の commit と、user が明示した push・PR・merge まで root が管理する。それ以外は「[手動で引き継ぐ](references/manual-handoff.md)」に従い、user が子を起動した後も root が報告と質問を受け、`skill://kstack-review-request` で user review を依頼する。子の状況は root が確認し、user に子の pane の巡回や報告の転送を頼まない。子から既存パターンから外れる実装の承認を求められたら、root は自分で決めずに user に聞き、結論を子に返す。今回のフェーズがすべて merge されたら、一覧に残りがあれば手順 2 に戻り、無ければ終わる。完了条件: 今回のフェーズの承認と明示許可された統合が確認できている。許可待ち・未統合のフェーズがあれば root に待ちの状態を残す
 
 ## フェーズ案
 
@@ -139,7 +139,8 @@ Good: 表示は型だけを前提に API と同じ回で並列にし、接続だ
 - 完了条件を満たしたら、最初の報告の前に 1 回だけ、`kstack-skill-review` を使う subagent、`kstack-drift-review` を使う subagent、`ponytail-review` を使う subagent に、並行して担当ファイルだけをレビューさせる。drift-review にはつなぎ目の全文も渡す（ほかのフェーズの担当ファイルはまだ無くてよい）。`ponytail-review` が環境に入っていなければ、代わりに review せず、入っていないことを報告に書く。subagent には直させず、指摘はあなたが直し、直した後も完了条件を満たすことを確かめる。つなぎ目か担当外のファイルを変えないと直せない指摘と、ponytail-review の指摘のうち決めたことを削る・既存パターンから外れる修正になるものは、直さずに報告する。報告の後に届く review の指摘を直すときは、この 3 つのレビューを回し直さず、完了条件だけ確かめて報告する
 - 最後に、フェーズ N・cwd・branch・変更したファイル・完了条件ごとの確認コマンドと結果・skill-review と drift-review と ponytail-review で直した指摘と直さなかった指摘（理由付き）・つなぎ目との差分を、intercom の `send` で root に報告して turn を終える
 - user review の依頼・指摘への返信・再依頼と、review の開始・終了は root に任せ、user に直接 review を頼まない。user がこの pane で review を頼んだ場合も root に連絡して窓口をそろえる。root から届いた指摘を直して再検証し、指摘ごとの対応結果と返信文を intercom の `send` で root に返して待つ
-- Git 操作は、user が明示した許可と範囲を root から受け取ったときだけ行う。許可された対象 branch と操作（commit・push・PR・merge など）を自分の worktree で実行し、commit hash・PR の merge commit などの結果を intercom の `send` で root に報告する。許可が無い間は commit しない。review の承認から Git の許可を推測しない
+- commit: user review の承認が root から届くまでは commit しない。承認が届いたら、担当の変更だけを `skill://kstack-git` の「commit の書き方」で自分の worktree の branch に commit し、commit hash を intercom の `send` で root に報告する（承認を commit の許可とみなす）
+- push・PR・merge は、user が明示した許可と範囲を root から受け取ったときだけ行う。PR は `skill://kstack-git` の「PR の作り方」で作り、PR の URL・merge commit などの結果を intercom の `send` で root に報告する。merge を許可されても、`gh pr view <PR の URL> --json reviewDecision,mergeStateStatus` で required review の approve がそろっていなければ merge せずに root に報告する（branch protection を迂回しない）。review の承認から push・PR・merge の許可を推測しない
 ```
 
 子に止めて root に報告させるのは、つなぎ目は user と合意済みで後のフェーズの前提になり、担当外のファイルは同じ回の別の子が触りうるから。つなぎ目から来る規約の指摘を子に直させないのも同じ理由で、直すかどうかは root が決める。既存パターンから外れる実装を書く前に止めさせるのは、書き上がった後の報告では user が作り直しの手間を見て判断を曲げやすく、承認されないまま merge されたずれを後のフェーズの子が前例として写すから。連絡先と review の窓口を prompt に書くのは、子がこの SKILL を読まないから。報告は起動方式によらず intercom で root に直接届く。root がつなぎ目を直して手順 4 で user と合意し直し、影響するフェーズの引き継ぎ prompt を出し直す。
