@@ -60,7 +60,7 @@ root が会話・判断・すべての編集を持ち、subagent は判断材料
    - 指摘は同じフェーズ内で root が修正し、gate に戻る。手順 5 の review は回し直さない（1 フェーズに 1 回）。修正で挙動が変わり得るなら、検証を subagent に出し直し、証拠を修正後の状態にそろえる。
    - 承認後、現在のフェーズに属する変更だけを stage し（開始前からある差分は含めない）、`skill://kstack-git` の「commit の書き方」で commit する。branch が default branch なら、最初の commit の前に `skill://kstack-git` の「PR の作り方」の手順 1 と同じ形で topic branch を切る。commit してから現在の todo を完了し、手順 3 に戻って次のフェーズを切り出す。一覧に残りが無ければ終わる。
 
-フェーズの commit は手順 6 の承認後に root が行う（承認を commit の許可とみなす）。次のフェーズの review に承認済みの差分を混ぜないため。push・PR・merge はこの Workflow の外に置き、承認から許可を推測せず、別の明示指示に従う。
+フェーズの commit は手順 6 の承認後に root が行う（承認を commit の許可とみなす）。次のフェーズの review に承認済みの差分を混ぜないため。push・PR・merge はこの Workflow の外に置き、承認から許可を推測せず、別の明示指示に従う（PR と merge は `skill://kstack-git` の「PR の作り方」「PR を merge する」に従う）。
 
 ## 既存パターンから外れる実装
 

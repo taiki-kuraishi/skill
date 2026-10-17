@@ -82,7 +82,7 @@ herdr agent prompt ho-<feature>-<task> "$(cat /tmp/ho-<feature>-<task>.md)" --wa
 - user review: root が user に依頼し、レビュー手順を管理する。あなたは user に直接 review を頼まず、開始・指摘への返信・再依頼・終了も root に任せる。user がこの pane で review を頼んだ場合も root に連絡して窓口をそろえる
 - review の指摘が root から届いたら、直して検証し（commit・push はしない）、指摘の ID ごとの対応結果と返信文を root に send する。引き継ぎ prompt に skill-review・drift-review・ponytail-review の指示があっても、ここでは回し直さない
 - commit: root から user の承認を伝えられたら、担当の変更だけを `skill://kstack-git` の「commit の書き方」で commit し、commit hash を root に返す。push はしない
-- push・PR・merge: root から指示された操作だけを行い、結果（PR の URL・merge commit）を root に返す。PR は push してから、`skill://kstack-git` の「PR の作り方」の書き方で `gh pr create --base <default branch>` により作る（本文は変更したファイル・確認結果・引き継ぎ prompt との差分。`.github/pull_request_template.md` があれば従う）。merge を指示されたら、draft なら `gh pr ready <PR の URL>` し、`gh pr checks <PR の URL> --watch` で CI を待ち、`gh pr view <PR の URL> --json reviewDecision,mergeStateStatus` で required review の approve がそろい merge できる状態かを確かめてから、`gh pr merge <PR の URL> --squash`（repo が squash を許していなければ、許されている方法）で merge する。approve がそろっていない・merge できない状態なら merge せずに root に返す（`--admin` などで branch protection を迂回しない）。CI が落ちたら直さずに、原因と修正案を root に返す
+- push・PR・merge: root から指示された操作だけを行い、結果（PR の URL・merge commit）を root に返す。PR は push してから、`skill://kstack-git` の「PR の作り方」の書き方で `gh pr create --base <default branch>` により作る（本文は変更したファイル・確認結果・引き継ぎ prompt との差分。`.github/pull_request_template.md` があれば従う）。PR を作っただけでは merge しない。merge を指示されたら、`skill://kstack-git` の「PR を merge する」に従って CI と approve を確かめてから merge し、そろっていなければ merge せずに root に返す
 ```
 
 ## 子とのやり取り

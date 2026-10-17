@@ -46,7 +46,7 @@ ifd が今回の回として合意したフェーズだけを、1 フェーズ 1
 
 1. **commit させる** — 承認が出たら、root が子に承認を `send` する。子は担当の変更だけを `skill://kstack-git` の「commit の書き方」で自分の worktree の branch に commit し、commit hash を root に報告する
 2. **許可を確かめて子に渡す** — root が user から明示された push・PR・merge の範囲を確かめ、足りない操作だけ許可を求める。許可された操作と対象 branch を子に `send` する。子は自分の worktree でその範囲だけを実行し（PR は `skill://kstack-git` の「PR の作り方」で作る）、PR の URL や merge commit など、統合先を確認できる結果を root に報告する
-3. **統合する** — ローカル統合を許可された場合、子が作った commit を root の checkout で `git merge --ff-only ho/<feature>/<task>` により取り込む（root は commit を作らない）。PR 経由なら許可範囲で子に merge させ、root は default branch の checkout を `pull --ff-only` で進める。失敗したら root で止まり、reset や force push に切り替えない
+3. **統合する** — ローカル統合を許可された場合、子が作った commit を root の checkout で `git merge --ff-only ho/<feature>/<task>` により取り込む（root は commit を作らない）。PR 経由なら、user が merge を指示したときだけ子に merge させ（子は `skill://kstack-git` の「PR を merge する」に従う）、root は default branch の checkout を `pull --ff-only` で進める。失敗したら root で止まり、reset や force push に切り替えない
 4. **証拠を確かめる** — root が read-only の VCS 確認で、報告された統合 commit が default branch の HEAD に含まれることを確かめる。確認後だけ統合済みとして記録する。今回のフェーズがすべて統合済みなら ifd の手順 2 に戻り、一覧の残りから次の回を設計・合意してから渡す
 5. **待ちを残す** — 許可が無い、統合できない、証拠が無いフェーズは root の todo を block にして user に伝える。未統合のフェーズを前提にする次のフェーズは始めない。手動起動された子 session と worktree は自動で停止・削除せず、完了報告に残存一覧を添える
 

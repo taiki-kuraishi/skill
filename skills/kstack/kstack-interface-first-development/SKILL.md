@@ -140,7 +140,7 @@ Good: 表示は型だけを前提に API と同じ回で並列にし、接続だ
 - 最後に、フェーズ N・cwd・branch・変更したファイル・完了条件ごとの確認コマンドと結果・skill-review と drift-review と ponytail-review で直した指摘と直さなかった指摘（理由付き）・つなぎ目との差分を、intercom の `send` で root に報告して turn を終える
 - user review の依頼・指摘への返信・再依頼と、review の開始・終了は root に任せ、user に直接 review を頼まない。user がこの pane で review を頼んだ場合も root に連絡して窓口をそろえる。root から届いた指摘を直して再検証し、指摘ごとの対応結果と返信文を intercom の `send` で root に返して待つ
 - commit: user review の承認が root から届くまでは commit しない。承認が届いたら、担当の変更だけを `skill://kstack-git` の「commit の書き方」で自分の worktree の branch に commit し、commit hash を intercom の `send` で root に報告する（承認を commit の許可とみなす）
-- push・PR・merge は、user が明示した許可と範囲を root から受け取ったときだけ行う。PR は `skill://kstack-git` の「PR の作り方」で作り、PR の URL・merge commit などの結果を intercom の `send` で root に報告する。merge を許可されても、`gh pr view <PR の URL> --json reviewDecision,mergeStateStatus` で required review の approve がそろっていなければ merge せずに root に報告する（branch protection を迂回しない）。review の承認から push・PR・merge の許可を推測しない
+- push・PR・merge は、user が明示した許可と範囲を root から受け取ったときだけ行う。PR は `skill://kstack-git` の「PR の作り方」で作り、PR を作っただけでは merge しない。merge を許可されたら `skill://kstack-git` の「PR を merge する」に従い、CI と approve がそろっていなければ merge せずに root に報告する。PR の URL・merge commit などの結果は intercom の `send` で root に報告する。review の承認から push・PR・merge の許可を推測しない
 ```
 
 子に止めて root に報告させるのは、つなぎ目は user と合意済みで後のフェーズの前提になり、担当外のファイルは同じ回の別の子が触りうるから。つなぎ目から来る規約の指摘を子に直させないのも同じ理由で、直すかどうかは root が決める。既存パターンから外れる実装を書く前に止めさせるのは、書き上がった後の報告では user が作り直しの手間を見て判断を曲げやすく、承認されないまま merge されたずれを後のフェーズの子が前例として写すから。連絡先と review の窓口を prompt に書くのは、子がこの SKILL を読まないから。報告は起動方式によらず intercom で root に直接届く。root がつなぎ目を直して手順 4 で user と合意し直し、影響するフェーズの引き継ぎ prompt を出し直す。
