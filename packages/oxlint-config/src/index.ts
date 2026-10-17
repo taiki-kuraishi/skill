@@ -3,6 +3,8 @@ import type { OxlintConfig } from "oxlint";
 export const typescript = {
   jsPlugins: ["@taiki-kuraishi/oxlint-config/plugin"],
   rules: {
+    // 利用側が categories.restriction を有効にしても、this を使わない private method などを指させない
+    "class-methods-use-this": "off",
     "no-ternary": "error",
     "kstack/blank-line-before-if": "error",
     "kstack/no-conditional-spread": "error",
