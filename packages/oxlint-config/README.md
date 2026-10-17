@@ -25,6 +25,8 @@ export する設定は SKILL の名前から `kstack-` を除いた名前にす�
 
 規約ではないが、`class-methods-use-this` を `"off"` にする。利用側が `categories: { restriction: "error" }` で有効にしても、`this` を使わない private method（kstack-layerd-architecture の「class 専用の処理は private method にする」の形）などを指させないため。extends した設定の `"off"` は利用側の `categories` より優先される。
 
+規約ではないが、`unicorn/throw-new-error` も `"off"` にする。kstack-better-result のエラー定義 `class UserNotFoundError extends TaggedError("UserNotFoundError")<{ ... }>() {}` は、名前が `Error` で終わる関数を `new` 無しで呼ぶので、利用側が `plugins` に `unicorn` を入れて `categories: { style: "error" }` で有効にすると `TaggedError("UserNotFoundError")` が指される（oxlint の実装は `throw` の中に限らず、`Error` で終わる名前の呼び出しをすべて指す）。`TaggedError` は `new` で呼ぶものではないので、この指摘は直せない。
+
 ### kstack-layerd-architecture（`layerdArchitecture`）
 
 「use case の処理は step 番号付きの doc と step コメントで書く」で入った規約だけを載せる。`kstack/use-case-steps` は、class 名が `UseCase` で終わり、本体を持つ `execute` を持つ class だけを見る。
