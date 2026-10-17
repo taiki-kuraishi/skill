@@ -1,6 +1,6 @@
 ---
 name: kstack-testing
-description: テストコードを書く・修正する・レビューするときの規約。spec ファイルやテスト関数を扱う場面すべてで使用すること — テスト本体に Arrange / Act / Assert のコメントを付ける構造化、テストデータを seed スクリプトや共有 fixture ではなく各テストケースの Arrange で作り、beforeEach / afterEach で DB を毎回まっさらに戻す方針など。テストの新規作成、修正、DB を使うテストの準備、レビュー指摘への対応でも発火させる。
+description: テストコードを書く・修正する・レビューするときの規約。spec ファイルやテスト関数を扱う場面すべてで使用すること — テスト本体に Arrange / Act / Assert のコメントを付ける構造化、テストデータを seed スクリプトや共有 fixture ではなく各テストケースの Arrange で作り、beforeEach / afterEach で DB を毎回まっさらに戻す方針、テストケースの選び方（正常系 1 件と use case / HTTP 応答の振る舞いごとに 1 件、入力 validation のテストは書かない）、行われないこと（呼ばれない・insert されない・ログが出ない）を assert しない方針など。テストの新規作成、修正、ケースの追加・削減、DB を使うテストの準備、レビュー指摘への対応でも発火させる。
 ---
 
 # kstack-testing
@@ -68,3 +68,38 @@ it("admin can open settings", async () => {
 ```
 
 なぜ: 前提データがテストの中に書かれていれば、そのテストだけ読めば何を検証しているか分かり、seed を変えたら無関係なテストが落ちるといった隠れた結合も生まれない。毎回空の DB から始めることで、実行順や並列実行に左右されずテストが独立する。
+
+## テストケースは正常系 1 件と、振る舞いごとに 1 件にする
+
+正常系を 1 件書き、use case 層や HTTP 応答の振る舞い（エラー時の応答など）を 1 つにつき 1 件書く。入力 validation（schema で弾かれる値）のテストは書かない。
+
+```ts
+// Bad: schema が弾く値を並べて validation を確かめる
+it.each([{ pageSize: 5 }, { sortKey: "unknown" }])("rejects %o", async (args) => {
+  const result = await client.callTool({ name: "search", arguments: args });
+  expect(result.isError).toBe(true);
+});
+
+// Good: 正常系 1 件と、エラー応答という振る舞い 1 件
+it("returns search results", async () => { /* ... */ });
+it("returns an error when the upstream request fails", async () => { /* ... */ });
+```
+
+なぜ: validation は schema やライブラリの宣言そのものが仕様で、テストは宣言の写しになり保守コストだけが増える。振る舞いごとに 1 件にすると、どのテストが何を守っているかが名前から分かる。
+
+## 行われないことを assert しない
+
+「呼ばれない」「他の行に insert されない」「ログが出ない」のような、起きないことを assert しない。起きたこと（戻り値、保存された行、出たログ）を assert する。
+
+```ts
+// Bad: 正常系で、エラーログが出ないこと・他 user の行が無いことを assert する
+expect(consoleErrors).toStrictEqual([]);
+expect(await findPosts(otherUser.id)).toStrictEqual([]);
+expect(fetchMock).not.toHaveBeenCalled();
+
+// Good: 起きたことだけを assert する（エラー時のテストではログの中身を見る）
+expect(await findPosts(user.id)).toStrictEqual([post]);
+expect(consoleErrors).toStrictEqual([error]);
+```
+
+なぜ: 起きないことは無数にあり、どれを選ぶかに根拠が無い。実装を変えても落ちないテストになりやすく、守っている振る舞いが読み取れない。

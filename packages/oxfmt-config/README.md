@@ -38,3 +38,7 @@ oxfmt で表せる規約は無い。`.gitignore` は oxfmt の整形対象では
 ### kstack-rest-api
 
 oxfmt で表せる規約は無い。整形の選択肢しか持たず、route が返すリソースの範囲、URL の形、request の値をどこで変換するかは決められない（3 規約の Bad / Good に `oxfmt --check` は差分を出さない）。
+
+### kstack-testing
+
+oxfmt で表せる規約は無い。整形の選択肢しか持たず、Arrange / Act / Assert のコメントの有無、テストデータをどこで作るか、テストの本数と assert に何を書くかは決められない（5 規約の Bad / Good に `oxfmt --check` は差分を出さない）。
