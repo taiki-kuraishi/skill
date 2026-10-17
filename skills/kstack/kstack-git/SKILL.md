@@ -1,11 +1,11 @@
 ---
 name: kstack-git
-description: Git の規約。.gitignore など git の設定ファイルを書く・修正する・レビューするときと、commit・PR を作るときに使う。.gitignore を repo root に 1 つだけ置き、サブディレクトリの除外パターンも root の .gitignore に書くこと、commit message（英語 1 行・prefix・gitmoji）と stage する範囲、PR の branch・title・body・draft・assignee を扱う。Terraform・Node.js などの stack や package を足して除外したいファイル（.terraform/、state、build 成果物、node_modules など）が増えたとき、サブディレクトリに .gitignore を作りたくなったとき、ツールが .gitignore を生成したとき、変更を commit するとき、PR を作成するとき、開発フローのフェーズ承認後に commit するとき、レビュー指摘への対応でも発火させる。
+description: Git の規約。.gitignore など git の設定ファイルを書く・修正する・レビューするときと、commit・PR を作る・PR を merge するときに使う。.gitignore を repo root に 1 つだけ置き、サブディレクトリの除外パターンも root の .gitignore に書くこと、commit message（英語 1 行・prefix・gitmoji）と stage する範囲、PR の branch・title・body・draft・assignee、merge は user の明示の指示を待ち CI と approve を確かめてから行うことを扱う。Terraform・Node.js などの stack や package を足して除外したいファイル（.terraform/、state、build 成果物、node_modules など）が増えたとき、サブディレクトリに .gitignore を作りたくなったとき、ツールが .gitignore を生成したとき、変更を commit するとき、PR を作成するとき、PR を merge するか迷ったとき・merge を指示されたとき、開発フローのフェーズ承認後に commit するとき、レビュー指摘への対応でも発火させる。
 ---
 
 # kstack-git
 
-[Git](https://git-scm.com/docs/gitignore) の設定ファイルと、commit・PR の作り方の規約。理由を理解した上で適用すること。
+[Git](https://git-scm.com/docs/gitignore) の設定ファイルと、commit・PR の作り方と merge の規約。理由を理解した上で適用すること。
 
 ## .gitignore は repo root に 1 つだけ置く
 
@@ -53,3 +53,19 @@ Good: git add skills/kstack/kstack-git/SKILL.md && git commit -m "📝 docs: add
 7. ずれがあれば、作った agent が直し、直した後にもう一度 subagent に確かめさせる。title・body・assignee は `gh pr edit <URL>`、draft のずれは `gh pr ready <URL>`（ready にする）か `gh pr ready <URL> --undo`（draft に戻す）で直す。subagent には PR を編集させない
 
 なぜ: draft で作ると、CI と自分の確認が済む前に review を頼まずに済む。default branch で直接 commit しないので、PR の差分が topic branch に閉じる。agent は `gh pr create` の引数や template を取りこぼしやすく、作った本人は自分の書いた本文の漏れに気づきにくいので、別の subagent に確かめさせる。commit・PR の作成は、文脈を持つ作業した agent が行い、subagent は確認だけをする。作成を subagent に任せない。
+
+## PR を merge する
+
+PR を作った後は merge しない。merge するかどうかとそのタイミングは user に聞き、明示の指示があってから行う（root の配下の子は、user の指示を root から受け取ったときだけ行う）。
+
+1. draft なら `gh pr ready <URL>` で ready にする
+2. `gh pr checks <URL> --watch` で CI が通ることを確かめる。落ちたら直さずに、原因と修正案を指示した相手に伝える
+3. `gh pr view <URL> --json reviewDecision,mergeStateStatus` で、required review の approve がそろい（`reviewDecision` が `REVIEW_REQUIRED`・`CHANGES_REQUESTED` でない）、merge できる状態（`mergeStateStatus` が `CLEAN` など）かを確かめる
+4. そろっていれば `gh pr merge <URL> --squash`（repo が squash を許していなければ、許されている方法）で merge し、PR の URL と merge commit を伝える。そろっていなければ merge せず、PR の URL・`reviewDecision`・`mergeStateStatus` を伝える。`--admin` などで branch protection を迂回しない
+
+```text
+Bad: user review が承認された / PR を作ってと言われた → そのまま gh pr merge
+Good: PR の URL を伝えて merge の指示を待ち、指示が来たら CI と approve を確かめてから merge
+```
+
+なぜ: repo によっては merge の前に approve が要る。review の承認や PR 作成の指示は merge の許可ではなく、確かめずに merge すると branch protection を迂回するか、user が merge のタイミングを選べなくなる。
