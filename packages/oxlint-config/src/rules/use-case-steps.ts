@@ -6,7 +6,7 @@ import { propertyNameOf } from "./query-hooks.ts";
 const useCaseClassSuffix = "UseCase";
 
 const docStepPattern = /^(\d+)\.\s*(.+)$/;
-const bodyStepPattern = /^step(\d+):\s*(.+)$/;
+const bodyStepPattern = /^Step (\d+):\s*(.+)$/;
 
 /** 本体を持つ `execute` の method / property。宣言だけの overload は doc も step も書けないので対象外 */
 const executeMemberOf = (node: ESTree.Class) => {
@@ -52,7 +52,7 @@ const parseDocOf = (comment: ESTree.Comment) => {
   return { summary, steps };
 };
 
-/** execute の中の `// stepN: ...` コメントを本文の順に返す */
+/** execute の中の `// Step N: ...` コメントを本文の順に返す */
 const bodyStepsOf = ({
   comments,
   member,
@@ -92,8 +92,8 @@ export const useCaseSteps = defineRule({
       missingSteps: "doc comment に処理の流れを番号付きで並べる（`1. ...` の形）。",
       missingSummary: "doc comment の番号付き step の前に、何を処理するかの 1 行を書く。",
       missingBodyStep:
-        "doc の step{{number}} に対応する `// step{{number}}: ...` を、本文の step の先頭に doc と同じ文言で書く。",
-      mismatch: "本文の `// stepN:` は doc の step と番号・文言を揃える。",
+        "doc の step {{number}} に対応する `// Step {{number}}: ...` を、本文の step の先頭に doc と同じ文言で書く。",
+      mismatch: "本文の `// Step N:` は doc の step と番号・文言を揃える。",
       missingBlankLine: "step の間は空行で区切る。",
     },
   },

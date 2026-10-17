@@ -1,6 +1,6 @@
 ---
 name: kstack-typescript
-description: TypeScript コードを書く・修正する・レビューするときの規約。ts ファイルや TypeScript の関数を扱う場面すべてで使用すること — return 型アノテーションやそのためだけの interface・type を書かず導出に任せること、else を使わない早期 return、if の前の空行など。コード生成、リファクタリング、バグ修正、レビュー指摘への対応でも発火させる。
+description: TypeScript コードを書く・修正する・レビューするときの規約。ts ファイルや TypeScript の関数・class を扱う場面すべてで使用すること — return 型アノテーションやそのためだけの interface・type を書かず導出に任せること、else を使わない早期 return、if の前の空行、型の絞り込みのためだけに this のプロパティを分割代入しないこと、class でしか使わない関数を private method にすること、class・error・定数・型が同居するファイルをディレクトリに分けて index.ts から export することなど。コード生成、リファクタリング、ファイル分割、バグ修正、レビュー指摘への対応でも発火させる。
 disable-model-invocation: false
 ---
 
@@ -180,3 +180,76 @@ class Api {
 ```
 
 なぜ: constructor で作れば生成と依存関係が class の先頭に集まり、各メソッドは使うことに集中できる。メソッドごとの呼び出しヘルパーは重複を生み、そのヘルパーの存在理由を読み手に考えさせる。
+
+## 型の絞り込みのためだけに this のプロパティを分割代入しない
+
+`this` のプロパティは、変数に移さずにそのまま `if` で絞り込む。
+
+```ts
+// Bad: 絞り込むためだけに、this のプロパティを別名の変数に移している
+public received(text: string) {
+  const { session } = this;
+
+  if (session === null) {
+    return [];
+  }
+  return this.handle({ session, text });
+}
+
+// Good: this のプロパティを直接絞り込む
+public received(text: string) {
+  if (this.session === null) {
+    return [];
+  }
+  return this.handle({ session: this.session, text });
+}
+```
+
+なぜ: TypeScript は `this.session` のようなプロパティの参照も `if` で絞り込めるので、分割代入は同じ値の別名を増やすだけになる。読み手は別名と `this` のどちらを読むべきか、途中で食い違わないかを追わされる。
+
+## class でしか使わない関数は private method にする
+
+1 つの class からしか呼ばない関数は、モジュール直下に置かず、その class の private method にする。`this` を使わない処理でも同じ。定数はモジュール直下に置いてよい。
+
+```ts
+// Bad: class でしか使わない関数がモジュール直下に浮いている
+const buildUrl = (args: { base: string; version: number }) => `${args.base}?v=${args.version}`;
+
+export class Client {
+  public connect() {
+    return buildUrl({ base: this.base, version: 10 });
+  }
+}
+
+// Good: private method にする
+export class Client {
+  public connect() {
+    return this.buildUrl({ base: this.base, version: 10 });
+  }
+
+  private buildUrl(args: { base: string; version: number }) {
+    return `${args.base}?v=${args.version}`;
+  }
+}
+```
+
+なぜ: private method なら、誰がその処理を使うかをアクセス修飾子で読め、モジュール直下の関数のように他のファイルから import されて依存が広がることもない。`this` を使わないことは、class の外に置く理由にならない。
+
+## class・error・定数・型が同居するファイルはディレクトリに分ける
+
+1 つのファイルに class と error・定数・型が同居するなら、`<name>.ts` を `<name>/` ディレクトリに変え、種類ごとのファイル（`errors.ts`・`constants.ts`・`types.ts`・class の `<name>.ts`）に分ける。ディレクトリの外に出すものだけを `<name>/index.ts` から export する。関数と対応表だけのように、責務が 1 つで error も型も持たないファイルは分けない。
+
+```text
+// Bad: error・定数・型・class が 1 ファイルにあり、何を外に出すかは散らばった export から読むしかない
+src/client.ts
+
+// Good: 種類ごとに分け、外に出すものは index.ts に集める
+src/client/
+  index.ts       // export { Client } from "./client";
+  client.ts
+  errors.ts
+  constants.ts
+  types.ts
+```
+
+なぜ: 種類ごとにファイルがあれば、error や定数を探すときに class の実装を読み進めずに済む。index.ts を外への唯一の出口にすると、ディレクトリ内の型や定数が外から直接 import されず、何が公開されているかを 1 ファイルで読める。

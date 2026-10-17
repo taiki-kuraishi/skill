@@ -19,13 +19,13 @@ ruleTester.run("use-case-steps", useCaseSteps, {
    */
   public execute = (args: { userId: string }) =>
     Result.gen(async function* () {
-      // step1: user を取り出す
+      // Step 1: user を取り出す
       const user = yield* await this.deps.users.findById(args);
 
-      // step2: 取り出した user で、決済サービスに請求書を作る
+      // Step 2: 取り出した user で、決済サービスに請求書を作る
       const invoice = yield* await this.deps.billing.createInvoice({ user });
 
-      // step3: 作った請求書を保存して return する
+      // Step 3: 作った請求書を保存して return する
       return this.deps.invoices.insert({ invoice });
     }, this);
 }`,
@@ -51,22 +51,22 @@ ruleTester.run("use-case-steps", useCaseSteps, {
    * 2. 読んだ user を返す
    */
   public execute(args: { userId: string }) {
-    // step1: 保存済みの user を読む
+    // Step 1: 保存済みの user を読む
     const user = this.users.findById(args);
 
-    // step2: 読んだ user を返す
+    // Step 2: 読んだ user を返す
     return user;
   }
 }`,
-    // `stepN:` の形でないコメント（`step 2:` の空白入り、TODO）は step として見ない
+    // `Step N:` の形でないコメント（`Step2:` の空白なし、TODO）は step として見ない
     `class SyncUserUseCase {
   /**
    * user を同期する
    * 1. user を読む
    */
   execute = () => {
-    // step1: user を読む
-    // step 2: 保存する
+    // Step 1: user を読む
+    // Step2: 保存する
     // TODO: 保存に失敗したときの retry を書く
     return this.users.find();
   };
@@ -108,13 +108,13 @@ ruleTester.run("use-case-steps", useCaseSteps, {
    * 1. user を読む
    */
   execute = () => {
-    // step1: user を読む
+    // Step 1: user を読む
     return this.users.find();
   };
 }`,
       errors: [{ messageId: "missingSummary" }],
     },
-    // Bad: 本文の `// step2:` が doc と違う文言
+    // Bad: 本文の `// Step 2:` が doc と違う文言
     {
       code: `class SyncUserUseCase {
   /**
@@ -123,10 +123,10 @@ ruleTester.run("use-case-steps", useCaseSteps, {
    * 2. user を返す
    */
   execute = () => {
-    // step1: user を読む
+    // Step 1: user を読む
     const user = this.users.find();
 
-    // step2: 保存する
+    // Step 2: 保存する
     return user;
   };
 }`,
@@ -141,7 +141,7 @@ ruleTester.run("use-case-steps", useCaseSteps, {
    * 2. user を返す
    */
   execute = () => {
-    // step1: user を読む
+    // Step 1: user を読む
     return this.users.find();
   };
 }`,
@@ -155,10 +155,10 @@ ruleTester.run("use-case-steps", useCaseSteps, {
    * 1. user を読む
    */
   execute = () => {
-    // step1: user を読む
+    // Step 1: user を読む
     const user = this.users.find();
 
-    // step2: user を返す
+    // Step 2: user を返す
     return user;
   };
 }`,
@@ -173,9 +173,9 @@ ruleTester.run("use-case-steps", useCaseSteps, {
    * 2. user を返す
    */
   public execute() {
-    // step1: user を読む
+    // Step 1: user を読む
     const user = this.users.find();
-    // step2: user を返す
+    // Step 2: user を返す
     return user;
   }
 }`,
@@ -195,6 +195,20 @@ ruleTester.run("use-case-steps", useCaseSteps, {
         { messageId: "missingBodyStep", data: { number: 1 } },
         { messageId: "missingBodyStep", data: { number: 2 } },
       ],
+    },
+    // 旧表記の `// step1:` は step コメントとして受け入れない
+    {
+      code: `class SyncUserUseCase {
+  /**
+   * user を同期する
+   * 1. user を読む
+   */
+  execute = () => {
+    // step1: user を読む
+    return this.users.find();
+  };
+}`,
+      errors: [{ messageId: "missingBodyStep", data: { number: 1 } }],
     },
   ],
 });

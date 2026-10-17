@@ -17,7 +17,7 @@ oxfmt で表せる規約は無い。`if` の前の空行も、oxfmt が既存の
 
 ### kstack-layerd-architecture
 
-oxfmt で表せる規約は無い。step 番号付きの doc と `// stepN:` コメントは oxfmt が整形するだけで、doc と本文の対応は変えられない。doc の step の有無と本文との対応は `@taiki-kuraishi/oxlint-config` の `layerdArchitecture`（`kstack/use-case-steps`）で検出する。
+oxfmt で表せる規約は無い。step 番号付きの doc と `// Step N:` コメントは oxfmt が整形するだけで、doc と本文の対応は変えられない。doc の step の有無と本文との対応は `@taiki-kuraishi/oxlint-config` の `layerdArchitecture`（`kstack/use-case-steps`）で検出する。
 
 ### kstack-monorepo
 
@@ -29,7 +29,11 @@ oxfmt で表せる規約は無い。`.gd` は oxfmt の整形対象ではない�
 
 ### kstack-code-comment
 
-例外の列挙を広げただけで、新しい規約は無い。oxfmt の設定は作らない。
+oxfmt で表せる規約は無い。class の method と export する関数の doc と `// Step N:` コメントは、oxfmt が整形するだけで書き足せない。例外の列挙を広げた変更には、新しい規約は無い。
+
+### kstack-better-result
+
+oxfmt で表せる規約は無い。整形の選択肢しか持たず、失敗を `null` で返すか `Result` の `Err` で返すかは決められない。
 
 ### kstack-git
 
