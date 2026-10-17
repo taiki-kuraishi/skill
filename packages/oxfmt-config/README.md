@@ -42,3 +42,7 @@ oxfmt で表せる規約は無い。整形の選択肢しか持たず、route �
 ### kstack-testing
 
 oxfmt で表せる規約は無い。整形の選択肢しか持たず、Arrange / Act / Assert のコメントの有無、テストデータをどこで作るか、テストの本数と assert に何を書くかは決められない（5 規約の Bad / Good に `oxfmt --check` は差分を出さない）。
+
+### kstack-drizzle-orm
+
+oxfmt で表せる規約は無い。整形の選択肢しか持たず、子の行を誰が消すか、cascade にするかの確認、migration の SQL を読む手順は決められない。`.sql` は oxfmt の整形対象ではない（`oxfmt --check m.sql` は `Expected at least one target file` になる）。
