@@ -1,6 +1,6 @@
 ---
 name: kstack-better-result
-description: better-result ライブラリ（Result 型）を使う TypeScript コードを設計する・書く・修正するときの規約。Result.gen による generator-based 合成の書き方（yield* するステップや条件分岐ごとの空行・コメントによる区切りを含む）、Result.tryPromise / Result.try で包む処理の粒度、エラーの種類の分け方（扱いを変える失敗は返す時点で別の TaggedError にし、isXxx のような判定関数で後から分類しない）を扱う。better-result の import、Result 型のエラー処理、fallible なステップの連結、例外を投げる処理の Result 化、TaggedError の定義、エラーの種類に応じたログレベル・リトライ・レスポンスの出し分けを含むコードや設計書を書く・レビューする場面では必ず使用すること。
+description: better-result ライブラリ（Result 型）を使う TypeScript コードを設計する・書く・修正するときの規約。Result.gen による generator-based 合成の書き方（yield* するステップや条件分岐ごとの空行・コメントによる区切りを含む）、Result.tryPromise / Result.try で包む処理の粒度、エラーの種類の分け方（扱いを変える失敗は返す時点で別の TaggedError にし、isXxx のような判定関数で後から分類しない）、失敗（parse できない入力・例外）を null / undefined で返さず Result の Err で返すことを扱う。better-result の import、Result 型のエラー処理、fallible なステップの連結、例外を投げる処理や null で失敗を返す処理の Result 化、TaggedError の定義、エラーの種類に応じたログレベル・リトライ・レスポンスの出し分けを含むコードや設計書を書く・レビューする場面では必ず使用すること。
 disable-model-invocation: false
 ---
 
@@ -156,3 +156,36 @@ result.error.match({
 ```
 
 なぜ: エラーを値で返すのは、起きうる失敗を型に載せて呼び出し側に扱わせるため。後から判定すると意味が status や message の値に埋もれ、判定の呼び忘れや分類の漏れを型検査で検出できない。status の意味を知るのは client なので、分類も client で済ませる。
+
+## 失敗を null / undefined で返さず、Result の Err で返す
+
+parse できない入力や例外のような失敗は、`null` / `undefined` に潰して返さず、`Result.try` などで包んで TaggedError の `Err` で返す。呼び出し側は `isErr()` で分ける。「見つからない」のような正常な結果を `null` で返すのは対象外。
+
+```ts
+// Bad: 失敗を null に潰し、なぜ読めなかったかが呼び出し側に残らない
+private parse(text: string) {
+  try {
+    return JSON.parse(text) as Payload;
+  } catch {
+    return null;
+  }
+}
+
+// Good: 失敗を TaggedError の Err で返す
+class PayloadParseError extends TaggedError("PayloadParseError")<{ cause: unknown; message: string }>() {}
+
+private parse(text: string) {
+  return Result.try({
+    try: () => JSON.parse(text) as Payload,
+    catch: (cause) => new PayloadParseError({ cause, message: "payload を JSON として読めない" }),
+  });
+}
+
+const payload = this.parse(text);
+
+if (payload.isErr()) {
+  return this.reconnect();
+}
+```
+
+なぜ: `null` は「失敗した」ことしか伝えず、原因が消えるうえ、正常な「無い」との区別も型に残らない。`Err` で返せば失敗の種類が型に載り、`cause` から原因を辿れる。

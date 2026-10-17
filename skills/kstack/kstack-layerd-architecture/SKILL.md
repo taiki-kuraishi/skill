@@ -1,6 +1,6 @@
 ---
 name: kstack-layerd-architecture
-description: レイヤードアーキテクチャ（client / repository / use case / service / utils・libs）で TypeScript の class やファイルを書く・修正する・レビューするときの規約。各層の責務と置き場所の判断、層のファイルを class で書きモジュール直下に独立した関数を置かないこと（class 専用の処理は private method、共有処理は utils・libs へ移す）、外部 API・SDK を呼ぶ client の設計（API key・timeout の隠蔽、エラーの値化、レスポンスの parse、endpoint と method の 1 対 1）、DB の repository の設計（1 table 1 repository、join 時の命名、transaction を持たない、1 query 1 method）、use case の execute への集約と Result.gen による合成、use case の処理の流れを step 番号付きの doc comment と本文の stepN コメントで書くこと、Cloudflare Workflow の step と use case の対応、service・utils・libs を作ってよい条件を扱う。client・repository・usecase・steps・service・utils・libs の新規作成やメソッド追加、ヘルパー関数の置き場所に迷う場面、レビュー指摘への対応では必ず使用すること。
+description: レイヤードアーキテクチャ（client / repository / use case / service / utils・libs）で TypeScript の class やファイルを書く・修正する・レビューするときの規約。各層の責務と置き場所の判断、層のファイルを class で書きモジュール直下に独立した関数を置かないこと（class 専用の処理は private method、共有処理は utils・libs へ移す）、外部 API・SDK を呼ぶ client の設計（API key・timeout の隠蔽、エラーの値化、レスポンスの parse、endpoint と method の 1 対 1）、DB の repository の設計（1 table 1 repository、join 時の命名、transaction を持たない、1 query 1 method）、use case の execute への集約と Result.gen による合成、use case の処理の流れを step 番号付きの doc comment と本文の Step N コメントで書くこと、Cloudflare Workflow の step と use case の対応、service・utils・libs を作ってよい条件を扱う。client・repository・usecase・steps・service・utils・libs の新規作成やメソッド追加、ヘルパー関数の置き場所に迷う場面、レビュー指摘への対応では必ず使用すること。
 ---
 
 # kstack-layerd-architecture
@@ -113,7 +113,7 @@ class LaunchMirrorUseCase {
 
 ## use case の処理は step 番号付きの doc と step コメントで書く
 
-`execute` の doc comment に「何を処理するか」の 1 行と、処理の流れを番号付きの step で並べる。本文では各 step の先頭に、doc と同じ文言で `// stepN: ...` を書き、step の間を空行で区切る。
+`execute` の doc comment に「何を処理するか」の 1 行と、処理の流れを番号付きの step で並べる。本文では各 step の先頭に、doc と同じ文言で `// Step N: ...` を書き、step の間を空行で区切る。
 
 ```ts
 // Bad: 流れを本文から読み解くしかない
@@ -133,13 +133,13 @@ public execute = (args: { userId: string }) =>
  */
 public execute = (args: { userId: string }) =>
   Result.gen(async function* () {
-    // step1: user を取り出す
+    // Step 1: user を取り出す
     const user = yield* await this.deps.users.findById(args);
 
-    // step2: 取り出した user で、決済サービスに請求書を作る
+    // Step 2: 取り出した user で、決済サービスに請求書を作る
     const invoice = yield* await this.deps.billing.createInvoice({ user });
 
-    // step3: 作った請求書を保存して return する
+    // Step 3: 作った請求書を保存して return する
     return this.deps.invoices.insert({ invoice });
   }, this);
 ```

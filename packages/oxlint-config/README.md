@@ -13,17 +13,20 @@ export する設定は SKILL の名前から `kstack-` を除いた名前にす�
 
 ### kstack-typescript（`typescript`）
 
-| 規約                                                | ルール / 表せない理由                                                                                                                                                         |
-| --------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 導出できる型を手書きしない                          | `kstack/no-explicit-return-type`。type predicate・`asserts` は除く。導出できない再帰関数は disable コメントで理由を残す。戻り値のためだけの `interface` / `type` は検出しない |
-| else・三項演算子を使わない。早期 return する        | `kstack/no-else`、`no-ternary`                                                                                                                                                |
-| `if` の前には空行を置く                             | `kstack/blank-line-before-if`                                                                                                                                                 |
-| 関数の引数はオブジェクトに構造化する                | `kstack/object-params`。呼び出しの引数にその場で書く関数（コールバック）と `this` 引数は除く。名前を付けて参照で渡すコールバックは検出するので、disable コメントで理由を残す  |
-| 条件付きオブジェクト spread を使わない              | `kstack/no-conditional-spread`                                                                                                                                                |
-| 小さすぎる処理を関数化しない                        | 表せない。「小さい」「名前に意味がある」を構文から決められない                                                                                                                |
-| 各メソッドで繰り返す依存の生成は constructor に置く | 表せない。依存の生成と同じ関数の呼び出しを構文から区別できない                                                                                                                |
+| 規約                                                           | ルール / 表せない理由                                                                                                                                                         |
+| -------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 導出できる型を手書きしない                                     | `kstack/no-explicit-return-type`。type predicate・`asserts` は除く。導出できない再帰関数は disable コメントで理由を残す。戻り値のためだけの `interface` / `type` は検出しない |
+| else・三項演算子を使わない。早期 return する                   | `kstack/no-else`、`no-ternary`                                                                                                                                                |
+| `if` の前には空行を置く                                        | `kstack/blank-line-before-if`                                                                                                                                                 |
+| 関数の引数はオブジェクトに構造化する                           | `kstack/object-params`。呼び出しの引数にその場で書く関数（コールバック）と `this` 引数は除く。名前を付けて参照で渡すコールバックは検出するので、disable コメントで理由を残す  |
+| 条件付きオブジェクト spread を使わない                         | `kstack/no-conditional-spread`                                                                                                                                                |
+| 小さすぎる処理を関数化しない                                   | 表せない。「小さい」「名前に意味がある」を構文から決められない                                                                                                                |
+| 各メソッドで繰り返す依存の生成は constructor に置く            | 表せない。依存の生成と同じ関数の呼び出しを構文から区別できない                                                                                                                |
+| 型の絞り込みのためだけに this のプロパティを分割代入しない     | 表せない。`const { x } = this` が絞り込みのためだけの別名か、複数のプロパティをまとめて読むためかを構文から区別できない                                                       |
+| class でしか使わない関数は private method にする               | 表せない。1 つの class だけが呼ぶかは同じファイルの中なら数えられるが、定数の初期化や他の関数からの呼び出しと合わせて判断が要るので、レビューで確かめる                       |
+| class・error・定数・型が同居するファイルはディレクトリに分ける | 表せない。ファイルの分け方と `index.ts` から何を export するかはディレクトリ構成の判断で、1 ファイルの AST からは決まらない                                                   |
 
-規約ではないが、`class-methods-use-this` を `"off"` にする。利用側が `categories: { restriction: "error" }` で有効にしても、`this` を使わない private method（kstack-layerd-architecture の「class 専用の処理は private method にする」の形）などを指させないため。extends した設定の `"off"` は利用側の `categories` より優先される。
+規約ではないが、`class-methods-use-this` を `"off"` にする。利用側が `categories: { restriction: "error" }` で有効にしても、`this` を使わない private method（kstack-typescript の「class でしか使わない関数は private method にする」、kstack-layerd-architecture の「class 専用の処理は private method にする」の形）などを指させないため。extends した設定の `"off"` は利用側の `categories` より優先される。
 
 規約ではないが、`unicorn/throw-new-error` も `"off"` にする。kstack-better-result のエラー定義 `class UserNotFoundError extends TaggedError("UserNotFoundError")<{ ... }>() {}` は、名前が `Error` で終わる関数を `new` 無しで呼ぶので、利用側が `plugins` に `unicorn` を入れて `categories: { style: "error" }` で有効にすると `TaggedError("UserNotFoundError")` が指される（oxlint の実装は `throw` の中に限らず、`Error` で終わる名前の呼び出しをすべて指す）。`TaggedError` は `new` で呼ぶものではないので、この指摘は直せない。
 
@@ -31,11 +34,11 @@ export する設定は SKILL の名前から `kstack-` を除いた名前にす�
 
 「use case の処理は step 番号付きの doc と step コメントで書く」で入った規約だけを載せる。`kstack/use-case-steps` は、class 名が `UseCase` で終わり、本体を持つ `execute` を持つ class だけを見る。
 
-| 規約                                                                      | ルール / 表せない理由                                                                                                                                                                                                                                        |
-| ------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `execute` の doc comment に、要約の 1 行と番号付きの step を並べる        | `kstack/use-case-steps`（messageId `missingDoc`・`missingSteps`・`missingSummary`）。doc comment が無い、`1. ...` の行が無い、番号付き step の前に要約行が無い形を指す。class 名が `UseCase` で終わらない use case、宣言だけの `execute` は検出しない        |
-| 本文の各 step の先頭に、doc と同じ番号・同じ文言で `// stepN: ...` を書く | `kstack/use-case-steps`（messageId `mismatch`・`missingBodyStep`）。doc に無い番号の step コメント、文言の違う step コメント、本文に無い doc の step を指す。文言は trim 後の完全一致で見る。`// step 1:` のように空白を入れた形と、番号の順序・連番は見ない |
-| step の間を空行で区切る                                                   | `kstack/use-case-steps`（messageId `missingBlankLine`）。2 つ目以降の step コメントの直前の行が空行でない形を指す。1 つ目の step は本体の先頭に来るので要求しない                                                                                            |
+| 規約                                                                       | ルール / 表せない理由                                                                                                                                                                                                                                                                                                                                         |
+| -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `execute` の doc comment に、要約の 1 行と番号付きの step を並べる         | `kstack/use-case-steps`（messageId `missingDoc`・`missingSteps`・`missingSummary`）。doc comment が無い、`1. ...` の行が無い、番号付き step の前に要約行が無い形を指す。class 名が `UseCase` で終わらない use case、宣言だけの `execute` は検出しない                                                                                                         |
+| 本文の各 step の先頭に、doc と同じ番号・同じ文言で `// Step N: ...` を書く | `kstack/use-case-steps`（messageId `mismatch`・`missingBodyStep`）。doc に無い番号の step コメント、文言の違う step コメント、本文に無い doc の step を指す。文言は trim 後の完全一致で見る。旧表記の `// step1:` と、`// Step1:` のように空白の無い形は step コメントとして見ない（doc の step があれば `missingBodyStep` になる）。番号の順序・連番は見ない |
+| step の間を空行で区切る                                                    | `kstack/use-case-steps`（messageId `missingBlankLine`）。2 つ目以降の step コメントの直前の行が空行でない形を指す。1 つ目の step は本体の先頭に来るので要求しない                                                                                                                                                                                             |
 
 ### kstack-react（`react`）
 
@@ -104,7 +107,19 @@ loader の結果をコンポーネントの hook が `useQuery` で読む、と�
 
 ### kstack-code-comment
 
-例外の列挙（use case の step 番号付き doc、GDScript の宣言の `##` doc comment）を広げただけで、新しい規約は無い。設定は作らない。
+「class の method と export する関数には doc を書く」で入った規約だけを載せる。設定は作らない。例外の列挙（use case の step 番号付き doc、GDScript の宣言の `##` doc comment）を広げた変更には、新しい規約は無い。
+
+| 規約                                                                                                                                      | ルール / 表せない理由                                                                                                                                                                      |
+| ----------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| class の method と export する関数には何をするかの 1 行の doc を書き、分岐のあるものは doc の番号付き手順と本文の `// Step N: ...` で示す | 表せない。doc comment の有無は構文で見られるが、どの分岐を手順に挙げるか（手順の粒度）は構文から決まらない。use case の `execute` だけは `kstack/use-case-steps` が doc と本文の対応を見る |
+
+### kstack-better-result
+
+「失敗を null / undefined で返さず、Result の Err で返す」で入った規約だけを載せる。設定は作らない。
+
+| 規約                                                   | ルール / 表せない理由                                                                            |
+| ------------------------------------------------------ | ------------------------------------------------------------------------------------------------ |
+| 失敗を null / undefined で返さず、Result の Err で返す | 表せない。`return null` が失敗を表すのか、正常な「見つからない」を表すのかを構文から区別できない |
 
 ### kstack-interface-first-development
 
