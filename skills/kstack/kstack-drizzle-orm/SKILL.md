@@ -1,6 +1,6 @@
 ---
 name: kstack-drizzle-orm
-description: "Drizzle ORM を使う TypeScript コードを書く・修正する・レビューするときの規約。Relational Queries（db.query.<table>.findFirst / findMany）の where・orderBy の書き方、drizzle-orm への依存を DB package に閉じ込める方針、テストで drizzle の client を in-memory DB（PGlite、libsql の :memory:）に差し替えて drizzle-kit の pushSchema でスキーマを流すテクニックを扱う。drizzle-orm の import、eq / and などの演算子、repository や DB アクセス層の作成、DB を使うテストの準備（seed スクリプト、ローカル DB、テスト用 auth / repository の組み立て）、レビュー指摘への対応でも発火させる。"
+description: "Drizzle ORM を使う TypeScript コードを書く・修正する・レビューするときの規約。Relational Queries（db.query.<table>.findFirst / findMany）の where・orderBy の書き方、drizzle-orm への依存を DB package に閉じ込める方針、親の行を消すときに子テーブルを外部キー（references）の onDelete cascade で消させる書き方と、cascade にするかを user に確認する手順、SQLite / Cloudflare D1 で既存の外部キーを変える migration の注意、テストで drizzle の client を in-memory DB（PGlite、libsql の :memory:）に差し替えて drizzle-kit の pushSchema でスキーマを流すテクニックを扱う。drizzle-orm の import、eq / and などの演算子、repository や DB アクセス層の作成、削除 API・関連レコードの削除、schema の外部キー定義と drizzle-kit generate の migration、DB を使うテストの準備（seed スクリプト、ローカル DB、テスト用 auth / repository の組み立て）、レビュー指摘への対応でも発火させる。"
 ---
 
 # kstack-drizzle-orm
@@ -34,6 +34,32 @@ await db.query.users.findFirst({
 なぜ: 演算子を import しなければ、アプリ側のコードは `drizzle-orm` を知らずに済み、ORM への依存を schema と client を持つ DB package に閉じ込められる。ORM の更新や差し替えの影響がその package の中で完結する。加えて callback の column は query scope に合わせて alias された table を指すため、ネストや自己参照の query でも正しい SQL になる。
 
 使っている drizzle-orm の major version を `package.json` で確かめ、v0.x なら callback、v1 なら object 記法を選ぶこと。
+
+## 親を消すときの子の行は、外部キーの onDelete で DB に消させる
+
+親の行を消すと決まったら、子テーブルを route や repository で順に delete しない。schema の `references` に `onDelete: "cascade"` を書き、親 1 行を消すだけにする。
+
+```ts
+// Bad: 子テーブルを先に手で消している
+await db.delete(comments).where(eq(comments.post_id, postId));
+await db.delete(posts).where(eq(posts.id, postId));
+
+// Good: schema に cascade を書き、親だけを消す
+export const comments = sqliteTable("comments", {
+  id: text().primaryKey(),
+  post_id: text()
+    .notNull()
+    .references(() => posts.id, { onDelete: "cascade" }),
+});
+
+await db.delete(posts).where(eq(posts.id, postId));
+```
+
+なぜ: 子テーブルが増えても削除コードを直さずに済み、消し忘れで孤立した行や外部キー違反が残らない。DB が 1 文で消すので、途中で失敗して一部だけ消えた状態にもならない。
+
+親を消したときに子をどうするか（`cascade` で消す、`restrict` で親の削除を止める、`set null` で残す、論理削除にする）は要件なので、agent が決めない。関連データを消してよいかを user に確認し、承認を得てから `cascade` にする。cascade で消えた行は戻せない。
+
+既存の外部キーの `onDelete` を変える migration は、データのある環境に流す前に生成された SQL を読む。SQLite は外部キーを ALTER できないので、drizzle-kit は `PRAGMA foreign_keys=OFF` → 新しいテーブルを作ってコピー → 元のテーブルを DROP → rename、という migration を生成する。Cloudflare D1 はクエリを暗黙のトランザクションで動かすので `PRAGMA foreign_keys=OFF` が効かず、親のテーブルの DROP で子の行が cascade で消えるか、制約違反で失敗する。作り直したテーブルは rowid も振り直される。本番データがあるなら、手書きの migration（バックアップ用のテーブルを経由して移すなど）と流す手順を user と決める。
 
 ## テストでは drizzle の client を in-memory DB に差し替える
 
