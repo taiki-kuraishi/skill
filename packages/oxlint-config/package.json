@@ -1,6 +1,6 @@
 {
   "name": "@taiki-kuraishi/oxlint-config",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "SKILL の規約を表す oxlint の共有設定と、自作ルールの JS plugin。",
   "repository": {
     "type": "git",
