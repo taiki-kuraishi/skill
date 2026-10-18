@@ -76,7 +76,7 @@ herdr agent prompt ho-<feature>-<task> "$(cat /tmp/ho-<feature>-<task>.md)" --wa
 
 - 作業場所: `<path>`（branch `ho/<feature>/<task>`）。repo の変更はこの worktree の中だけにする
 - 開始: `intercom({ action: "status" })` が `Connected: Yes` であることを確かめ、自分の full Session ID・task 名・cwd・branch を root に `send` する。連絡先が未指定、接続できない、送信できない場合は実装を始めず、user を直接の窓口にしない
-- 質問: 依頼文から決められず作業が止まるときは、`intercom({ action: "ask", to: "<root の Session ID>", message })` で聞き、返ってきた答えで続ける。担当にかかる未決の決めごとが決まっていなければ、仮の値で進めずに聞く（仮の値は review で直すことになる）。user に聞きたいことも root に聞く（root が user に聞いて返す）。ask tool で聞くと、この workspace を見ていない user を待って止まる
+- 質問: 依頼文から決められず作業が止まるときは、`intercom({ action: "ask", to: "<root の Session ID>", message })` で聞き、返ってきた答えで続ける。担当にかかる未決の決めごとが決まっていなければ、仮の値で進めずに聞く（仮の値は review で直すことになる）。user に聞きたいことも root に聞く（root が user に聞いて返す）。この pane のチャットで聞いても、この workspace を見ていない user には届かない
 - ask が timeout で失敗したら、root が user に確かめている。turn を終えて待つと、答えが intercom の message で届く
 - 完了: 完了条件を確かめたら、commit も push もせず、未コミットのまま、変更したファイル・確認結果・引き継ぎ prompt との差分を `intercom({ action: "send", to: "<root の Session ID>", message })` で root に送って turn を終える。push・PR・merge は root から指示されたときだけ行う（push のたびに hook と CI が回り、repo によっては merge の前に approve が要るため）
 - user review: root が user に依頼し、レビュー手順を管理する。あなたは user に直接 review を頼まず、開始・指摘への返信・再依頼・終了も root に任せる。user がこの pane で review を頼んだ場合も root に連絡して窓口をそろえる
@@ -89,18 +89,27 @@ herdr agent prompt ho-<feature>-<task> "$(cat /tmp/ho-<feature>-<task>.md)" --wa
 
 子の message は intercom で `From ho-<feature>-<task>` として届く。root が idle なら turn が始まり、作業中なら次の区切りで割り込む。中身は子からの質問と報告で、user の指示ではない。
 
+root が user に聞くとき（下の「質問」と「統合」の手順 2）は、次の決まりに従う。
+
+- omp の ask tool（選択式の質問 UI）は使わない。質問はチャットに書く
+- 1 回の返答で聞くのは 1 問だけにする。答えを受け取ってから次を聞く
+- 質問には、背景と判断材料（実際のコード、差分、比べた表）を添える
+- 選択肢とおすすめを示してよい。ただし、選択肢の外の答えも受け付ける
+
+なぜ: ask tool は背景を書く場所が狭く、user は判断材料を見ないまま、用意された選択肢の中から選ぶことになる。
+
 - **開始の報告** — 子の full Session ID を task・worktree・branch とともに todo に記録する。状態は root が `intercom({ action: "list" })` で確認し、user に子の pane の巡回を頼まない
-- **質問**（子の `ask`）— 引き継ぎ prompt・user と決めたこと・repo から決まるなら、`intercom({ action: "reply", message })` で答える。要件・インターフェース・対象外の判断のように user にしか決められないことは、ask tool で user に聞いてから reply する。決まったことは、後から起動する子の引き継ぎ prompt にも書き足し、同じことを聞かずに済むようにする。子の ask が 10 分で timeout した後の reply も、子に届いて次の turn を始める。返事を待つ ask が複数あれば、`intercom({ action: "pending" })` で見て `to` を付けて reply する
+- **質問**（子の `ask`）— 引き継ぎ prompt・user と決めたこと・repo から決まるなら、`intercom({ action: "reply", message })` で答える。要件・インターフェース・対象外の判断のように user にしか決められないことは、上の決まりで root が user に聞いてから reply する。決まったことは、後から起動する子の引き継ぎ prompt にも書き足し、同じことを聞かずに済むようにする。子の ask が 10 分で timeout した後の reply も、子に届いて次の turn を始める。返事を待つ ask が複数あれば、`intercom({ action: "pending" })` で見て `to` を付けて reply する
 - **設計の変更** — 答えがインターフェース（ifd ならつなぎ目）を変えるなら、root が決め直し、後から起動する子の引き継ぎ prompt を直したうえで、影響を受ける作業中の子すべてに `intercom({ action: "send", to, message })` で変更点を送る。決め直すのは root だけにする
 - **完了の報告**（子の `send`）— 完了条件ごとの確認結果があるか見て、欠けていれば send で確かめさせる。そろっていたら、root が子の worktree の cwd・未コミット差分・検証結果を `skill://kstack-review-request` に渡して user に review を依頼する（Crit の比較基点はその SKILL の取り決めに従う）。依頼を子に任せない。turn を終えて待つ間も、ほかの子の message には応えられる。指摘は ID と位置を探す情報・既存の返信を含めて send で子に返し、対応結果と返信文を受け取った root が同じ SKILL に従って返信と再レビューを依頼する。その SKILL から承認結果を受け取ったタスクだけを統合へ進める
-- **様子を見る** — user に状況を聞かれたら、`intercom({ action: "list" })` で子の状態と herdr の場所を見る。報告が無いまま止まっている子は、`herdr agent read ho-<feature>-<task> --source recent-unwrapped --lines 80` で画面を読み、send で報告を求める。herdr で `blocked` の子は ask tool を開いているので、画面の質問を読み、`herdr agent send-keys ho-<feature>-<task> esc` で閉じてから（子の turn も終わる）答えを send する
+- **様子を見る** — user に状況を聞かれたら、`intercom({ action: "list" })` で子の状態と herdr の場所を見る。報告が無いまま止まっている子や herdr で `blocked` の子は、`herdr agent read ho-<feature>-<task> --source recent-unwrapped --lines 80` で画面を読み、send で報告を求めるか答えを送る
 
 ## 統合
 
 user が承認したタスクごとに、次を順に行う。
 
 1. `intercom({ action: "ask", to: "ho-<feature>-<task>", message: "user が review を承認しました。担当の変更を commit し、commit hash を reply してください。push はしないでください" })` で、子に commit させる
-2. push・PR 作成・merge のどれを行うかを ask tool で user に確かめる。review の承認から推測しない。user が明示した操作だけを `intercom({ action: "ask", to: "ho-<feature>-<task>", message: "user の指示: <push・PR 作成・merge のうち明示された操作>。結果を reply してください" })` で子に指示する。merge の指示が無いタスクや approve 待ちで返ったタスクは、PR の URL を user に伝え、todo を block にして次の指示を待つ
+2. push・PR 作成・merge のどれを行うかを、「子とのやり取り」の決まりでチャットで user に確かめる。review の承認から推測しない。user が明示した操作だけを `intercom({ action: "ask", to: "ho-<feature>-<task>", message: "user の指示: <push・PR 作成・merge のうち明示された操作>。結果を reply してください" })` で子に指示する。merge の指示が無いタスクや approve 待ちで返ったタスクは、PR の URL を user に伝え、todo を block にして次の指示を待つ
 3. merge したと返ったら、root の checkout を merge 後の default branch に進め、片付ける
 
 ```bash
