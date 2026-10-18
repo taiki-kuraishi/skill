@@ -11,14 +11,18 @@ metadata:
 
 ## セットアップ（マシンごとに 1 回）
 
-この repo の checkout で実行する。別の repo で実行すると、リンク先の無い symlink ができ、crit はフックを見つけられない。
+環境変数 `KSTACK_SKILL_REPO` にこの repo の checkout の絶対 path を設定し、`~/.crit.config.json` の `hooks` にフックを書く（他のキーは消さない）。
 
-```bash
-mkdir -p ~/.crit/hooks
-ln -s "$(git rev-parse --show-toplevel)/.agents/skills/review-inbox/scripts/on_finish_approved.sh" ~/.crit/hooks/on_finish_approved.sh
-test -x ~/.crit/hooks/on_finish_approved.sh
+```json
+{
+  "hooks": {
+    "on_finish_approved": "inline:exec \"$KSTACK_SKILL_REPO/.agents/skills/review-inbox/scripts/on_finish_approved.sh\""
+  }
+}
 ```
 
+- crit はフックを、crit を起動した agent の env で動かす。`KSTACK_SKILL_REPO` が無い agent から approve すると、フックは exit 127 で失敗し、指摘も保存されない。login shell で読まれる場所に設定し、設定より前に起動した agent と crit は起動し直す
+- 設定できたかは、crit を起動する agent の shell で `test -x "$KSTACK_SKILL_REPO/.agents/skills/review-inbox/scripts/on_finish_approved.sh"` と `jq -e '.hooks.on_finish_approved' ~/.crit.config.json` の両方が通ることで確かめる
 - `~/.pi/agent/intercom/config.json` に `busyDelivery` を `"human-first"` で足す（他のキーは消さない）。既定の `steer` だと、子を監督している最中の turn に通知が割り込む
 - フックは `jq`・`git`・`node`（`~/.omp/plugins/node_modules/.bin/pi-intercom` は `node` で動く）を使う。crit の daemon の PATH に `jq` か `git` が無いと保存もされず、`node` が無いと保存だけされて通知が届かない
 
