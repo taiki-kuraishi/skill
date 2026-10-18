@@ -1,6 +1,6 @@
 ---
 name: kstack-agents-md
-description: AGENTS.md（CLAUDE.md など coding agent 向けの指示ファイルを含む）を書く・修正する・レビューするときの規約 — コードや設定ファイルを読めば分かる実装の事実（ファイル構成と各ファイルの中身、有効にした機能、resource や設定の値）を書かず、コードに現れないリポジトリの規約（terraform apply・デプロイ・DB migration の実行手順と認証、user の承認が要る操作、レビューと commit の運用）を書く。機能の実装やリファクタリング、レビュー指摘への対応のついでに AGENTS.md を更新する場面や、/init などで AGENTS.md を新しく作る場面、兄弟の app・package を参考に新しい app・package を足して、頼まれていなくても兄弟に倣って AGENTS.md を作る場面でも発火させる。
+description: AGENTS.md（CLAUDE.md など coding agent 向けの指示ファイルを含む）を書く・修正する・レビューするときの規約 — コードや設定ファイルを読めば分かる実装の事実（ファイル構成と各ファイルの中身、有効にした機能、resource や設定の値）を書かず、コードに現れないリポジトリの規約（terraform apply・デプロイ・DB migration の実行手順と認証、user の承認が要る操作、レビューと commit の運用）を書く。AGENTS.md と repo 独自の SKILL.md は日本語で書き、upstream から取り込んだ skill などは訳さず原文のまま残す。機能の実装やリファクタリング、レビュー指摘への対応のついでに AGENTS.md を更新する場面や、/init などで AGENTS.md を新しく作る場面、兄弟の app・package を参考に新しい app・package を足して、頼まれていなくても兄弟に倣って AGENTS.md を作る場面、AGENTS.md や SKILL.md を英語から日本語に書き直す場面でも発火させる。
 ---
 
 # kstack-agents-md
@@ -45,3 +45,30 @@ AGENTS.md を書き換えるのは、手順や運用の決まりが増えたり�
 書く規約は、user と決めたことと、作業で実際に使って通った手順に限る。上の Good 例の手順や承認の決まりは書き方の見本なので、そのまま写さない。分からない規約は推測で埋めず、user に聞く。
 
 特定のコードに付く理由（なぜこの値なのか、なぜ定石と違う書き方なのか）は、AGENTS.md ではなくそのコードのコメントに書く（kstack-code-comment）。
+
+## 日本語で書き、upstream から取り込んだものは原文のまま残す
+
+AGENTS.md と、repo で書いた agent 向けの指示ファイル（CLAUDE.md、repo 独自の SKILL.md）は日本語で書く。upstream から取り込んだもの（vendored の skill など）は訳さず、原文のまま残す。
+
+```md
+<!-- Bad: repo で書いた AGENTS.md を英語で書いている -->
+
+## commit
+
+Commit only after the user has reviewed the diff.
+```
+
+```md
+<!-- Good: 日本語で書く -->
+
+## commit
+
+user が差分をレビューしてから commit する
+```
+
+```text
+Bad: upstream から取り込んだ skill の SKILL.md を日本語に訳して書き換える
+Good: 取り込んだ skill は原文のまま残し、repo で書いた AGENTS.md と skill だけを日本語にする
+```
+
+なぜ: user が読んで承認・修正する文書なので、user の言葉で書かないと review で読み流される。取り込んだものを訳すと、upstream の更新を取り込むたびに訳文と衝突して同期できなくなる。

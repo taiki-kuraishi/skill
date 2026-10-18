@@ -5,7 +5,7 @@ description: TanStack Query（@tanstack/react-query）の hooks を書く・修�
 
 # kstack-tanstack-query
 
-[TanStack Query](https://tanstack.com/query/latest) の hooks を書くときの規約。理由を理解した上で適用すること。package の新設と責務の書き方は kstack-monorepo、`useQuery` の読み込み中の判定（`useSuspenseQuery` を使わない理由）は kstack-react、Hono の型付きクライアントは kstack-hono の SKILL を参照。
+[TanStack Query](https://tanstack.com/query/latest) の hooks を書くときの規約。理由を理解した上で適用すること。package の新設は kstack-monorepo、責務の書き方は kstack-readme、`useQuery` の読み込み中の判定（`useSuspenseQuery` を使わない理由）は kstack-react、Hono の型付きクライアントは kstack-hono の SKILL を参照。
 
 ## API を呼ぶ hooks は app に書かず、hooks を配る package に置く
 
