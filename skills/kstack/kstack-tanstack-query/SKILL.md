@@ -1,15 +1,15 @@
 ---
 name: kstack-tanstack-query
-description: TanStack Query（@tanstack/react-query）の hooks を書く・修正する・レビューするときの規約。API を呼ぶ useQuery・useMutation を app に直書きせず、hooks を配る専用 package（api-query など）に置き、app はそれを呼んで表示の形に整えるだけにする構成を扱う。queryKey・queryFn・mutationFn を書く場面、monorepo で hooks を共有する package の新設と構成（client を運ぶ Provider、1 route 1 file、index.ts の公開面、peerDependencies）、QueryClientProvider の置き場所、QueryClient の既定（throwOnError で失敗を Error Boundary に投げる）、mutation hook の options と invalidateQueries、レビュー指摘への対応では必ず使用すること。
+description: TanStack Query（@tanstack/react-query）の hooks を書く・修正する・レビューするときの規約。API や better-auth など認証ライブラリの client（getSession・signOut）を呼ぶ useQuery・useMutation を app に直書きせず、hooks を配る専用 package（api-query・auth-query など）に置き、app はそれを呼んで表示の形に整えるだけにする構成を扱う。queryKey・queryFn・mutationFn を書く場面、`{ data, error }` で返す client の error を throw する書き方、monorepo で hooks を共有する package の新設と構成（client を運ぶ Provider、1 route 1 file、index.ts の公開面、peerDependencies）、QueryClientProvider の置き場所、QueryClient の既定（throwOnError で失敗を Error Boundary に投げる）、mutation hook の options と invalidateQueries（package が持つ queryKey の無効化）、レビュー指摘への対応では必ず使用すること。
 ---
 
 # kstack-tanstack-query
 
 [TanStack Query](https://tanstack.com/query/latest) の hooks を書くときの規約。理由を理解した上で適用すること。package の新設は kstack-monorepo、責務の書き方は kstack-readme、`useQuery` の読み込み中の判定（`useSuspenseQuery` を使わない理由）は kstack-react、Hono の型付きクライアントは kstack-hono の SKILL を参照。
 
-## API を呼ぶ hooks は app に書かず、hooks を配る package に置く
+## API・認証の client を呼ぶ hooks は app に書かず、hooks を配る package に置く
 
-API を呼ぶ `useQuery`・`useMutation` と、その `queryKey`・`queryFn`・`mutationFn` は app に書かない。API の package ごとに hooks を配る package（`@acme/api` なら `@acme/api-query`）を作り、API の route 1 つにつき hook を 1 つ置く。app の hook はそれを呼んで、結果を表示の形に整えるだけにする。
+API を呼ぶ `useQuery`・`useMutation` と、その `queryKey`・`queryFn`・`mutationFn` は app に書かない。API の package ごとに hooks を配る package（`@acme/api` なら `@acme/api-query`）を作り、API の route 1 つにつき hook を 1 つ置く。better-auth など認証ライブラリの client（`getSession`・`signOut`）を包む hooks も同じく、`@acme/auth-query` のような package に置き、client は Provider から受け取る。app の hook はそれを呼んで、結果を表示の形に整えるだけにする。
 
 ```ts
 // Bad: app の hook が queryKey と route の呼び出しを持っている
@@ -56,11 +56,51 @@ export function useTodoList() {
   const todos = data.todos.map((todo) => ({ id: todo.id, label: todo.title ?? "Untitled" }));
   return { status: "ready", todos } as const;
 }
+
+// Bad: app の hook が認証ライブラリの client を直接 useQuery で包んでいる
+const { data } = useQuery({ queryKey: ["session"], queryFn: () => authClient.getSession() });
+
+// Good: 認証の client の hooks も package に置く。{ data, error } で返す client は error を throw する
+export const useSessionQuery = () => {
+  const client = useAuth();
+
+  return useQuery({
+    queryKey: ["session"],
+    queryFn: async () => {
+      const { data, error } = await client.getSession();
+      if (error) {
+        throw new Error(error.statusText, { cause: error });
+      }
+      return data;
+    },
+  });
+};
+
+// Good: package だけが持つ key は package の mutation hook が無効化し、呼び出し側の onSuccess は合成する
+export const useSignOutMutation = (options?: Omit<UseMutationOptions<void, Error, void>, "mutationFn">) => {
+  const client = useAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation<void, Error, void>({
+    ...options,
+    mutationFn: async () => {
+      const { error } = await client.signOut();
+      if (error) {
+        throw new Error(error.statusText, { cause: error });
+      }
+    },
+    onSuccess: async (...args) => {
+      await queryClient.invalidateQueries({ queryKey: ["session"] });
+      await options?.onSuccess?.(...args);
+    },
+  });
+};
 ```
 
 - package の hook に入れるのは `queryKey` と `queryFn`（mutation なら `mutationFn`）だけ。非 2xx は `parseResponse` が `DetailedError` を投げるので、エラーの変換・retry・整形は入れない。整形は画面ごとに違うので app の hook が持つ。`placeholderData` のように画面ごとに変わる query の options は、mutation hook と同じく `options` で受けて展開する
+- 例外として、better-auth の client（better-fetch）のように非 2xx を throw せず `{ data: null, error }` で返す client は、`queryFn`・`mutationFn` で `error` を throw する。throw しないと失敗しても session が `null` になり、未ログインと区別できない
 - query hook の `data` は 200 の body か、読み込み中の `undefined` になる。`undefined` は読み込み中だけを表すので、見つからないことを値で返す route は `null` を返す（`data` は body | `null` | `undefined`）。queryFn が `undefined` で解決すると TanStack Query はエラーにする
-- `invalidateQueries` は呼び出し側が `onSuccess` で行う。どの query を無効化すべきかは画面ごとに違い、package は知らない
+- `invalidateQueries` は呼び出し側が `onSuccess` で行う。どの query を無効化すべきかは画面ごとに違い、package は知らない。例外として、package が自分で持ち呼び出し側が知らない queryKey（`["session"]` など）を、どの画面から呼んでも同じく取り直すなら、package の mutation hook の `onSuccess` で無効化してよい（画面で変わらないので上の理由に当たらない）。そのときも `options.onSuccess` は上書きせず、無効化の後に呼ぶ
 - 型は手書きしない（kstack-typescript）。`Variables` と `Data` は `InferRequestType` / `InferResponseType` から導出し、hc の引数（`{ param, json }`）を `{ id, body }` のように平らにしない
 
 なぜ: queryKey・route・エラーの扱いが画面の hook に混ざると、同じ API を読む画面や app ごとに重複し、API が変わったときの修正箇所が散らばる。API を呼ぶ層を package に切り出せば、app は受け取った結果をどう表示するかだけを書く。
