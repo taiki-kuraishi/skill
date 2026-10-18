@@ -31,7 +31,7 @@ ifd が今回の回として合意したフェーズだけを、1 フェーズ 1
 子の message は intercom で届く。root は渡したら終わりにしない。待ちの todo を block にして turn を終え、message が届くたびに答えて調整を続ける。
 
 - **起動の報告** — 子の `Session ID` を todo の項目に書き、`intercom({ action: "list" })` で子の状態を見られるようにする
-- **質問** — prompt・user と決めたこと・repo から決まることは `intercom({ action: "reply", message })` で答える。複数の ask があるなら `pending` で sender を確かめ、`to` も指定する。user にしか決められないことは root の ask tool で user に聞いてから reply する。決まったことは、後から渡す prompt にも足す
+- **質問** — prompt・user と決めたこと・repo から決まることは `intercom({ action: "reply", message })` で答える。複数の ask があるなら `pending` で sender を確かめ、`to` も指定する。user にしか決められないことは、root がチャットで 1 問ずつ（背景と判断材料を添えて）user に聞いてから reply する。決まったことは、後から渡す prompt にも足す
 - **設計の変更** — つなぎ目が変わったら root が決め直し、影響する子すべてに `send` で送り、todo と案を更新する
 - **完了の報告** — 完了条件ごとの確認結果があるか見る。欠けたら `send` で確かめさせる。そろったら review へ進む
 - **動きが見えないとき** — 報告が無いまま進まない子には `send` で状況の報告を求めて待つ

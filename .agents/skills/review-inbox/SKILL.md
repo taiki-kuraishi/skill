@@ -49,13 +49,13 @@ Good: root 1 つだけに /alias review-inbox を付け、list で 1 件であ�
 1. 保存した JSON の `repo_root` と `comments_json` の件数を確かめる。読めないときは、path を添えて user に伝えて止まる
 2. `skill://kstack-handoff` の「起動」で、子を 1 つ起動する。`<feature>` は `review`、`<task>` は JSON の `session_key` にする（例: branch `ho/review/23bd52db9a3a`）。同じ branch が既にあれば（`git branch --list 'ho/review/*'`）、連番を足す（例: `ho/review/23bd52db9a3a-2`）
 3. 引き継ぎ prompt は下の形にし、後ろに kstack-handoff の「子との取り決め」を足す
-4. 以降は kstack-handoff の「子に応える」と「統合」に従う。子が送る分類案は、root が ask tool で user に示し、回答を reply で子に返す。user が Crit で approve したら、「統合」の手順 2 ではなく、下の「承認から merge まで」に従う。PR の衝突だけは、「統合」の「止まって user に聞く」ではなく、下の「共有ファイルの衝突」に従う
+4. 以降は kstack-handoff の「子に応える」と「統合」に従う。子が送る分類案は、root がチャットで 1 問ずつ（分類案と対象の指摘を添えて）user に示し、回答を reply で子に返す。user が Crit で approve したら、「統合」の手順 2 ではなく、下の「承認から merge まで」に従う。PR の衝突だけは、「統合」の「止まって user に聞く」ではなく、下の「共有ファイルの衝突」に従う
 
 ```md
 `<保存した JSON の path>` は、`<repo_root>` の Crit review の approve 時のコメントです。`skill://skill-from-review` を読み、その手順を最後まで回してください。
 
 - 手順 1・2 の分類と、追記か新規作成かの案ができたら、書く前に `intercom({ action: "ask" })` で root に送り、user の承認を待つ。承認されなかった指摘は SKILL 化しない
-- skill-from-review の中で user に聞くこと（テストを回すか、など）は、ask tool ではなく root に ask する
+- skill-from-review の中で user に聞くこと（テストを回すか、など）は、user にチャットで聞かず、root に ask する
 - 手順 7 の user review は自分で依頼せず、完了報告として root に送る
 ```
 
