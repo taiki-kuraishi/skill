@@ -13,7 +13,7 @@ export const noNegatedData = defineRule({
     },
   },
   createOnce(context) {
-    const scopes: Array<Set<string>> = [];
+    const scopes: Set<string>[] = [];
     const currentScope = () => scopes.at(-1);
 
     const enter = () => scopes.push(new Set());

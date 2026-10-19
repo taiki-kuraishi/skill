@@ -2,11 +2,48 @@ import type { OxlintConfig } from "oxlint";
 
 export const typescript = {
   jsPlugins: ["@taiki-kuraishi/oxlint-config/plugin"],
+  categories: {
+    correctness: "error",
+    perf: "error",
+    restriction: "error",
+    style: "error",
+    suspicious: "error",
+  },
   rules: {
-    // 利用側が categories.restriction を有効にしても、this を使わない private method などを指させない
+    // `categories` で一括有効になるが SKILL の規約と逆を向く、または規約に無い書き方を強いるルールを切る（理由は README）
     "class-methods-use-this": "off",
+    "eslint/max-statements": "off",
+    "eslint/sort-imports": "off",
+    "func-names": "off",
+    "func-style": "off",
+    "id-length": "off",
+    "max-params": "off",
+    "new-cap": "off",
+    "no-console": "off",
+    "no-continue": "off",
+    "no-duplicate-imports": "off",
+    "no-empty-function": "off",
+    "no-magic-numbers": "off",
     "no-ternary": "error",
-    // better-result の class 定義 `extends TaggedError("XxxError")<...>()` を、new 無しで Error を作る呼び出しとして指させない
+    "no-undefined": "off",
+    "no-void": "off",
+    "object-shorthand": "off",
+    "one-var": "off",
+    "oxc/no-async-await": "off",
+    "oxc/no-optional-chaining": "off",
+    "oxc/no-rest-spread-properties": "off",
+    "prefer-destructuring": "off",
+    "sort-keys": "off",
+    "typescript/explicit-function-return-type": "off",
+    "typescript/explicit-module-boundary-types": "off",
+    "typescript/no-extraneous-class": "off",
+    "unicorn/consistent-function-scoping": "off",
+    "unicorn/no-anonymous-default-export": "off",
+    "unicorn/no-null": "off",
+    "unicorn/no-static-only-class": "off",
+    "unicorn/prefer-ternary": "off",
+    "unicorn/require-module-specifiers": "off",
+    // `better-result` の class 定義 `extends TaggedError("XxxError")<...>()` を、new 無しで Error を作る呼び出しとして指させない
     "unicorn/throw-new-error": "off",
     "kstack/blank-line-before-if": "error",
     "kstack/no-conditional-spread": "error",
@@ -57,7 +94,7 @@ export const tanstackQuery = {
 export const testing = {
   plugins: ["vitest"],
   rules: {
-    // plugins に vitest を入れると有効になる correctness の既定ルールは、SKILL に無い規約なので切る
+    // `plugins` に vitest を入れると有効になる correctness の既定ルールは、SKILL に無い規約なので切る
     "vitest/expect-expect": "off",
     "vitest/hoisted-apis-on-top": "off",
     "vitest/no-conditional-expect": "off",
@@ -77,7 +114,7 @@ export const testing = {
     "vitest/valid-title": [
       "error",
       {
-        // valid-title の既定の検査（前後の空白、文字列でないタイトル）は SKILL に無い規約なので切る
+        // `valid-title` の既定の検査（前後の空白、文字列でないタイトル）は SKILL に無い規約なので切る
         ignoreSpaces: true,
         ignoreTypeOfDescribeName: true,
         ignoreTypeOfTestName: true,

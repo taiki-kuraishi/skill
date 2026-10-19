@@ -28,7 +28,7 @@ function ProjectDetail() {
   return <h1>{detail.name}</h1>;
 }`,
     },
-    // package の hook（useTodosQuery など）を呼ぶ形は component の仕事
+    // Package の hook（useTodosQuery など）を呼ぶ形は component の仕事
     {
       code: `
 function OrderSummary() {

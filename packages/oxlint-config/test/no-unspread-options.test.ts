@@ -28,15 +28,15 @@ ruleTester.run("no-unspread-options", noUnspreadOptions, {
     queryFn: () => parseResponse(client.api.todos.$get()),
   });
 };`,
-    // options を受けない hook は展開しない
+    // `options` を受けない hook は展開しない
     `export const useTodosQuery = () => {
   const client = useApi();
 
   return useQuery({ queryKey: ["todos"], queryFn: () => parseResponse(client.api.todos.$get()) });
 };`,
-    // options をそのまま渡す形は展開しなくてよい
+    // `options` をそのまま渡す形は展開しなくてよい
     `export const useTodosQuery = (options?: Options) => useQuery(options ?? todosQuery);`,
-    // options を null 合体で展開する形も展開として扱う
+    // `options` を null 合体で展開する形も展開として扱う
     `export const useTodosQuery = (options?: Options) => {
   const client = useApi();
 
@@ -46,7 +46,7 @@ ruleTester.run("no-unspread-options", noUnspreadOptions, {
     queryFn: () => parseResponse(client.api.todos.$get()),
   });
 };`,
-    // query 以外の呼び出しは対象外
+    // Query 以外の呼び出しは対象外
     `export const useThing = (options?: Options) => client.request({ query: options });`,
   ],
   invalid: [

@@ -7,13 +7,13 @@ import {
   queryLikeHookNameOf,
 } from "./query-hooks.ts";
 
-/** hook ではないが、query の options を作る関数 */
+/** Hook ではないが、query の options を作る関数 */
 const queryOptionsFactoryNames: Record<string, true> = {
   infiniteQueryOptions: true,
   queryOptions: true,
 };
 
-/** query の options を受け取る呼び出しの名前。`use*Query` 系の hook も含める */
+/** Query の options を受け取る呼び出しの名前。`use*Query` 系の hook も含める */
 const queryOptionsCallNameOf = (node: ESTree.CallExpression) => {
   const { callee } = node;
 
@@ -70,7 +70,7 @@ const isDefaultOptionsQueries = (node: ESTree.ObjectExpression) => {
 };
 
 /**
- * object が query の options として渡されている呼び出し（`useQuery` 系の第 1 引数、
+ * Object が query の options として渡されている呼び出し（`useQuery` 系の第 1 引数、
  * `useQueries` の `queries` 配列の要素、`queryOptions` 系の引数）を返す
  */
 const queryOptionsCallOf = (node: ESTree.ObjectExpression) => {
@@ -152,7 +152,7 @@ export const throwOnErrorPlacement = defineRule({
           return;
         }
 
-        // query の options（useQuery 系・queryOptions 系）の中でだけ hook を指摘する
+        // Query の options（useQuery 系・queryOptions 系）の中でだけ hook を指摘する
         if (queryOptionsCallOf(object) === undefined) {
           return;
         }

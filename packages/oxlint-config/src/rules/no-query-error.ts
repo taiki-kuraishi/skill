@@ -64,7 +64,7 @@ export const noQueryError = defineRule({
         for (const property of properties) {
           const fn = enclosingFunctionOf(property);
 
-          // component が query を読む形は no-query-in-component が指摘する
+          // Component が query を読む形は no-query-in-component が指摘する
           if (fn === undefined || jsxFunctions.contains(fn)) {
             continue;
           }

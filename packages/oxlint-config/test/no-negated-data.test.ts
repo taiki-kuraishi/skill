@@ -20,13 +20,13 @@ ruleTester.run("no-negated-data", noNegatedData, {
   }
   return { status: "ready", name: user.name } as const;
 }`,
-    // null 合体や任意プロパティは読み込み中と見つからないを区別できる
+    // Null 合体や任意プロパティは読み込み中と見つからないを区別できる
     `
 function useThing(id: string) {
   const { data } = useQuery(userQuery(id));
   return { name: data?.name ?? "Untitled" };
 }`,
-    // query の data ではない値の否定
+    // Query の data ではない値の否定
     `
 function isEmpty(value: string) {
   return !value;
