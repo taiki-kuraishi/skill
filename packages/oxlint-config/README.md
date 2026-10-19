@@ -98,6 +98,7 @@ loader の結果をコンポーネントの hook が `useQuery` で読む、と�
 | root に output を書かず、module の output は呼び出し側で使うものだけ                | 表せない。HCL は oxlint の対象外。root の output は tflint-ruleset-opa の Rego（SKILL に記載）で lint できる。module の未参照 output は既存の tflint ruleset に検出手段が無い |
 | module の中は主リソースごとにファイルを分ける                                       | 表せない。HCL は oxlint の対象外                                                                                                                                              |
 | resource 名は種類ではなく個体を指す                                                 | 表せない。HCL は oxlint の対象外                                                                                                                                              |
+| 固定の一覧から resource を作るときは for_each・count を使わず 1 つずつ定義する      | 表せない。HCL は oxlint の対象外                                                                                                                                              |
 | secret の名前に使う側の都合を入れない                                               | 表せない。HCL は oxlint の対象外                                                                                                                                              |
 | tflint に provider 公式の ruleset を入れ、deep_check を有効にする                   | 表せない。`.tflint.hcl` は oxlint の対象外                                                                                                                                    |
 
