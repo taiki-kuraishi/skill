@@ -4,8 +4,8 @@ SKILL の規約を表す oxlint の共有設定と、自作ルールの JS plugi
 
 ## 責務
 
-- 実装すること: kstack の SKILL ごとの oxlint 共有設定（`extends` に渡す設定オブジェクト）と、既存ルールで表せない規約の自作ルール（JS plugin）
-- 実装しないこと: oxfmt の設定、SKILL に書かれていない規約、型情報を使うルール（oxlint の JS plugin は型情報を使えない）
+- 実装すること: kstack の SKILL ごとの oxlint 共有設定（`extends` に渡す設定オブジェクト）。SKILL の規約は explicit なルール設定と、既存ルールで表せない規約の自作ルール（JS plugin）で表す。加えて、設定ごとに利用先に合わせた `categories` の有効化と、SKILL と逆を向く・または規約に無い書き方を強いるルールの `"off"`（理由はその節の off の表）
+- 実装しないこと: oxfmt の設定、SKILL に対応する節の個別設定に既存ルールを列挙すること（SKILL の規約を表すものは explicit に設定し、`categories` で入るものは lint が agent に伝えるので、対応表には書かない）、型情報を使うルール（oxlint の JS plugin は型情報を使えない）
 
 ## SKILL と設定の対応
 
