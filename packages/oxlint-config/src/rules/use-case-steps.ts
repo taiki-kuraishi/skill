@@ -31,7 +31,8 @@ const executeMemberOf = (node: ESTree.Class) => {
 /** Doc comment の要約行と、`1. ...` の形の番号付き step。step より後ろの行は要約にしない */
 const parseDocOf = (comment: ESTree.Comment) => {
   const steps: { number: number; text: string }[] = [];
-  let summary: string | undefined = undefined;
+  // oxlint-disable-next-line init-declarations -- 要約は doc の step より前の行から後で決まるので、宣言では初期化できない
+  let summary: string | undefined;
 
   for (const rawLine of comment.value.split("\n")) {
     const line = rawLine
