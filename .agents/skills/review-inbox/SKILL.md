@@ -30,7 +30,7 @@ metadata:
 
 1. herdr の中で、repo 本体の checkout の default branch に omp を起動し、`/skill:review-inbox` で始める
 2. `skill://kstack-handoff` の手順 1「確かめる」を行い、root の `Session ID`・checkout・default branch を控える
-3. `/alias review-inbox` で intercom の名前を固定する。`intercom({ action: "list" })` で、`review-inbox` が自分 1 つだけであることを確かめる
+3. intercom の名前を `review-inbox` に固定する。tool から slash command は直接実行できないので、herdr 経由で自分の pane に送る（`herdr agent list` で自分の pane_id を確認し、`herdr agent prompt "<pane_id>" '/alias review-inbox'`）。その後 `intercom({ action: "list" })` で、`review-inbox` が自分 1 つだけであることを確かめる
 4. turn を終えて通知を待つ
 
 フックは名前が `review-inbox` の session がちょうど 1 つのときだけ送る。0 個や 2 個以上なら送らず、保存だけして終わる。
