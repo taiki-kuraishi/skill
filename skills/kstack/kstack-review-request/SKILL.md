@@ -1,6 +1,6 @@
 ---
 name: kstack-review-request
-description: Crit で実装・修正したコードや PR を user にレビュー依頼・再依頼し、承認を受け取る共通手順。呼び出し側とツール固有手順を分離し、root-driven-development・interface-first-development・handoff の user review gate で使用する。agent によるコード・文書レビューでは規約として読むだけで、レビューは開始しない。
+description: Crit で実装・修正したコードや PR、動く画面（dev server の live review）を user にレビュー依頼・再依頼し、承認を受け取る共通手順。呼び出し側とツール固有手順を分離し、root-driven-development・interface-first-development・handoff の user review gate で使用する。agent によるコード・文書レビューでは規約として読むだけで、レビューは開始しない。
 ---
 
 # kstack-review-request
@@ -76,6 +76,17 @@ Good: CRIT_PUBLIC_URL と PORT から REVIEW_URL を決め、--public-url に同
 ```
 
 なぜ: loopback の URL は user の端末から開けない。`--public-url` は Host の許可と表示 URL を変えるだけで port の転送は作らないため、listen は loopback のまま既存の転送経路に任せる。port を先に決めると、URL を事前に確定でき、複数の review が同時に動いても衝突しない。
+
+## live review で起動する
+
+呼び出し元から dev server の URL（`localhost:<port>`）を受け取ったら、上と同じ `PORT`・`REVIEW_URL`・background job で、`crit live "${network_args[@]}" <url>` として起動する（option は `live` の後に置く）。この SKILL の「手順」の 3〜7 はコードの review と同じで、指摘は DOM 要素に pin される。返信はコードの指摘と同じく `--reply-to <id>` で行い、`--selector` は新しく pin を付けるときだけ使う。修正を見せ直す前に、dev server が更新後のコードで動いていることを確かめる。
+
+```text
+Bad: DOM の指摘への返信に --selector を付け、別の新しい指摘を作る / review 中に dev server を止める
+Good: --session <ID> --reply-to <id> で返信し、dev server を動かしたまま次の round を開く
+```
+
+なぜ: `--selector` は新規の pin を作るので、返信のつもりが user の指摘と切り離された指摘になる。dev server が止まると、user は修正後の画面を見直せない。
 
 ## session を取り違えない
 
