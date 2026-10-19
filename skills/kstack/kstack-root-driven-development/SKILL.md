@@ -1,6 +1,6 @@
 ---
 name: kstack-root-driven-development
-description: Root が user と要件・やることを合意し、次のフェーズだけを都度切り出して自ら実装し、既存パターンから外れる実装は書く前に user の承認を取り、各フェーズで kstack-review-request に従って user review を依頼し、承認まで止める開発フロー
+description: Root が user と要件・やることを合意し、次のフェーズだけを都度切り出して自ら実装し、既存パターンから外れる実装は書く前に user の承認を取り、各フェーズで kstack-review-request に従って user review（UI が変わるフェーズは dev server への live review を先に回す）を依頼し、承認まで止める開発フロー
 disable-model-invocation: true
 ---
 
@@ -60,6 +60,7 @@ root が会話・判断・すべての編集を持ち、subagent は判断材料
    - 開始状態との差分を確認し、現在のフェーズに属する変更だけを報告する。
    - 変更は unstaged のまま保ち、承認前に commit しない。
    - root が `skill://kstack-review-request` に従い、repository root の未コミット差分について user に review を依頼する。承認済みのフェーズは commit 済みなので、その SKILL の取り決めどおり `HEAD` を基点にすると表示に混ざらない。レビューの範囲は現在のフェーズとし、開始前の差分が表示に含まれる場合は分けて示す。
+   - UI（見た目・操作）が変わるフェーズは、コード review の前に、root が dev server を起動し、`kstack-review-request` の live review を回す。指摘を直してからコード review に進む。差分からは動作や見た目の崩れが読み取れず、見た目の指摘でコードが変わるため。文言だけの修正など live で確かめることが無いフェーズは省いてよいが、理由を `未解決事項` に書く。
    - 手順 5 の review で直した指摘は `検証と証拠` に、直さなかった指摘・要確認・SKILL 同士の食い違いは理由を添えて `未解決事項` に入れる。
    - 承認待ちとして応答を終える。`kstack-review-request` から承認結果を受け取るまでは次フェーズのコードに触れない。
    - 指摘は同じフェーズ内で root が修正し、gate に戻る。手順 5 の review は回し直さない（1 フェーズに 1 回）。修正で挙動が変わり得るなら、検証を subagent に出し直し、証拠を修正後の状態にそろえる。

@@ -1,6 +1,6 @@
 ---
 name: kstack-interface-first-development
-description: repo 本体の default branch で動く root session が、次に始めるフェーズとつなぎ目（共有の型・API）を user と合意して子 session に実装を渡し、起動方式にかかわらず質問・既存パターンから外れる実装の事前承認・完了報告・kstack-review-request による user review を最後まで管理する。前のフェーズが merge されてから次の回だけを決める開発フロー
+description: repo 本体の default branch で動く root session が、次に始めるフェーズとつなぎ目（共有の型・API）を user と合意して子 session に実装を渡し、起動方式にかかわらず質問・既存パターンから外れる実装の事前承認・完了報告・kstack-review-request による user review（UI が変わるフェーズは子の dev server への live review を先に回す）を最後まで管理する。前のフェーズが merge されてから次の回だけを決める開発フロー
 disable-model-invocation: true
 ---
 
@@ -42,6 +42,15 @@ root は repo 本体の checkout（linked worktree ではない）の default br
    なぜ: ask tool は背景を書く場所が狭く、user は判断材料を見ないまま選ぶことになり、用意された選択肢の外の答えを考えにくくなる。チャットに並べた問いは、一部にしか答えなくても turn が進み、答えの漏れと催促が往復を増やす。user は数 turn 前の質問も、子や subagent とのやり取りも覚えていないので、参照だけの催促では答えられない。
 
 5. **引き継いで監督する** — 切り出した項目はフェーズごとの todo に置き換える。root の `intercom({ action: "status" })` が `Connected: Yes` であることを確かめ、`Session ID` を控える。接続できなければ root で user に必要な設定を伝えて止まり、子へ窓口を移さない。今回のフェーズだけを、作業場所と root の連絡先を埋めた引き継ぎ prompt で始め、フェーズが複数なら並列に始めると添える。herdr の中（`HERDR_ENV=1`）なら、`skill://kstack-handoff` で子を起動し、質問・user review・承認後の commit と、user が明示した push・PR・merge まで root が管理する。それ以外は「[手動で引き継ぐ](references/manual-handoff.md)」に従い、user が子を起動した後も root が報告と質問を受け、`skill://kstack-review-request` で user review を依頼する。子の状況は root が確認し、user に子の pane の巡回や報告の転送を頼まない。子から既存パターンから外れる実装の承認を求められたら、root は自分で決めずに user に聞き、結論を子に返す。今回のフェーズがすべて merge されたら、一覧に残りがあれば手順 2 に戻り、無ければ終わる。完了条件: 今回のフェーズの承認と明示許可された統合が確認できている。許可待ち・未統合のフェーズがあれば root に待ちの状態を残す
+
+   UI（見た目・操作）が変わるフェーズの user review は、`skill://kstack-review-request` の live review（子が報告した dev server の URL）を先に回し、その指摘を子に直させてから、コード review（差分）に進む。文言だけの修正など live で確かめることが無いフェーズは省いてよいが、省く理由を gate の `未解決事項` に書く。
+
+   ```text
+   Bad: 画面を変えたフェーズを差分だけで review に出し、動作や崩れを user が merge 後に見つける
+   Good: 子の dev server で live review → 指摘を子が直す → 差分のコード review
+   ```
+
+   なぜ: 差分からは、動かした時の挙動や見た目の崩れが読み取れない。見た目の指摘でコードが変わるので、先に live を済ませるとコード review を回し直さずに済む。
 
 ## フェーズ案
 
@@ -145,6 +154,7 @@ Good: 表示は型だけを前提に API と同じ回で並列にし、接続だ
 - 完了条件: <フェーズの完了条件>
 - 完了条件を満たしたら、最初の報告の前に 1 回だけ、`kstack-skill-review` を使う subagent、`kstack-drift-review` を使う subagent、`ponytail-review` を使う subagent に、並行して担当ファイルだけをレビューさせる。drift-review にはつなぎ目の全文も渡す（ほかのフェーズの担当ファイルはまだ無くてよい）。`ponytail-review` が環境に入っていなければ、代わりに review せず、入っていないことを報告に書く。subagent には直させず、指摘はあなたが直し、直した後も完了条件を満たすことを確かめる。つなぎ目か担当外のファイルを変えないと直せない指摘と、ponytail-review の指摘のうち決めたことを削る・既存パターンから外れる修正になるものは、直さずに報告する。報告の後に届く review の指摘を直すときは、この 3 つのレビューを回し直さず、完了条件だけ確かめて報告する
 - 最後に、フェーズ N・cwd・branch・変更したファイル・完了条件ごとの確認コマンドと結果・skill-review と drift-review と ponytail-review で直した指摘と直さなかった指摘（理由付き）・つなぎ目との差分を、intercom の `send` で root に報告して turn を終える
+- UI（見た目・操作）を変えたら、完了報告に dev server の URL（`localhost:<port>`）を書き、root から review 終了が届くまで dev server を止めない（root がその URL で live review を開く）
 - user review の依頼・指摘への返信・再依頼と、review の開始・終了は root に任せ、user に直接 review を頼まない。user がこの pane で review を頼んだ場合も root に連絡して窓口をそろえる。root から届いた指摘を直して再検証し、指摘ごとの対応結果と返信文を intercom の `send` で root に返して待つ
 - commit: user review の承認が root から届くまでは commit しない。承認が届いたら、担当の変更だけを `skill://kstack-git` の「commit の書き方」で自分の worktree の branch に commit し、commit hash を intercom の `send` で root に報告する（承認を commit の許可とみなす）
 - push・PR・merge は、user が明示した許可と範囲を root から受け取ったときだけ行う。PR は `skill://kstack-git` の「PR の作り方」で作り、PR を作っただけでは merge しない。merge を許可されたら `skill://kstack-git` の「PR を merge する」に従い、CI と approve がそろっていなければ merge せずに root に報告する。PR の URL・merge commit などの結果は intercom の `send` で root に報告する。review の承認から push・PR・merge の許可を推測しない
