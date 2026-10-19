@@ -16,11 +16,11 @@ const testMembers: Record<string, true> = {
   todo: true,
 };
 
-type Call = {
+interface Call {
   node: ESTree.CallExpression;
   kind: "describe" | "test";
   title: string;
-};
+}
 
 const staticTitleOf = (argument: ESTree.Argument | undefined) => {
   if (argument?.type === "Literal" && typeof argument.value === "string") {
