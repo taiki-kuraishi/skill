@@ -16,7 +16,7 @@ ruleTester.run("vrt-test-name", vrtTestName, {
 test("sign-in page", async ({ page }) => {
   await expect(page).toHaveScreenshot();
 });`,
-    // describe は英語ならコメント不要
+    // `describe` は英語ならコメント不要
     `import { expect, test } from "@playwright/test";
 
 test.describe("sign-in", () => {
@@ -32,14 +32,14 @@ test.describe("sign-in", () => {
 check("sign-in page", async ({ page }) => {
   await expect(page).toHaveScreenshot();
 });`,
-    // skip などの member は test のまま見る
+    // `skip` などの member は test のまま見る
     `import { expect, test } from "@playwright/test";
 
 // サインイン画面
 test.skip("sign-in page", async ({ page }) => {
   await expect(page).toHaveScreenshot();
 });`,
-    // toHaveScreenshot が無いファイルは VRT ではないので、日本語の名前もそのまま
+    // `toHaveScreenshot` が無いファイルは VRT ではないので、日本語の名前もそのまま
     `import { expect, test } from "@playwright/test";
 
 test("ログイン後に callbackURL へ移動する", async ({ page }) => {

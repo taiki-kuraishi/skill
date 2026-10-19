@@ -35,7 +35,7 @@ export const blankLineBeforeIf = defineRule({
           return;
         }
 
-        // a comment on the previous statement's last line belongs to that statement, not to this if
+        // A comment on the previous statement's last line belongs to that statement, not to this if
         const leadingCommentLines = context.sourceCode
           .getCommentsBefore(node)
           .map((comment) => comment.loc.start.line)

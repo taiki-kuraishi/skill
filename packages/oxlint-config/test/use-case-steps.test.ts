@@ -35,7 +35,7 @@ ruleTester.run("use-case-steps", useCaseSteps, {
     return this.invoices.find();
   };
 }`,
-    // execute を持たない class は対象外
+    // `execute` を持たない class は対象外
     `class InvoiceUseCase {
   run = () => 1;
 }`,
@@ -43,7 +43,7 @@ ruleTester.run("use-case-steps", useCaseSteps, {
     `class InvoiceUseCase {
   execute: (args: { userId: string }) => Promise<void>;
 }`,
-    // arrow ではなく method で書く形も見る
+    // Arrow ではなく method で書く形も見る
     `class SyncUserUseCase {
   /**
    * user を同期する
@@ -85,7 +85,7 @@ ruleTester.run("use-case-steps", useCaseSteps, {
 }`,
       errors: [{ messageId: "missingDoc" }],
     },
-    // doc comment ではなく行コメントを書いている
+    // Doc comment ではなく行コメントを書いている
     {
       code: `class SyncUserUseCase {
   // user を同期する
@@ -93,7 +93,7 @@ ruleTester.run("use-case-steps", useCaseSteps, {
 }`,
       errors: [{ messageId: "missingDoc" }],
     },
-    // doc comment はあるが、番号付きの step が並んでいない
+    // Doc comment はあるが、番号付きの step が並んでいない
     {
       code: `class SyncUserUseCase {
   /** user を同期する */
@@ -101,7 +101,7 @@ ruleTester.run("use-case-steps", useCaseSteps, {
 }`,
       errors: [{ messageId: "missingSteps" }],
     },
-    // doc comment が step から始まっていて、要約の 1 行が無い
+    // Doc comment が step から始まっていて、要約の 1 行が無い
     {
       code: `class SyncUserUseCase {
   /**
@@ -132,7 +132,7 @@ ruleTester.run("use-case-steps", useCaseSteps, {
 }`,
       errors: [{ messageId: "mismatch" }],
     },
-    // doc の step2 に対応する step コメントが本文に無い
+    // Doc の step2 に対応する step コメントが本文に無い
     {
       code: `class SyncUserUseCase {
   /**
@@ -164,7 +164,7 @@ ruleTester.run("use-case-steps", useCaseSteps, {
 }`,
       errors: [{ messageId: "mismatch" }],
     },
-    // step の間が空行で区切られていない
+    // Step の間が空行で区切られていない
     {
       code: `class SyncUserUseCase {
   /**
@@ -181,7 +181,7 @@ ruleTester.run("use-case-steps", useCaseSteps, {
 }`,
       errors: [{ messageId: "missingBlankLine" }],
     },
-    // doc の step が 2 つとも本文に無い
+    // Doc の step が 2 つとも本文に無い
     {
       code: `class SyncUserUseCase {
   /**

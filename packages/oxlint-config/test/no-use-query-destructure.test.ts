@@ -23,7 +23,7 @@ ruleTester.run("no-use-query-destructure", noUseQueryDestructure, {
   }
   return { status: "ready", todos: data.todos } as const;
 }`,
-    // view の hook が useQuery を読む形は kstack-react の例なので指摘しない（層が区別できない）
+    // View の hook が useQuery を読む形は kstack-react の例なので指摘しない（層が区別できない）
     `function useProjectDetail() {
   const { data: project } = useQuery(projectQuery);
   if (project === undefined) {
@@ -40,7 +40,7 @@ ruleTester.run("no-use-query-destructure", noUseQueryDestructure, {
   const query = useQuery({ queryKey: ["todos"], queryFn: fetchTodos });
   return query;
 };`,
-    // component が query を読む形は no-query-in-component が指摘する
+    // Component が query を読む形は no-query-in-component が指摘する
     `function OrderSummary() {
   const { data } = useQuery(ordersQuery);
   return <div>{data?.length}</div>;

@@ -12,7 +12,7 @@ const queryHookNames: Record<string, true> = {
   useSuspenseQuery: true,
 };
 
-/** query の options を受け取る hook（mutation を含む） */
+/** Query の options を受け取る hook（mutation を含む） */
 const optionsHookNames: Record<string, true> = {
   useInfiniteQuery: true,
   useMutation: true,
@@ -74,7 +74,7 @@ export const queryLikeHookNameOf = (node: ESTree.CallExpression) => {
     return undefined;
   }
 
-  if (!/^use([A-Z][A-Za-z0-9]*)?Quer(?:y|ies)$/.test(name)) {
+  if (!/^use(?:[A-Z][A-Za-z0-9]*)?Quer(?:y|ies)$/.test(name)) {
     return undefined;
   }
   return name;

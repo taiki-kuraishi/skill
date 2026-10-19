@@ -16,7 +16,7 @@ export const noExplicitReturnType = defineRule({
         return;
       }
 
-      // a type predicate is not inferred from an arbitrary body, so writing it duplicates nothing
+      // A type predicate is not inferred from an arbitrary body, so writing it duplicates nothing
       if (node.returnType.typeAnnotation.type === "TSTypePredicate") {
         return;
       }

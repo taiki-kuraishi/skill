@@ -35,7 +35,7 @@ Good: Bad / Good を lint して、見逃し（例: return しない else）と�
 - 表せない規約は無理にルール化しない。「小さい」「意味がある」のような判断が要る規約は、閾値を決めると誤検知が増える。表せない理由を対応表に書き、レビューで確かめる
 - 型情報が要る判定はできない（oxlint の JS plugin は型情報を使えない）。構文で近似するなら、外れる形を対応表に書く
 - 既存ルールと自作ルールで同じ箇所が二重に指摘されるなら、範囲の狭い方を外す
-- 規約と逆向きのルール（例: `unicorn/prefer-ternary`、`explicit-function-return-type`）は category 単位で有効にすると衝突するので、ルール単位で有効にする
+- 規約と逆向きのルール（例: `unicorn/prefer-ternary`、`explicit-function-return-type`）は、`typescript` が category 単位で有効にしているので、`rules` で `"off"` にし、README の off の表に理由を書く
 
 ## 落とし穴
 

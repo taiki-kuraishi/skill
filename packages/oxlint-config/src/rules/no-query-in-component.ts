@@ -9,11 +9,11 @@ const loadingFlagNames: Record<string, true> = {
   isRefetching: true,
 };
 
-type Frame = {
+interface Frame {
   calls: ESTree.CallExpression[];
   dataNames: Set<string>;
   loading: boolean;
-};
+}
 
 const isUndefined = (node: ESTree.Node) => node.type === "Identifier" && node.name === "undefined";
 
@@ -39,7 +39,7 @@ export const noQueryInComponent = defineRule({
     const exit = (node: ESTree.Function | ESTree.ArrowFunctionExpression) => {
       const frame = frames.pop();
 
-      // component が data の中身を読む・読み込み中を判定したときだけ指摘する。
+      // Component が data の中身を読む・読み込み中を判定したときだけ指摘する。
       // `data === null` の確認だけ（セッションの有無を見る gate）は kstack-tanstack-router の例なので残す
       if (!frame?.loading || !jsxFunctions.contains(node)) {
         return;

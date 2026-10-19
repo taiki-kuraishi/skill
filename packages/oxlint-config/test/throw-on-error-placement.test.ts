@@ -15,24 +15,24 @@ ruleTester.run("throw-on-error-placement", throwOnErrorPlacement, {
     queries: { throwOnError: (_error, query) => query.state.data === undefined },
   },
 });`,
-    // defaultOptions 以外の場所に置く形は対象外
+    // `defaultOptions` 以外の場所に置く形は対象外
     `const options = { throwOnError: (error) => error !== null };`,
-    // false で明示的に切るのは対象外
+    // `false` で明示的に切るのは対象外
     `new QueryClient({ defaultOptions: { queries: { throwOnError: false } } });`,
     // 画面の hook が retry を決めるのは対象外
     `export const useTodosQuery = (options?: Options) => useQuery({ ...todosQuery, ...options });`,
-    // mutation の既定は query の options ではない
+    // Mutation の既定は query の options ではない
     `new QueryClient({ defaultOptions: { mutations: { throwOnError: true } } });`,
-    // mutation の hook も対象外
+    // Mutation の hook も対象外
     `export const useCreateTodo = () =>
   useMutation({ mutationFn: createTodo, throwOnError: true });`,
-    // hook の外の、query とは関係ない object
+    // Hook の外の、query とは関係ない object
     `const requestConfig = { throwOnError: true };`,
-    // hook の中でも、query の options でなければ対象外
+    // Hook の中でも、query の options でなければ対象外
     `export function useRequestConfig() {
   return { throwOnError: true };
 }`,
-    // query の options でも、true 以外は対象外
+    // Query の options でも、`true` 以外は対象外
     `export const todosQuery = queryOptions({
   queryKey: ["todos"],
   queryFn: fetchTodos,

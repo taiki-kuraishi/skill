@@ -7,14 +7,14 @@ export default defineConfig({
     ignorePatterns: ["**/dist/**"],
   },
   fmt: {
-    // both formatters would rewrite these files and disagree on the result
+    // Both formatters would rewrite these files and disagree on the result
     ignorePatterns: ["**/*.{md,json,jsonc,yml,yaml,toml}", "**/dist/**"],
   },
   run: {
     tasks: {
       lint: {
         command: "vp lint --deny-warnings",
-        // jsPlugins loads the plugin from the package's dist, which only exists after a build
+        // The jsPlugins option loads the plugin from the package's dist, which only exists after a build
         dependsOn: ["@taiki-kuraishi/oxlint-config#build"],
       },
       fmt: "vp fmt",

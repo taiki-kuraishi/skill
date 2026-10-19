@@ -17,19 +17,19 @@ ruleTester.run("no-query-error", noQueryError, {
   }
   return { status: "ready", todos: data.todos } as const;
 }`,
-    // component が error を読む形は no-query-in-component が指摘するので、ここでは見逃す
+    // Component が error を読む形は no-query-in-component が指摘するので、ここでは見逃す
     `function ProjectDetail({ id }: { id: string }) {
   const { data, error } = useQuery(userQuery(id));
   return <h1>{error ? "error" : data?.name}</h1>;
 }`,
-    // mutation の onError は画面の hook が持つ
+    // Mutation の onError は画面の hook が持つ
     `function useCreateTodo() {
   return useMutation({
     mutationFn: (body) => createTodo(body),
     onError: (error) => reportError(error),
   });
 }`,
-    // query の data ではない分割代入
+    // Query の data ではない分割代入
     `function useThing(state: { error: string | null }) {
   const { error } = state;
   return error;

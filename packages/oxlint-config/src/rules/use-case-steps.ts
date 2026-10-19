@@ -2,11 +2,11 @@ import { defineRule } from "@oxlint/plugins";
 import type { ESTree } from "@oxlint/plugins";
 import { propertyNameOf } from "./query-hooks.ts";
 
-/** use case とみなす class 名の末尾。構文から use case かどうかは決められないので、命名を手掛かりにする */
+/** Use case とみなす class 名の末尾。構文から use case かどうかは決められないので、命名を手掛かりにする */
 const useCaseClassSuffix = "UseCase";
 
-const docStepPattern = /^(\d+)\.\s*(.+)$/;
-const bodyStepPattern = /^Step (\d+):\s*(.+)$/;
+const docStepPattern = /^(?<number>\d+)\.\s*(?<text>.+)$/;
+const bodyStepPattern = /^Step (?<number>\d+):\s*(?<text>.+)$/;
 
 /** 本体を持つ `execute` の method / property。宣言だけの overload は doc も step も書けないので対象外 */
 const executeMemberOf = (node: ESTree.Class) => {
@@ -28,9 +28,10 @@ const executeMemberOf = (node: ESTree.Class) => {
   return undefined;
 };
 
-/** doc comment の要約行と、`1. ...` の形の番号付き step。step より後ろの行は要約にしない */
+/** Doc comment の要約行と、`1. ...` の形の番号付き step。step より後ろの行は要約にしない */
 const parseDocOf = (comment: ESTree.Comment) => {
   const steps: { number: number; text: string }[] = [];
+  // oxlint-disable-next-line init-declarations -- 要約は doc の step より前の行から後で決まるので、宣言では初期化できない
   let summary: string | undefined;
 
   for (const rawLine of comment.value.split("\n")) {
@@ -38,10 +39,10 @@ const parseDocOf = (comment: ESTree.Comment) => {
       .trim()
       .replace(/^\*\s?/, "")
       .trim();
-    const matched = docStepPattern.exec(line);
+    const groups = docStepPattern.exec(line)?.groups;
 
-    if (matched) {
-      steps.push({ number: Number(matched[1]), text: matched[2].trim() });
+    if (groups) {
+      steps.push({ number: Number(groups.number), text: groups.text.trim() });
       continue;
     }
 
@@ -52,7 +53,7 @@ const parseDocOf = (comment: ESTree.Comment) => {
   return { summary, steps };
 };
 
-/** execute の中の `// Step N: ...` コメントを本文の順に返す */
+/** `execute` の中の `// Step N: ...` コメントを本文の順に返す */
 const bodyStepsOf = ({
   comments,
   member,
@@ -71,10 +72,10 @@ const bodyStepsOf = ({
       continue;
     }
 
-    const matched = bodyStepPattern.exec(comment.value.trim());
+    const groups = bodyStepPattern.exec(comment.value.trim())?.groups;
 
-    if (matched) {
-      steps.push({ number: Number(matched[1]), text: matched[2].trim(), comment });
+    if (groups) {
+      steps.push({ number: Number(groups.number), text: groups.text.trim(), comment });
     }
   }
   return steps;
@@ -113,13 +114,12 @@ export const useCaseSteps = defineRule({
 
       const doc = context.sourceCode
         .getCommentsBefore(member)
-        .filter(
+        .findLast(
           (comment) =>
             comment.type === "Block" &&
             comment.value.startsWith("*") &&
             comment.loc.end.line === member.loc.start.line - 1,
-        )
-        .at(-1);
+        );
 
       if (doc === undefined) {
         context.report({ node: member, messageId: "missingDoc" });
