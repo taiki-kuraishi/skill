@@ -1,6 +1,6 @@
 ---
 name: kstack-testing
-description: テストコードを書く・修正する・レビューするときの規約。spec ファイルやテスト関数を扱う場面すべてで使用すること — テスト本体に Arrange / Act / Assert のコメントを付ける構造化、テストデータを seed スクリプトや共有 fixture ではなく各テストケースの Arrange で作り、beforeEach / afterEach で DB を毎回まっさらに戻す方針、テストケースの選び方（正常系 1 件と use case / HTTP 応答の振る舞いごとに 1 件、入力 validation のテストは書かない）、行われないこと（呼ばれない・insert されない・ログが出ない）を assert しない方針など。テストの新規作成、修正、ケースの追加・削減、DB を使うテストの準備、レビュー指摘への対応でも発火させる。
+description: テストコードを書く・修正する・レビューするときの規約。spec ファイルやテスト関数を扱う場面すべてで使用すること — テスト本体に Arrange / Act / Assert のコメントを付ける構造化、テストデータを seed スクリプトや共有 fixture ではなく各テストケースの Arrange で作り、beforeEach / afterEach で DB を毎回まっさらに戻す方針、テストケースの選び方（正常系 1 件と use case / HTTP 応答の振る舞いごとに 1 件、入力 validation のテストは書かない）、行われないこと（呼ばれない・insert されない・ログが出ない）を assert しない方針、テスト名（describe / it / test の第 1 引数）を日本語で書くことなど。テストの新規作成、修正、ケースの追加・削減、DB を使うテストの準備、レビュー指摘への対応でも発火させる。
 ---
 
 # kstack-testing
@@ -13,7 +13,7 @@ description: テストコードを書く・修正する・レビューすると�
 
 ```ts
 // Bad: 準備と検証が混ざり、何が検証対象か追いにくい
-it("returns page content", async () => {
+it("ページの内容を返す", async () => {
   const req = new Request("/content?id=1");
   mockDb.get.mockResolvedValue(page);
   const res = await handler(req);
@@ -22,7 +22,7 @@ it("returns page content", async () => {
 });
 
 // Good: 3 区画がコメントで明示され、テストの構造が一目で分かる
-it("returns page content", async () => {
+it("ページの内容を返す", async () => {
   // Arrange
   const req = new Request("/content?id=1");
   mockDb.get.mockResolvedValue(page);
@@ -46,7 +46,7 @@ it("returns page content", async () => {
 
 ```ts
 // Bad: 事前に seed.sh が投入したユーザーを前提にし、前のテストが残した行も見えてしまう
-it("admin can open settings", async () => {
+it("admin は設定画面を開ける", async () => {
   const res = await app.request("/settings", { headers: { cookie: adminCookie } });
   expect(res.status).toBe(200);
 });
@@ -55,7 +55,7 @@ it("admin can open settings", async () => {
 beforeEach(async () => await testDb.begin());
 afterEach(async () => await testDb.rollback());
 
-it("admin can open settings", async () => {
+it("admin は設定画面を開ける", async () => {
   // Arrange
   const admin = await createUser(testDb, { role: "admin" });
 
@@ -81,8 +81,8 @@ it.each([{ pageSize: 5 }, { sortKey: "unknown" }])("rejects %o", async (args) =>
 });
 
 // Good: 正常系 1 件と、エラー応答という振る舞い 1 件
-it("returns search results", async () => { /* ... */ });
-it("returns an error when the upstream request fails", async () => { /* ... */ });
+it("検索結果を返す", async () => { /* ... */ });
+it("上流のリクエストが失敗するとエラーを返す", async () => { /* ... */ });
 ```
 
 なぜ: validation は schema やライブラリの宣言そのものが仕様で、テストは宣言の写しになり保守コストだけが増える。振る舞いごとに 1 件にすると、どのテストが何を守っているかが名前から分かる。
@@ -103,3 +103,21 @@ expect(consoleErrors).toStrictEqual([error]);
 ```
 
 なぜ: 起きないことは無数にあり、どれを選ぶかに根拠が無い。実装を変えても落ちないテストになりやすく、守っている振る舞いが読み取れない。
+
+## テスト名は日本語で書く
+
+`describe` / `it` / `test` の第 1 引数（テスト名）は日本語で書く。
+
+```ts
+// Bad
+describe("search tool", () => {
+  it("returns an error when the upstream request fails", async () => { /* ... */ });
+});
+
+// Good
+describe("検索 tool", () => {
+  it("上流のリクエストが失敗するとエラーを返す", async () => { /* ... */ });
+});
+```
+
+なぜ: テスト名は user が読んで、何を守るテストかを確かめる仕様の一覧になる。user の言葉で書かないと、review や失敗時の出力で読み流される。

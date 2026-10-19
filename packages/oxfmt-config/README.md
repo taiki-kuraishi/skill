@@ -107,7 +107,7 @@ oxfmt で表せる規約は無い。整形の選択肢しか持たず、route �
 
 ### kstack-testing
 
-oxfmt で表せる規約は無い。整形の選択肢しか持たず、Arrange / Act / Assert のコメントの有無、テストデータをどこで作るか、テストの本数と assert に何を書くかは決められない（5 規約の Bad / Good に `oxfmt --check` は差分を出さない）。
+oxfmt で表せる規約は無い。整形の選択肢しか持たず、Arrange / Act / Assert のコメントの有無、テストデータをどこで作るか、テストの本数と assert に何を書くか、テスト名の言語は決められない（6 規約の Bad / Good に `oxfmt --check` は差分を出さない）。
 
 ### kstack-drizzle-orm
 
