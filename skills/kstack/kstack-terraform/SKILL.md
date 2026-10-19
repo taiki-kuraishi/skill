@@ -1,6 +1,6 @@
 ---
 name: kstack-terraform
-description: Terraform（.tf ファイル、HCL）と tflint 設定（.tflint.hcl、tflint-ruleset-opa の Rego ポリシー）を書く・修正する・レビューするときの規約。リテラル値に名前を付けるときは locals ではなく default 付きの variable にすること、resource を S3・KMS・IAM のようにサービス名の module にまとめて root に resource を残さないこと、root module（state の単位）の分け方とディレクトリ名を agent が決めずに user と相談すること、provider ブロックを provider.tf に置き versions.tf を terraform ブロックだけにすること、root に output を書かず module の output を呼び出し側で参照するものだけにすること、module 内を bucket などの主リソースごとのファイルに分けること、同じ種類の resource が増えても衝突しない名前を付けること、Secret Manager などの secret 名に tf-var のような使う側の prefix を入れないこと、tflint に provider 公式の ruleset plugin を version・source 付きで入れ deep_check を有効にすることを扱う。AWS・GCP・Cloudflare などのインフラや root module（stack）の追加、module 化やファイル分割のリファクタリング、lint 設定、レビュー指摘への対応でも発火させる。
+description: Terraform（.tf ファイル、HCL）と tflint 設定（.tflint.hcl、tflint-ruleset-opa の Rego ポリシー）を書く・修正する・レビューするときの規約。リテラル値に名前を付けるときは locals ではなく default 付きの variable にすること、resource を S3・KMS・IAM のようにサービス名の module にまとめて root に resource を残さないこと、root module（state の単位）の分け方とディレクトリ名を agent が決めずに user と相談すること、provider ブロックを provider.tf に置き versions.tf を terraform ブロックだけにすること、root に output を書かず module の output を呼び出し側で参照するものだけにすること、module 内を bucket などの主リソースごとのファイルに分けること、同じ種類の resource が増えても衝突しない名前を付けること、固定の一覧から resource を作るときに for_each や count を使わず 1 つずつ resource ブロックで定義すること、Secret Manager などの secret 名に tf-var のような使う側の prefix を入れないこと、tflint に provider 公式の ruleset plugin を version・source 付きで入れ deep_check を有効にすることを扱う。AWS・GCP・Cloudflare などのインフラや root module（stack）の追加、module 化やファイル分割のリファクタリング、lint 設定、レビュー指摘への対応でも発火させる。
 ---
 
 # kstack-terraform
@@ -165,6 +165,33 @@ resource "aws_s3_bucket" "cloudtrail_logs" {
 なぜ: resource のアドレス（`aws_s3_bucket.cloudtrail_logs`）は state のキーなので、後から改名すると `moved` block を書くか、作り直しになる。1 件目のときに種類の名前を付けると、2 件目が来た時点で改名を迫られる。
 
 1 つしか存在し得ない resource（AWS Organizations の organization など）は `this` でよい。
+
+## 固定の一覧から resource を作るときは for_each・count を使わず 1 つずつ定義する
+
+作る resource が書く時点で決まっているなら、名前の一覧を variable や locals に置いて `for_each`・`count` で展開せず、1 つずつ resource ブロックを書く。
+
+```hcl
+# Bad: 名前の一覧を変数に置き、for_each で展開する
+variable "secret_names" {
+  type = list(string)
+}
+
+resource "aws_secretsmanager_secret" "this" {
+  for_each = toset(var.secret_names)
+  name     = each.value
+}
+
+# Good: 1 つずつ宣言する
+resource "aws_secretsmanager_secret" "oauth_client_secret" {
+  name = "oauth-client-secret"
+}
+
+resource "aws_secretsmanager_secret" "database_password" {
+  name = "database-password"
+}
+```
+
+なぜ: Terraform は宣言的なコードなのに、`for_each` で展開すると何が作られるかがコードから読めなくなり、宣言的でなくなる。1 つずつ書けば plan・grep・参照（`aws_secretsmanager_secret.oauth_client_secret`）で個体を直接追え、一覧の変数も要らない。
 
 ## secret の名前に使う側の都合を入れない
 
