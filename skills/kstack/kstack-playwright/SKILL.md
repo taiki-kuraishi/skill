@@ -1,6 +1,6 @@
 ---
 name: kstack-playwright
-description: Playwright（@playwright/test）でブラウザテストを書く・修正する・レビューするときの規約。VRT（ビジュアルリグレッションテスト、toHaveScreenshot）と E2E テストの置き場所・実行環境・assert 対象の分け方、E2E のテストケース粒度（URL を変える操作単位、toHaveURL での検証）を扱う。spec ファイルの新規作成、テスト追加先の判断、playwright config の作成、レビュー指摘への対応でも発火させる。
+description: Playwright（@playwright/test）でブラウザテストを書く・修正する・レビューするときの規約。VRT（ビジュアルリグレッションテスト、toHaveScreenshot）と E2E テストの置き場所・実行環境・assert 対象の分け方、VRT のテスト名（英語で書き、日本語はコメントで添える）、E2E のテストケース粒度（URL を変える操作単位、toHaveURL での検証）を扱う。spec ファイルの新規作成、テスト追加先の判断、playwright config の作成、レビュー指摘への対応でも発火させる。
 ---
 
 # kstack-playwright
@@ -35,6 +35,25 @@ VRT はフォントやレンダリングの差でスクリーンショットが�
 ```
 
 なぜ: 環境固定が必要なのは画像比較のためだけ。E2E まで Docker 前提にすると、起動が遅くなりローカルで気軽に回せなくなるだけで、得るものがない。
+
+## VRT のテスト名は英語で書き、日本語はコメントで添える
+
+VRT の `test` / `describe` の第 1 引数は英語で書き、`test` の上の行に日本語のコメントで内容を書く。
+
+```ts
+// Bad
+test("サインイン画面", async ({ page }) => {
+  await expect(page).toHaveScreenshot();
+});
+
+// Good
+// サインイン画面
+test("sign-in page", async ({ page }) => {
+  await expect(page).toHaveScreenshot();
+});
+```
+
+なぜ: `toHaveScreenshot()` はテスト名からスナップショットのファイル名を作るので、日本語の名前はファイル名にも日本語が入る。日本語はコメントに残せば、何を撮るテストかは読める。
 
 ## E2E は URL を assert し、テストケースは URL を変える操作単位にする
 

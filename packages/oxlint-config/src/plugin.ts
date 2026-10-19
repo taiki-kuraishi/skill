@@ -11,6 +11,7 @@ import { noUseQueryDestructure } from "./rules/no-use-query-destructure.ts";
 import { objectParams } from "./rules/object-params.ts";
 import { throwOnErrorPlacement } from "./rules/throw-on-error-placement.ts";
 import { useCaseSteps } from "./rules/use-case-steps.ts";
+import { vrtTestName } from "./rules/vrt-test-name.ts";
 
 export default eslintCompatPlugin(
   definePlugin({
@@ -28,6 +29,7 @@ export default eslintCompatPlugin(
       "object-params": objectParams,
       "throw-on-error-placement": throwOnErrorPlacement,
       "use-case-steps": useCaseSteps,
+      "vrt-test-name": vrtTestName,
     },
   }),
 );

@@ -1,6 +1,6 @@
 ---
 name: kstack-testing
-description: テストコードを書く・修正する・レビューするときの規約。spec ファイルやテスト関数を扱う場面すべてで使用すること — テスト本体に Arrange / Act / Assert のコメントを付ける構造化、テストデータを seed スクリプトや共有 fixture ではなく各テストケースの Arrange で作り、beforeEach / afterEach で DB を毎回まっさらに戻す方針、テストケースの選び方（正常系 1 件と use case / HTTP 応答の振る舞いごとに 1 件、入力 validation のテストは書かない）、行われないこと（呼ばれない・insert されない・ログが出ない）を assert しない方針、テスト名（describe / it / test の第 1 引数）を日本語で書くことなど。テストの新規作成、修正、ケースの追加・削減、DB を使うテストの準備、レビュー指摘への対応でも発火させる。
+description: テストコードを書く・修正する・レビューするときの規約。spec ファイルやテスト関数を扱う場面すべてで使用すること — テスト本体に Arrange / Act / Assert のコメントを付ける構造化、テストデータを seed スクリプトや共有 fixture ではなく各テストケースの Arrange で作り、beforeEach / afterEach で DB を毎回まっさらに戻す方針、テストケースの選び方（正常系 1 件と use case / HTTP 応答の振る舞いごとに 1 件、入力 validation のテストは書かない）、行われないこと（呼ばれない・insert されない・ログが出ない）を assert しない方針、テスト名の言語（it / test の第 1 引数は日本語、describe の第 1 引数は英語。VRT の test は kstack-playwright に従う）など。テストの新規作成、修正、ケースの追加・削減、DB を使うテストの準備、レビュー指摘への対応でも発火させる。
 ---
 
 # kstack-testing
@@ -104,20 +104,26 @@ expect(consoleErrors).toStrictEqual([error]);
 
 なぜ: 起きないことは無数にあり、どれを選ぶかに根拠が無い。実装を変えても落ちないテストになりやすく、守っている振る舞いが読み取れない。
 
-## テスト名は日本語で書く
+## テスト名は `it` / `test` を日本語、`describe` を英語で書く
 
-`describe` / `it` / `test` の第 1 引数（テスト名）は日本語で書く。
+`it` / `test` の第 1 引数（テスト名）は日本語で書き、`describe` の第 1 引数は英語で書く。
+VRT（スクリーンショットを撮るテスト）の `test` は除く。`kstack-playwright` に従う。
 
 ```ts
-// Bad
+// Bad: describe・it とも英語
 describe("search tool", () => {
   it("returns an error when the upstream request fails", async () => { /* ... */ });
 });
 
-// Good
+// Bad: describe が日本語
 describe("検索 tool", () => {
+  it("上流のリクエストが失敗するとエラーを返す", async () => { /* ... */ });
+});
+
+// Good
+describe("search tool", () => {
   it("上流のリクエストが失敗するとエラーを返す", async () => { /* ... */ });
 });
 ```
 
-なぜ: テスト名は user が読んで、何を守るテストかを確かめる仕様の一覧になる。user の言葉で書かないと、review や失敗時の出力で読み流される。
+なぜ: `it` / `test` の名前は user が読んで、何を守るテストかを確かめる仕様の一覧になる。user の言葉で書かないと、review や失敗時の出力で読み流される。`describe` の名前は対象を指す識別子として、出力やフィルタ（`-t` など）で使うので英語にする。

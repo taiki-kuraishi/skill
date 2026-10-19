@@ -107,7 +107,11 @@ oxfmt で表せる規約は無い。整形の選択肢しか持たず、route �
 
 ### kstack-testing
 
-oxfmt で表せる規約は無い。整形の選択肢しか持たず、Arrange / Act / Assert のコメントの有無、テストデータをどこで作るか、テストの本数と assert に何を書くか、テスト名の言語は決められない（6 規約の Bad / Good に `oxfmt --check` は差分を出さない）。
+oxfmt で表せる規約は無い。整形の選択肢しか持たず、Arrange / Act / Assert のコメントの有無、テストデータをどこで作るか、テストの本数と assert に何を書くか、`it` / `test` の名前と `describe` の名前の言語は決められない（6 規約の Bad / Good に `oxfmt --check` は差分を出さない）。
+
+### kstack-playwright
+
+oxfmt で表せる規約は無い。整形の選択肢しか持たず、テストの置き場所、Docker で実行するか、テスト名の言語とコメント、1 ケースの粒度は決められない（4 規約の Bad / Good に `oxfmt --check` は差分を出さない）。VRT のテスト名は `@taiki-kuraishi/oxlint-config` の `playwright`（`kstack/vrt-test-name`）で検出する。
 
 ### kstack-drizzle-orm
 
