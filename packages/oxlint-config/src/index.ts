@@ -81,11 +81,24 @@ export const testing = {
         ignoreSpaces: true,
         ignoreTypeOfDescribeName: true,
         ignoreTypeOfTestName: true,
-        mustMatch: [
-          "[\\p{Script=Hiragana}\\p{Script=Katakana}\\p{Script=Han}]",
-          "テスト名は日本語で書く（kstack-testing）。",
-        ],
+        // 種別ごとの値は文字列しか受け付けず、配列で渡した message は黙って無視される（oxlint 1.88）。
+        // そのため SKILL 名は verbose mode のコメントとして pattern に埋め、指摘の文面に出す
+        mustMatch: {
+          it: "(?x)[\\p{Script=Hiragana}\\p{Script=Katakana}\\p{Script=Han}] # テスト名は日本語で書く（kstack-testing）。",
+          test: "(?x)[\\p{Script=Hiragana}\\p{Script=Katakana}\\p{Script=Han}] # テスト名は日本語で書く（kstack-testing）。",
+        },
+        mustNotMatch: {
+          describe:
+            "(?x)[\\p{Script=Hiragana}\\p{Script=Katakana}\\p{Script=Han}] # describe は英語で書く（kstack-testing）。",
+        },
       },
     ],
+  },
+} satisfies OxlintConfig;
+
+export const playwright = {
+  jsPlugins: ["@taiki-kuraishi/oxlint-config/plugin"],
+  rules: {
+    "kstack/vrt-test-name": "error",
   },
 } satisfies OxlintConfig;
