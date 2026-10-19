@@ -79,7 +79,7 @@ Good: CRIT_PUBLIC_URL と PORT から REVIEW_URL を決め、--public-url に同
 
 ## live review で起動する
 
-呼び出し元から dev server の URL（`localhost:<port>`）を受け取ったら、上と同じ `PORT`・`REVIEW_URL`・background job で、`crit live "${network_args[@]}" <url>` として起動する（option は `live` の後に置く）。この SKILL の「手順」の 3〜7 はコードの review と同じで、指摘は DOM 要素に pin される。返信はコードの指摘と同じく `--reply-to <id>` で行い、`--selector` は新しく pin を付けるときだけ使う。修正を見せ直す前に、dev server が更新後のコードで動いていることを確かめる。
+呼び出し元から dev server の URL（`localhost:<port>`）を受け取ったら、上と同じ `PORT`・background job で、`crit live "${network_args[@]}" <url>` として起動する（option は `live` の後に置く）。user に渡す URL は `REVIEW_URL` に `/live` を付けたものにする（`REVIEW_URL` のままでは通常の Files 画面が開き、live の入口ではない）。この SKILL の「手順」の 3〜7 はコードの review と同じで、指摘は DOM 要素に pin される。返信はコードの指摘と同じく `--reply-to <id>` で行い、`--selector` は新しく pin を付けるときだけ使う。修正を見せ直す前に、dev server が更新後のコードで動いていることを確かめる。公開 URL 越しで `Commenting unavailable` と出たら、見るだけの確認として回し、指摘はチャットで集めてコード review に持ち込む。
 
 ```text
 Bad: DOM の指摘への返信に --selector を付け、別の新しい指摘を作る / review 中に dev server を止める
