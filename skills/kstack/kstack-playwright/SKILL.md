@@ -42,7 +42,7 @@ E2E の Assert は `toHaveURL` による遷移先の検証を主にする。テ�
 
 ```ts
 // Bad: 描画内容の確認と複数の遷移を 1 ケースに詰め込み、見た目の検証も混ぜている
-test("sign-in", async ({ page }) => {
+test("ログイン", async ({ page }) => {
   await page.goto("/sign-in");
   await expect(page.getByRole("heading", { name: "ログイン" })).toBeVisible();
   await page.getByRole("button", { name: "ログイン" }).click();

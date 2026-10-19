@@ -53,3 +53,39 @@ export const tanstackQuery = {
     "kstack/throw-on-error-placement": "error",
   },
 } satisfies OxlintConfig;
+
+export const testing = {
+  plugins: ["vitest"],
+  rules: {
+    // plugins に vitest を入れると有効になる correctness の既定ルールは、SKILL に無い規約なので切る
+    "vitest/expect-expect": "off",
+    "vitest/hoisted-apis-on-top": "off",
+    "vitest/no-conditional-expect": "off",
+    "vitest/no-conditional-tests": "off",
+    "vitest/no-disabled-tests": "off",
+    "vitest/no-focused-tests": "off",
+    "vitest/no-standalone-expect": "off",
+    "vitest/prefer-snapshot-hint": "off",
+    "vitest/require-awaited-expect-poll": "off",
+    "vitest/require-local-test-context-for-concurrent-snapshots": "off",
+    "vitest/require-mock-type-parameters": "off",
+    "vitest/require-to-throw-message": "off",
+    "vitest/valid-describe-callback": "off",
+    "vitest/valid-expect": "off",
+    "vitest/valid-expect-in-promise": "off",
+    "vitest/warn-todo": "off",
+    "vitest/valid-title": [
+      "error",
+      {
+        // valid-title の既定の検査（前後の空白、文字列でないタイトル）は SKILL に無い規約なので切る
+        ignoreSpaces: true,
+        ignoreTypeOfDescribeName: true,
+        ignoreTypeOfTestName: true,
+        mustMatch: [
+          "[\\p{Script=Hiragana}\\p{Script=Katakana}\\p{Script=Han}]",
+          "テスト名は日本語で書く（kstack-testing）。",
+        ],
+      },
+    ],
+  },
+} satisfies OxlintConfig;
