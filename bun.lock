@@ -18,7 +18,7 @@
     },
     "packages/oxlint-config": {
       "name": "@taiki-kuraishi/oxlint-config",
-      "version": "0.7.0",
+      "version": "0.8.0",
       "dependencies": {
         "@oxlint/plugins": "^1.87.0",
       },

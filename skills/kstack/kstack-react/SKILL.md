@@ -1,6 +1,6 @@
 ---
 name: kstack-react
-description: React のコンポーネント・hooks を書く・修正する・レビューするときの規約。useEffect・useLayoutEffect を使わず、データ取得は TanStack Query（useQuery）で読み、読み込み中は view の hook が data === undefined から判定する。外部の状態の購読は zustand などの store に任せ、描画を止めない非同期・楽観的な UI を設計する。view を index.tsx・hooks/・components/ のディレクトリにまとめて .tsx には関数を 1 つだけ置くこと、view と hook を 1 対 1 にして hook が表示の形（status など）で返すこと、フォームをデータが揃ってから key 付きの内側の component で mount することも扱う。tsx でのデータ取得、ローディング表示、useSuspenseQuery・Suspense からの書き換え、派生 state、ブラウザ API や外部ストアの購読、認証確認などの楽観的な表示、絞り込み・ページ送りなど再取得を伴う更新、コンポーネントの分割・ファイル配置・hook の切り出し、フォーム（TanStack Form など）の初期値、レビュー指摘への対応でも発火させる。
+description: React のコンポーネント・hooks を書く・修正する・レビューするときの規約。useEffect・useLayoutEffect を使わず、データ取得は TanStack Query（useQuery）で読み、読み込み中は view の hook が data === undefined から判定する。外部の状態の購読は zustand などの store に任せ、描画を止めない非同期・楽観的な UI を設計する。view を index.tsx・hooks/・components/ のディレクトリにまとめて .tsx には関数を 1 つだけ置くこと、view と hook を 1 対 1 にして hook が表示の形（status など）で返すこと、JSX 内の条件付き表示を if と表示 component に分けること、props のバケツリレーと委譲だけの wrapper を作らないこと、フォームをデータが揃ってから key 付きの内側の component で mount することも扱う。tsx でのデータ取得、ローディング表示、useSuspenseQuery・Suspense からの書き換え、派生 state、ブラウザ API や外部ストアの購読、認証確認などの楽観的な表示、絞り込み・ページ送りなど再取得を伴う更新、コンポーネントの分割・ファイル配置・hook の切り出し、フォーム（TanStack Form など）の初期値、レビュー指摘への対応でも発火させる。
 ---
 
 # kstack-react
@@ -138,9 +138,49 @@ dashboard/
 
 なぜ: 1 ファイル 1 コンポーネントなら責務が混ざらず、置き場所が構造から決まる。`components/` を外から import させなければ、view どうしが部品を介して暗黙に結びつかず、共有が要った時点で「共有の置き場所へ移す」という判断が必ず挟まる。
 
+## 別の component を描くだけの wrapper を作らない
+
+分岐・hook・props の加工がなく、別の component を描画するだけの component を作らない。呼び出し側から実体を直接使う。
+
+```tsx
+// Bad: 名前を増やすだけの委譲
+function AccountPage() {
+  return <AccountCard />;
+}
+
+// Good: 呼び出し側で実体を使う
+<AccountCard />;
+```
+
+なぜ: 委譲だけの component は表示や状態の責務を持たず、実体を読むまでの移動を 1 回増やす。
+
+## 条件付き表示は if で切り替え、表示内容は別の component に置く
+
+JSX 内の `条件 && 表示` で出し分けず、状態を読む component が hook の戻り値を `if` で判定して早期 return し、分岐ごとの表示 component を選ぶ。単純な条件付き表示も同じように分ける。
+
+```tsx
+// Bad: 状態の判定と表示内容が JSX の中で混ざる
+function Notice() {
+  const notice = useNotice();
+  return <>{notice.cancelled && <p>キャンセルされました</p>}</>;
+}
+
+// Good: 表示内容は別ファイルの CancelledNotice に置く
+function Notice() {
+  const notice = useNotice();
+
+  if (notice.cancelled) {
+    return <CancelledNotice />;
+  }
+  return null;
+}
+```
+
+なぜ: 判定は if の並び、表示内容は各 component と読む場所が分かれ、JSX のネストから条件を探す必要がなくなる。
+
 ## view と hook は 1 対 1 にし、hook が表示の形で返す
 
-view ごとに `hooks/use-<view>.ts` を 1 つ置く。データの読み取り、集計・整形、表示の判定（読み込み中・空などの `status`）は hook の中で終わらせ、component は戻り値を描くだけにする。`useQuery` の読み込み中の判定（`data === undefined`）も常に hook で行い、component では `data` や `isPending` を見ない。集計・整形のための関数や型は、その hook のファイルに非 export で置き、共有モジュールへ切り出さない。複数の view が同じ式を使っていても、それぞれの hook に書く。自分ではデータを読まず、親や page が確定させた値を props で受けて描くだけの view（状態表示など）は hook を持たない。
+view ごとに `hooks/use-<view>.ts` を 1 つ置く。データの読み取り、集計・整形、表示の判定（読み込み中・空などの `status`）は hook の中で終わらせ、component は戻り値を描くだけにする。`useQuery` の読み込み中の判定（`data === undefined`）も常に hook で行い、component では `data` や `isPending` を見ない。集計・整形のための関数や型は、その hook のファイルに非 export で置き、共有モジュールへ切り出さない。複数の view が同じ式を使っていても、それぞれの hook に書く。子が自分では決められない値だけを props で受けて描く view（map で回す行など）は hook を持たない。
 
 ```tsx
 // Bad: component が集計と判定を持ち、式は共有モジュールから import している
@@ -179,6 +219,28 @@ function OrderSummary() {
 - hook は引数なしで呼べる形にし、選択中の項目や URL の state は hook の中で解決する。例外は、hook の中では決められない値、または引き直すと食い違いうる値。親が読み込み済みの行を受け取るフォームの hook、route の param（hook の中でルートを引くと hook がその route に癒着する）、親が確定させた id に書き込むだけの hook、購読する対象や登録するフォームのように呼び出し側が決める値は引数で受ける
 
 なぜ: UI は頻繁に変わるので、重複を許してでも、変更が他の view へ波及しないほうが安い。式を共有すると片方の変更が他方に及び、component が集計を持つと見た目の変更と計算の変更が同じファイルで絡む。hook が表示の形で返せば、component は何を描くかだけを読める。
+
+## props をバケツリレーせず、子の hook が同じ情報源を読む
+
+子が直接読める情報は props で渡さず、子の view 用 hook から query hook や store を読む。view と hook は 1 対 1 のまま、それぞれの hook が同じ情報源を読んでよい。props は map で回す行や route の param など、子が自分では決められない値だけにする。
+
+```tsx
+// Bad: 子が直接読める情報を親から渡す
+function AccountCard() {
+  const account = useAccountCard();
+  return <AccountHeader name={account.name} />;
+}
+
+// Good: 子の view 用 hook が query hook / store を直接読む
+function AccountHeader() {
+  const header = useAccountHeader();
+  return <h1>{header.name}</h1>;
+}
+```
+
+複数の component で共有する可変 state は store に置く。`useState` を持つ hook を複数箇所から呼んでも、呼び出しごとに独立した state が作られるだけで共有されない。
+
+なぜ: 親が子の情報を運ぶだけになると、中間の component まで props の変更が広がる。同じ query key の取得は TanStack Query に、可変 state の共有は store に任せれば、各 view が必要な情報を自分で読める。
 
 ## フォームはデータが揃ってから、key 付きの内側の component で mount する
 

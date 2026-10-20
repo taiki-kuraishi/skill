@@ -78,12 +78,21 @@ export const react = {
             message:
               "useSuspenseQuery を使わず useQuery で読み、読み込み中は view の hook が data === undefined から判定する（kstack-react）。",
           },
+          {
+            name: "react",
+            importNames: ["useEffect", "useLayoutEffect"],
+            message:
+              "Effect を使わず、データ取得・イベント・購読・DOM 操作の目的ごとの仕組みに置き換える（kstack-react）。",
+          },
         ],
       },
     ],
+    "kstack/no-delegation-only-component": "error",
+    "kstack/no-jsx-conditional-and": "error",
     "kstack/no-negated-data": "error",
     "kstack/no-query-error": "error",
     "kstack/no-query-in-component": "error",
+    "kstack/one-function-per-tsx": "error",
     "react-doctor/activity-wraps-effect-heavy-subtree": "error",
     "react-doctor/advanced-event-handler-refs": "error",
     "react-doctor/alt-text": "error",
@@ -182,7 +191,7 @@ export const react = {
     "react-doctor/jsx-no-script-url": "error",
     "react-doctor/jsx-no-target-blank": "error",
     "react-doctor/jsx-no-undef": "error",
-    "react-doctor/jsx-numeric-and-leaked-render": "error",
+    "react-doctor/jsx-numeric-and-leaked-render": "off",
     "react-doctor/jsx-props-no-spread-multi": "error",
     "react-doctor/label-has-associated-control": "error",
     "react-doctor/lang": "error",
@@ -747,6 +756,7 @@ export const testing = {
 export const playwright = {
   jsPlugins: ["@taiki-kuraishi/oxlint-config/plugin"],
   rules: {
+    "kstack/playwright-assert": "error",
     "kstack/vrt-test-name": "error",
   },
 } satisfies OxlintConfig;

@@ -1,6 +1,6 @@
 ---
 name: kstack-playwright
-description: Playwright（@playwright/test）でブラウザテストを書く・修正する・レビューするときの規約。VRT（ビジュアルリグレッションテスト、toHaveScreenshot）と E2E テストの置き場所・実行環境・assert 対象の分け方、VRT のテスト名（英語で書き、日本語はコメントで添える）、E2E のテストケース粒度（URL を変える操作単位、toHaveURL での検証）を扱う。spec ファイルの新規作成、テスト追加先の判断、playwright config の作成、レビュー指摘への対応でも発火させる。
+description: Playwright（@playwright/test）でブラウザテストを書く・修正する・レビューするときの規約。VRT（ビジュアルリグレッションテスト、toHaveScreenshot）と E2E テストの置き場所・実行環境・assert 対象の分け方、VRT のテスト名（英語で書き、日本語はコメントで添える）、E2E のテストケース粒度（URL を変える操作単位、Assert は toHaveURL のみ）、VRT の Assert は toHaveScreenshot のみとし構造を使った locator.waitFor で撮影状態を待つことを扱う。spec ファイルの新規作成、テスト追加先の判断、playwright config の作成、レビュー指摘への対応でも発火させる。
 ---
 
 # kstack-playwright
@@ -57,7 +57,7 @@ test("sign-in page", async ({ page }) => {
 
 ## E2E は URL を assert し、テストケースは URL を変える操作単位にする
 
-E2E の Assert は `toHaveURL` による遷移先の検証を主にする。テストケースは「この操作をすると、この URL へ移動する（しない）」という、URL を変える操作 1 つにつき 1 ケースで切る。
+E2E の Assert は `toHaveURL` だけにする。文言・要素の有無・件数を `toHaveText`・`toBeVisible`・`toHaveCount` などで expect せず、表示の検証は VRT に任せる。locator を `click`・`fill` などの操作に使うのはよい。テストケースは「この操作をすると、この URL へ移動する（しない）」という、URL を変える操作 1 つにつき 1 ケースで切る。
 
 ```ts
 // Bad: 描画内容の確認と複数の遷移を 1 ケースに詰め込み、見た目の検証も混ぜている
@@ -84,3 +84,19 @@ test("ログインボタンを押すと /home へ移動する", async ({ page })
 ```
 
 なぜ: 見た目の検証は VRT の役割で、E2E が担うのは「ユーザーの操作でどこへ行くか」。URL を変える操作単位で切れば、テスト名がそのまま画面遷移の仕様一覧になり、失敗したときにどの遷移が壊れたか即座に分かる。
+
+## VRT の Assert は toHaveScreenshot だけにする
+
+表示される文言や要素の表示を別の expect で重複検証しない。撮影する状態までの待機は、要素の構造を使った `locator.waitFor()` で行う。
+
+```ts
+// Bad: スクリーンショットと同じ表示を文言でも検証している
+await expect(page.getByText("保存に失敗しました")).toBeVisible();
+await expect(page).toHaveScreenshot();
+
+// Good: 構造で撮影状態を待ち、表示は画像で検証する
+await page.locator("main [role='alert']").waitFor();
+await expect(page).toHaveScreenshot();
+```
+
+なぜ: 文言や要素の表示はスクリーンショットにも写る。同じ表示を二重に検証すると、表示を変えるたびに画像と expect の両方を直すことになる。
