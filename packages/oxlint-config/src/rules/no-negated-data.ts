@@ -54,7 +54,7 @@ export const noNegatedData = defineRule({
           return;
         }
 
-        const { name } = node.argument;
+        const name = node.argument.name;
 
         if (name === "data" || scopes.some((scope) => scope.has(name))) {
           context.report({ node, messageId: "negated" });

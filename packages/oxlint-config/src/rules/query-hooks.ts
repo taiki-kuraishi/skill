@@ -28,7 +28,7 @@ const plainQueryHookNames: Record<string, true> = {
 };
 
 const callNameOf = (node: ESTree.CallExpression) => {
-  const { callee } = node;
+  const callee = node.callee;
 
   if (callee.type !== "Identifier") {
     return undefined;
@@ -112,7 +112,7 @@ export const functionNameOf = (node: FunctionNode) => {
     return node.id?.name;
   }
 
-  const { parent } = node;
+  const parent = node.parent;
 
   if (parent.type === "VariableDeclarator" && parent.id.type === "Identifier") {
     return parent.id.name;

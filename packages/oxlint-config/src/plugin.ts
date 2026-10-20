@@ -6,6 +6,7 @@ import { noElse } from "./rules/no-else.ts";
 import { noExplicitReturnType } from "./rules/no-explicit-return-type.ts";
 import { noJsxConditionalAnd } from "./rules/no-jsx-conditional-and.ts";
 import { noNegatedData } from "./rules/no-negated-data.ts";
+import { noPropertyDestructure } from "./rules/no-property-destructure.ts";
 import { noQueryError } from "./rules/no-query-error.ts";
 import { noQueryInComponent } from "./rules/no-query-in-component.ts";
 import { noUnspreadOptions } from "./rules/no-unspread-options.ts";
@@ -28,6 +29,7 @@ export default eslintCompatPlugin(
       "no-explicit-return-type": noExplicitReturnType,
       "no-jsx-conditional-and": noJsxConditionalAnd,
       "no-negated-data": noNegatedData,
+      "no-property-destructure": noPropertyDestructure,
       "no-query-error": noQueryError,
       "no-query-in-component": noQueryInComponent,
       "no-unspread-options": noUnspreadOptions,

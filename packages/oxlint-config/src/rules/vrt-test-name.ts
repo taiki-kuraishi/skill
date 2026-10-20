@@ -109,11 +109,12 @@ export const vrtTestName = defineRule({
           return;
         }
 
-        const { root, members } = chain;
         const isDescribe =
-          describeNames.has(root) || (testNames.has(root) && members.includes("describe"));
+          describeNames.has(chain.root) ||
+          (testNames.has(chain.root) && chain.members.includes("describe"));
         const isTest =
-          testNames.has(root) && members.every((member) => testMembers[member] === true);
+          testNames.has(chain.root) &&
+          chain.members.every((member) => testMembers[member] === true);
 
         if (!isDescribe && !isTest) {
           return;

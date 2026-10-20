@@ -52,14 +52,14 @@ export const noJsxConditionalAnd = defineRule({
   createOnce(context) {
     return {
       JSXExpressionContainer(node) {
-        const { parent } = node;
+        const parent = node.parent;
 
         // 属性値の `disabled={busy && locked}` は表示の出し分けではないので対象外
         if (parent.type !== "JSXElement" && parent.type !== "JSXFragment") {
           return;
         }
 
-        const { expression } = node;
+        const expression = node.expression;
 
         if (expression.type !== "LogicalExpression" || expression.operator !== "&&") {
           return;

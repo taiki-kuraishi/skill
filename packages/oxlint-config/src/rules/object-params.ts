@@ -19,7 +19,7 @@ export const objectParams = defineRule({
         return;
       }
 
-      const { parent } = node;
+      const parent = node.parent;
 
       // A callback receives arguments in the order its caller defines, so it cannot take one object
       if (

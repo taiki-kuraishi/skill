@@ -19,7 +19,7 @@ const executeMemberOf = (node: ESTree.Class) => {
       continue;
     }
 
-    const { value } = element;
+    const value = element.value;
 
     if (value?.type === "ArrowFunctionExpression" || value?.type === "FunctionExpression") {
       return element;
