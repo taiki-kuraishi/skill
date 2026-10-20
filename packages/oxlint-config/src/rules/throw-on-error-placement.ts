@@ -127,8 +127,8 @@ export const throwOnErrorPlacement = defineRule({
     },
     messages: {
       literal:
-        "throwOnError: true にせず、data が無いときだけ投げる関数（(_error, query) => query.state.data === undefined）を QueryClient の既定に渡す。",
-      inHook: "throwOnError は QueryClient の既定に置き、package や app の hook には書かない。",
+        "Do not use throwOnError: true. Set QueryClient defaults to a function that throws only when data is absent: (_error, query) => query.state.data === undefined.",
+      inHook: "Set throwOnError in QueryClient defaults, not in package or app hooks.",
     },
   },
   createOnce(context) {

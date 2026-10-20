@@ -9,7 +9,7 @@ export const noNegatedData = defineRule({
     },
     messages: {
       negated:
-        "見つからない判定は data === null で書き、!data で書かない（!data は読み込み中の undefined まで含む）。",
+        "Use data === null to check for missing data, not !data, which also matches undefined while loading.",
     },
   },
   createOnce(context) {

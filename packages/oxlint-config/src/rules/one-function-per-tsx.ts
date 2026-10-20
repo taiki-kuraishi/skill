@@ -29,7 +29,7 @@ export const oneFunctionPerTsx = defineRule({
     },
     messages: {
       multiple:
-        ".tsx のトップレベルには関数を 1 つだけ置き、補助のコンポーネントや関数は別ファイルへ出す。",
+        "Keep only one top-level function in a .tsx file. Move helper components and functions to separate files.",
     },
   },
   createOnce(context) {

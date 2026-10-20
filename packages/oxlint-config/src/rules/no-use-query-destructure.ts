@@ -18,7 +18,7 @@ export const noUseQueryDestructure = defineRule({
     },
     messages: {
       destructure:
-        "package の query hook は useQuery の結果をそのまま返す（return useQuery(...)）。app の hook は package の hook を呼び、読み込み中の判定と整形だけをする。",
+        "Return the useQuery result directly from package query hooks (return useQuery(...)). App hooks should call package hooks and only determine the loading state and shape the result.",
     },
   },
   createOnce(context) {

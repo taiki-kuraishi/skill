@@ -89,13 +89,14 @@ export const useCaseSteps = defineRule({
     },
     messages: {
       missingDoc:
-        "use case の execute には、何を処理するかの 1 行と番号付きの step を並べた doc comment を書く。",
-      missingSteps: "doc comment に処理の流れを番号付きで並べる（`1. ...` の形）。",
-      missingSummary: "doc comment の番号付き step の前に、何を処理するかの 1 行を書く。",
+        "Document the use case execute method with a one-line summary followed by numbered steps.",
+      missingSteps:
+        "List the processing flow as numbered steps in the doc comment (using `1. ...`).",
+      missingSummary: "Add a one-line summary before the numbered steps in the doc comment.",
       missingBodyStep:
-        "doc の step {{number}} に対応する `// Step {{number}}: ...` を、本文の step の先頭に doc と同じ文言で書く。",
-      mismatch: "本文の `// Step N:` は doc の step と番号・文言を揃える。",
-      missingBlankLine: "step の間は空行で区切る。",
+        "Add `// Step {{number}}: ...` at the start of the body step corresponding to doc step {{number}}, using the same wording.",
+      mismatch: "Match the number and wording of each `// Step N:` body comment to its doc step.",
+      missingBlankLine: "Separate steps with a blank line.",
     },
   },
   createOnce(context) {

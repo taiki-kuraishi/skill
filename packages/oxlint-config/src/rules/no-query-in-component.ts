@@ -26,7 +26,7 @@ export const noQueryInComponent = defineRule({
     },
     messages: {
       component:
-        "component では query を読まない。view の hook（hooks/use-<view>.ts）が読み込み中を判定し、表示の形（status など）で返す。",
+        "Do not read queries in components. Read them in the view hook (hooks/use-<view>.ts), determine the loading state, and return display-ready state such as status.",
     },
   },
   createOnce(context) {

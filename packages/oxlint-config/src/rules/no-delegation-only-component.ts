@@ -116,7 +116,8 @@ export const noDelegationOnlyComponent = defineRule({
         "Disallow a component that only renders another component without branching, hooks, or prop processing.",
     },
     messages: {
-      delegation: "別の component を描くだけの wrapper を作らず、呼び出し側で実体を直接使う。",
+      delegation:
+        "Do not create a wrapper that only renders another component. Use that component directly at the call site.",
     },
   },
   createOnce(context) {

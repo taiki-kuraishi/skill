@@ -23,7 +23,8 @@ export const blankLineBeforeIf = defineRule({
     type: "layout",
     docs: { description: "Require a blank line before if statements that do not open a block." },
     messages: {
-      missing: "if の前に空行を 1 行入れる。if にコメントを付けるなら、空行はコメントの前に置く。",
+      missing:
+        "Add a blank line before if. If it has a comment, place the blank line before the comment.",
     },
   },
   createOnce(context) {

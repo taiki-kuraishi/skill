@@ -9,7 +9,7 @@ export const noPropertyDestructure = defineRule({
     },
     messages: {
       destructure:
-        "引数・this・env のように名前で参照できるオブジェクトは分割代入せず、args.update.userId のように元のオブジェクトから読む。",
+        "Do not destructure objects accessible by name, such as arguments, this, or env. Read properties from the original object, as in args.update.userId.",
     },
   },
   createOnce(context) {

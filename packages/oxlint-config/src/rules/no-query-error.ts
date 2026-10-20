@@ -22,7 +22,7 @@ export const noQueryError = defineRule({
     },
     messages: {
       error:
-        "hook は error を分岐しない。data が無いまま失敗した query は QueryClient の既定で Error Boundary に投げる。",
+        "Do not branch on error in hooks. Configure QueryClient defaults to throw failed queries without data to an Error Boundary.",
     },
   },
   createOnce(context) {
