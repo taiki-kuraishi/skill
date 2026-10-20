@@ -6,7 +6,7 @@ export const noConditionalSpread = defineRule({
     docs: { description: "Disallow spreading a conditional expression into an object literal." },
     messages: {
       conditional:
-        "プロパティの有無を spread で切り替えず、引数を object union に分けて早期 return する。",
+        "Do not toggle properties with a conditional spread. Use an object union for the arguments and return early.",
     },
   },
   createOnce(context) {

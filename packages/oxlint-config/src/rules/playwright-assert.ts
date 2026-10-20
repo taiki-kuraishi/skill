@@ -51,8 +51,8 @@ export const playwrightAssert = defineRule({
     },
     messages: {
       unsupported:
-        "assert は E2E では toHaveURL だけ、VRT では toHaveScreenshot だけにする。toHaveScreenshot を直接呼ばない test は E2E と VRT を構文から区別できない（kstack-playwright）。",
-      vrt: "VRT の assert は toHaveScreenshot だけにする。撮影する状態までの待機は locator.waitFor() で行う（kstack-playwright）。",
+        "Use only toHaveURL assertions in E2E tests and toHaveScreenshot assertions in VRT tests. Tests that do not call toHaveScreenshot directly cannot be classified as E2E or VRT from syntax (kstack-playwright).",
+      vrt: "Use only toHaveScreenshot assertions in VRT tests. Use locator.waitFor() to wait for the state to capture (kstack-playwright).",
     },
   },
   createOnce(context) {

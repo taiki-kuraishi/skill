@@ -7,7 +7,7 @@ export const noExplicitReturnType = defineRule({
     docs: { description: "Disallow return type annotations that TypeScript can infer." },
     messages: {
       explicit:
-        "戻り値の型を書かず、TypeScript の導出に任せる。導出できない再帰関数などは disable コメントで理由を残す。",
+        "Let TypeScript infer the return type. If inference is impossible, such as for a recursive function, explain why in a disable comment.",
     },
   },
   createOnce(context) {

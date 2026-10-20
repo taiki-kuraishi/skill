@@ -46,7 +46,7 @@ export const noJsxConditionalAnd = defineRule({
     },
     messages: {
       conditional:
-        "JSX children で 条件 && 表示 を書かず、状態を if で判定して分岐ごとの component を返す。",
+        "Do not use condition && content in JSX children. Check the state with if and return a component for each branch.",
     },
   },
   createOnce(context) {

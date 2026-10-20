@@ -58,9 +58,9 @@ export const vrtTestName = defineRule({
     },
     messages: {
       notEnglish:
-        "VRT の test / describe の名前は英語で書く。日本語は test の上のコメントに書く（kstack-playwright）。",
+        "Write VRT test and describe names in English. Put Japanese descriptions in comments above the tests (kstack-playwright).",
       missingJapanese:
-        "VRT の test の直上の行に、何を撮るテストかを日本語のコメントで書く（kstack-playwright）。",
+        "Add a Japanese comment on the line immediately above each VRT test describing what it captures (kstack-playwright).",
     },
   },
   createOnce(context) {

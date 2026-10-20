@@ -9,7 +9,7 @@ export const noUnspreadOptions = defineRule({
     },
     messages: {
       unspread:
-        "画面ごとに変わる query の options（placeholderData など）は options で受けて展開する（{ ...options }）。",
+        "Accept query options that vary by screen, such as placeholderData, as options and spread them with { ...options }.",
     },
   },
   createOnce(context) {

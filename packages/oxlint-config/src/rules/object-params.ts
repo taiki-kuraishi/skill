@@ -6,7 +6,7 @@ export const objectParams = defineRule({
     type: "suggestion",
     docs: { description: "Require functions with several parameters to take a single object." },
     messages: {
-      positional: "複数の引数を位置引数で受け取らず、1 つのオブジェクト引数にまとめる。",
+      positional: "Use a single object parameter instead of multiple positional parameters.",
     },
   },
   createOnce(context) {

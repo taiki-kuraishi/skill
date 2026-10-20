@@ -5,7 +5,7 @@ export const noElse = defineRule({
     type: "suggestion",
     docs: { description: "Disallow else; return early instead." },
     messages: {
-      else: "else を使わず、異常系をガード句として先に return する。",
+      else: "Do not use else. Handle exceptional cases with guard clauses and return early.",
     },
   },
   createOnce(context) {

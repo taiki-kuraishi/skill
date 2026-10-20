@@ -77,13 +77,13 @@ export const react = {
             name: "@tanstack/react-query",
             importNames: ["useSuspenseInfiniteQuery", "useSuspenseQueries", "useSuspenseQuery"],
             message:
-              "useSuspenseQuery を使わず useQuery で読み、読み込み中は view の hook が data === undefined から判定する（kstack-react）。",
+              "Use useQuery instead of useSuspenseQuery, and determine the loading state from data === undefined in the view hook (kstack-react).",
           },
           {
             name: "react",
             importNames: ["useEffect", "useLayoutEffect"],
             message:
-              "Effect を使わず、データ取得・イベント・購読・DOM 操作の目的ごとの仕組みに置き換える（kstack-react）。",
+              "Replace Effects with purpose-specific mechanisms for data fetching, events, subscriptions, and DOM operations (kstack-react).",
           },
         ],
       },
