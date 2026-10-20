@@ -4,7 +4,7 @@ import type { ESTree } from "@oxlint/plugins";
 const japanese = /[\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Han}]/u;
 
 /** `test` に付けて test のまま扱う member。`test.beforeEach` などの hook と `test.extend` は対象外 */
-const testMembers: Record<string, true> = {
+export const testMembers: Record<string, true> = {
   concurrent: true,
   fail: true,
   fixme: true,
@@ -34,7 +34,7 @@ const staticTitleOf = (argument: ESTree.Argument | undefined) => {
 };
 
 /** `test.describe.skip(...)` → `{ root: "test", members: ["describe", "skip"] }` */
-const memberChainOf = (callee: ESTree.Expression) => {
+export const memberChainOf = (callee: ESTree.Expression) => {
   const members: string[] = [];
   let current = callee;
 
