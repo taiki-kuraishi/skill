@@ -49,6 +49,7 @@ export const typescript = {
     "kstack/no-conditional-spread": "error",
     "kstack/no-else": "error",
     "kstack/no-explicit-return-type": "error",
+    "kstack/no-property-destructure": "error",
     "kstack/object-params": "error",
   },
 } satisfies OxlintConfig;

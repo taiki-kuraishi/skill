@@ -15,7 +15,7 @@ const queryOptionsFactoryNames: Record<string, true> = {
 
 /** Query の options を受け取る呼び出しの名前。`use*Query` 系の hook も含める */
 const queryOptionsCallNameOf = (node: ESTree.CallExpression) => {
-  const { callee } = node;
+  const callee = node.callee;
 
   if (callee.type !== "Identifier") {
     return undefined;

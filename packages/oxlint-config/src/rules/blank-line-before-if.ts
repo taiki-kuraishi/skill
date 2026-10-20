@@ -2,7 +2,7 @@ import { defineRule } from "@oxlint/plugins";
 import type { ESTree } from "@oxlint/plugins";
 
 const previousStatementOf = (node: ESTree.IfStatement) => {
-  const { parent } = node;
+  const parent = node.parent;
 
   if (parent.type === "SwitchCase") {
     return parent.consequent[parent.consequent.indexOf(node) - 1];

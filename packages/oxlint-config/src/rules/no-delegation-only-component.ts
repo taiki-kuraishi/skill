@@ -42,7 +42,7 @@ const returnedJsxOf = (node: FunctionNode) => {
 
 /** 返している JSX の名前が component か。`div` などの host element は委譲ではない */
 const componentNameOf = (element: ESTree.JSXElement) => {
-  const { name } = element.openingElement;
+  const name = element.openingElement.name;
 
   if (name.type === "JSXIdentifier") {
     if (!isComponentName(name.name)) {
@@ -86,7 +86,7 @@ const isForwardingAttribute = (attribute: ESTree.JSXAttributeItem) => {
     );
   }
 
-  const { value } = attribute;
+  const value = attribute.value;
 
   if (value === null) {
     return true;
@@ -96,7 +96,7 @@ const isForwardingAttribute = (attribute: ESTree.JSXAttributeItem) => {
     return true;
   }
 
-  const { expression } = value;
+  const expression = value.expression;
 
   return (
     expression.type === "Identifier" ||
