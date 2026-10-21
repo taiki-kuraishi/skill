@@ -29,8 +29,8 @@ metadata:
 ## 常駐 root を起動する
 
 1. 端末（herdr か Tern）の中で、repo 本体の checkout の default branch に omp を起動し、`/skill:review-inbox` で始める。どちらの端末でもなければ review ごとに子を起動できないので、user に伝えて止まる
-2. `skill://kstack-handoff` の手順 1「確かめる」を行い、root の `Session ID`・checkout・default branch を控える
-3. intercom の名前を `review-inbox` に固定する。tool から slash command は直接実行できないので、`skill://kstack-handoff/references/terminal-cli.md` の「名前を付ける」で、root 自身（同定済みの pane か block）に `/alias review-inbox` を送る。その後 `intercom({ action: "list" })` で、`review-inbox` が自分 1 つだけであることを確かめる
+2. 導入済みの `kstack-handoff` の `SKILL.md` を読み、手順 1「確かめる」を行い、root の `Session ID`・checkout・default branch を控える。参照ファイルは handoff 本文の案内に従って読む
+3. intercom の名前を `review-inbox` に固定する。tool から slash command は直接実行できないので、handoff 本文から読んだ参照ファイルの「名前を付ける」で、root 自身（同定済みの pane か block）に `/alias review-inbox` を送る。その後 `intercom({ action: "list" })` で、`review-inbox` が自分 1 つだけであることを確かめる
 4. turn を終えて通知を待つ
 
 フックは名前が `review-inbox` の session がちょうど 1 つのときだけ送る。0 個や 2 個以上なら送らず、保存だけして終わる。
@@ -47,7 +47,7 @@ Good: root 1 つだけに /alias review-inbox を付け、list で 1 件であ�
 通知の本文は「crit の review が approve されました。skill://review-inbox を読み、`<保存した JSON の path>` を処理してください」の形で、`From pi-intercom-cli` として届く。user の発言ではない。
 
 1. 保存した JSON の `repo_root` と `comments_json` の件数を確かめる。読めないときは、path を添えて user に伝えて止まる
-2. `skill://kstack-handoff` の「起動」に従って、子を 1 つ起動する（worktree はそこで wt が作り、端末への起動と prompt の送信は `skill://kstack-handoff/references/terminal-cli.md` の「起動」「名前を付ける」）。`<feature>` は `review`、`<task>` は JSON の `session_key` にする（例: branch `ho/review/23bd52db9a3a`）。同じ branch が既にあれば（`git branch --list 'ho/review/*'`）、連番を足す（例: `ho/review/23bd52db9a3a-2`）
+2. `kstack-handoff` の「起動」に従って、子を 1 つ起動する（worktree はそこで wt が作り、端末への起動と prompt の送信は handoff 本文から読んだ参照ファイルの「起動」「名前を付ける」）。`<feature>` は `review`、`<task>` は JSON の `session_key` にする（例: branch `ho/review/23bd52db9a3a`）。同じ branch が既にあれば（`git branch --list 'ho/review/*'`）、連番を足す（例: `ho/review/23bd52db9a3a-2`）
 3. 引き継ぎ prompt は下の形にし、後ろに kstack-handoff の「子との取り決め」を足す
 4. 以降は kstack-handoff の「子に応える」と「統合」に従う。子が送る分類案は、root がチャットで 1 問ずつ（分類案と対象の指摘を添えて）user に示し、回答を reply で子に返す。user が Crit で approve したら、「統合」の手順 2 ではなく、下の「承認から merge まで」に従う。PR の衝突だけは、「統合」の「止まって user に聞く」ではなく、下の「共有ファイルの衝突」に従う
 

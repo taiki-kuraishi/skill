@@ -6,7 +6,7 @@
 
 ## 前提を確かめる
 
-1. **端末** — Herdr か Tern に判定できるなら、`skill://kstack-handoff/references/terminal-cli.md` の手順に戻る。Tern で root の block が 1 つに定まらないときも、同じ file の「root の場所を控える」の停止手順に従い、この手順には降りない
+1. **端末** — 導入済みの `kstack-handoff` の `SKILL.md` を読み、本文が案内する参照ファイルで端末を判定する。Herdr か Tern に判定できるなら、その手順に戻る。Tern で root の block が 1 つに定まらないときも、同じ参照ファイルの「root の場所を控える」の停止手順に従い、この手順には降りない
 2. **root の位置** — `git rev-parse --show-toplevel` が `git worktree list` の 1 行目の path で、`git branch --show-current` が default branch。違えば、repo 本体の checkout で起動し直すよう user に伝えて止まる
 3. **intercom** — `intercom({ action: "status" })` が `Connected: Yes`。root は status の `Session ID`（子からの宛先）を控える。`intercom({ action: "list" })` で子の一覧と状態を読む
 4. **足りなければ止まる** — どれか欠けたら、何が足りないかを user に伝えて止まる。intercom plugin が無ければ、その導入と omp の再起動を伝える。子が user に直接聞く運用や、user が pane の文面を運ぶ運用に黙って切り替えない

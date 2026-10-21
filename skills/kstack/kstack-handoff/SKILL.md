@@ -12,6 +12,10 @@ root session は repo 本体の checkout の default branch で動く。委任�
 
 端末ごとの操作（子の起動・prompt の送信・画面の読み方・片付け）は [terminal-cli](references/terminal-cli.md) に置く。herdr と Tern のどちらの手順を使うかもそこで決め、ここには端末に依らない段取りだけを書く。
 
+参照ファイルの相対 path は、実際に読み込んだこの `SKILL.md` の親ディレクトリを基準に解決する。`references/terminal-cli.md` はその配下にある。agent が示した SKILL の実ファイル path を使い、作業 repo・呼び出し元 SKILL のディレクトリ・固定の `~/.agents/skills` を基準にしない。URI 経由で参照を読めなければ、その実ファイル path から読む。
+
+そこでも参照ファイルが無い・読めない場合は、試した絶対 path とエラーを user に伝えて止まる。別の導入先にある本文と参照を混ぜず、同じ導入先へ `kstack-handoff` をディレクトリごと揃えてから再開する。
+
 ## 手順
 
 1. **確かめる** — intercom がつながっていること（`intercom({ action: "status" })` が `Connected: Yes`）を確かめ、`Session ID` を控える。[terminal-cli の「端末を選ぶ」](references/terminal-cli.md#端末を選ぶ) で端末と root の場所を同定する。続けて、gh が使えること（`gh auth status`）、root が repo 本体の checkout の default branch にいること（`git rev-parse --show-toplevel` が `git worktree list` の 1 行目の path で、`git branch --show-current` が `gh repo view --json defaultBranchRef -q .defaultBranchRef.name` と同じ）を確かめる。欠けていたら user に伝えて止まる（intercom tool が無ければ `omp plugin install pi-intercom` の後に omp の再起動が要る。root が linked worktree や別の branch にいたら、repo 本体の checkout の default branch で起動し直してもらう）。完了条件: 端末の種類・root の端末上の ID・root の Session ID・checkout・default branch がそろっている

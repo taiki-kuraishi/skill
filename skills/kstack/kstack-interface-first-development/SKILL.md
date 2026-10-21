@@ -10,7 +10,7 @@ disable-model-invocation: true
 
 フェーズは最初に全部は決めない。最初に作るのは、この session でやることの一覧だけ。フェーズは、前のフェーズが merge されるたびに、その一覧から次の回の分だけを切り出す。
 
-root は repo 本体の checkout（linked worktree ではない）の default branch で起動する。root はコードを書かず commit もしないので、自分の branch は要らない。子の worktree は wt CLI で作る。Herdr では root の workspace の下の子 workspace、Tern では main の omp が動く root パネルに紐づく floating パネルで子を起動する。Tern の子は root と同じ session・tab に置き、別 session は作らない。複数の機能を並列に進めるときは、repo 本体の checkout で root を増やし（Herdr は root の workspace に、Tern は root の session に tab を足す）、同じ checkout を共有する（root は branch を切り替えない）。起動と片付けの CLI は `skill://kstack-handoff/references/terminal-cli.md` に従う。
+root は repo 本体の checkout（linked worktree ではない）の default branch で起動する。root はコードを書かず commit もしないので、自分の branch は要らない。子の worktree は wt CLI で作る。Herdr では root の workspace の下の子 workspace、Tern では main の omp が動く root パネルに紐づく floating パネルで子を起動する。Tern の子は root と同じ session・tab に置き、別 session は作らない。複数の機能を並列に進めるときは、repo 本体の checkout で root を増やし（Herdr は root の workspace に、Tern は root の session に tab を足す）、同じ checkout を共有する（root は branch を切り替えない）。端末の CLI は、導入済みの `kstack-handoff` の `SKILL.md` を読み、本文が案内する参照ファイルに従う。
 
 ## 手順
 
@@ -41,7 +41,7 @@ root は repo 本体の checkout（linked worktree ではない）の default br
 
    なぜ: ask tool は背景を書く場所が狭く、user は判断材料を見ないまま選ぶことになり、用意された選択肢の外の答えを考えにくくなる。チャットに並べた問いは、一部にしか答えなくても turn が進み、答えの漏れと催促が往復を増やす。user は数 turn 前の質問も、子や subagent とのやり取りも覚えていないので、参照だけの催促では答えられない。
 
-5. **引き継いで監督する** — 切り出した項目はフェーズごとの todo に置き換える。root の `intercom({ action: "status" })` が `Connected: Yes` であることを確かめ、`Session ID` を控える。接続できなければ root で user に必要な設定を伝えて止まり、子へ窓口を移さない。今回のフェーズだけを、作業場所と root の連絡先を埋めた引き継ぎ prompt で始め、フェーズが複数なら並列に始めると添える。herdr か Tern の中で動いているなら（どちらかは `skill://kstack-handoff/references/terminal-cli.md` の「端末を選ぶ」で判定する）、`skill://kstack-handoff` で子を起動し（端末ごとの手順は同じ file の「起動」に従う）、質問・user review・承認後の commit と、user が明示した push・PR・merge まで root が管理する。端末の中で root を特定できるなら、その端末の操作が失敗しても手動の引き継ぎに切り替えず、何が失敗したかを user に報告して止まる。herdr でも Tern でもない端末で動いているとき（`terminal-cli.md` の「端末を選ぶ」でどちらにも判定できないとき）だけ「[手動で引き継ぐ](references/manual-handoff.md)」に従い、user が子を起動した後も root が報告と質問を受け、`skill://kstack-review-request` で user review を依頼する。子の状況は root が確認し、user に子の端末画面の巡回や報告の転送を頼まない。子から既存パターンから外れる実装の承認を求められたら、root は自分で決めずに user に聞き、結論を子に返す。今回のフェーズがすべて merge されたら、一覧に残りがあれば手順 2 に戻り、無ければ終わる。完了条件: 今回のフェーズの承認と明示許可された統合が確認できている。許可待ち・未統合のフェーズがあれば root に待ちの状態を残す
+5. **引き継いで監督する** — 切り出した項目はフェーズごとの todo に置き換える。root の `intercom({ action: "status" })` が `Connected: Yes` であることを確かめ、`Session ID` を控える。接続できなければ root で user に必要な設定を伝えて止まり、子へ窓口を移さない。今回のフェーズだけを、作業場所と root の連絡先を埋めた引き継ぎ prompt で始め、フェーズが複数なら並列に始めると添える。導入済みの `kstack-handoff` の `SKILL.md` を読み、本文が案内する参照ファイルの「端末を選ぶ」で端末を判定する。Herdr か Tern なら `kstack-handoff` で子を起動し、質問・user review・承認後の commit と、user が明示した push・PR・merge まで root が管理する。端末の操作や参照ファイルの読み取りが失敗したら手動の引き継ぎに切り替えず、何が失敗したかを user に報告して止まる。Herdr でも Tern でもない端末で動いているときだけ「[手動で引き継ぐ](references/manual-handoff.md)」に従い、user が子を起動した後も root が報告と質問を受け、`skill://kstack-review-request` で user review を依頼する。子の状況は root が確認し、user に子の端末画面の巡回や報告の転送を頼まない。子から既存パターンから外れる実装の承認を求められたら、root は自分で決めずに user に聞き、結論を子に返す。今回のフェーズがすべて merge されたら、一覧に残りがあれば手順 2 に戻り、無ければ終わる。完了条件: 今回のフェーズの承認と明示許可された統合が確認できている。許可待ち・未統合のフェーズがあれば root に待ちの状態を残す
 
    UI（見た目・操作）が変わるフェーズの user review は、`skill://kstack-review-request` の live review（子が報告した dev server の URL）を先に回し、その指摘を子に直させてから、コード review（差分）に進む。文言だけの修正など live で確かめることが無いフェーズは省いてよいが、省く理由を gate の `未解決事項` に書く。
 
