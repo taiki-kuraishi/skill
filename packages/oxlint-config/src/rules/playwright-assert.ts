@@ -136,15 +136,14 @@ export const playwrightAssert = defineRule({
             continue;
           }
 
-          if (vrtRanges.has(range)) {
-            if (matcher.name !== "toHaveScreenshot") {
-              context.report({ node: matcher.node, messageId: "vrt" });
-            }
-            continue;
+          const isVrt = vrtRanges.has(range);
+
+          if (isVrt && matcher.name !== "toHaveScreenshot") {
+            context.report({ node: matcher.node, messageId: "vrt" });
           }
 
           // 直接の撮影がない test は E2E と断定できないので、両方の規約を並べた汎用の指摘にする
-          if (matcher.name !== "toHaveURL") {
+          if (!isVrt && matcher.name !== "toHaveURL") {
             context.report({ node: matcher.node, messageId: "unsupported" });
           }
         }
