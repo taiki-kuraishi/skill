@@ -17,6 +17,7 @@ export const typescript = {
     "func-names": "off",
     "func-style": "off",
     "id-length": "off",
+    "max-depth": ["error", { max: 2 }],
     "max-params": "off",
     "new-cap": "off",
     "no-console": "off",

@@ -82,18 +82,16 @@ export const vrtTestName = defineRule({
         }
 
         for (const specifier of node.specifiers) {
-          if (specifier.type !== "ImportSpecifier") {
+          if (specifier.type !== "ImportSpecifier" || specifier.imported.type !== "Identifier") {
             continue;
           }
 
-          if (specifier.imported.type === "Identifier") {
-            if (specifier.imported.name === "test") {
-              testNames.add(specifier.local.name);
-            }
+          if (specifier.imported.name === "test") {
+            testNames.add(specifier.local.name);
+          }
 
-            if (specifier.imported.name === "describe") {
-              describeNames.add(specifier.local.name);
-            }
+          if (specifier.imported.name === "describe") {
+            describeNames.add(specifier.local.name);
           }
         }
       },
