@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 # kstack-root-driven-development
 
-root が会話・判断・すべての編集を持ち、subagent は判断材料だけを返す。root は test code を書くが、その実行を含む検証作業は subagent が行う。user が現在のフェーズを承認するまで working tree を次のフェーズへ進めない。
+root が会話・判断・すべての編集を持ち、subagent は判断材料だけを返す。root は test code を書くが、その実行を含む検証作業は subagent が行う。user が現在のフェーズを承認するまで working tree を次のフェーズへ進めない。subagent は agent の組み込み tool で起動するため、このフローは Herdr・Tern の有無に依存しない。実装を子 session に渡す `kstack-handoff` は使わない。
 
 ## 責務
 

@@ -1,14 +1,17 @@
 # manual-handoff
 
-`HERDR_ENV` が 1 でないとき（herdr の外）の `kstack-interface-first-development` の引き継ぎ。root は repo 本体の checkout の default branch のまま動き、子は user が 1 回だけ手で起動する。起動と prompt の貼り付け以外は user の作業にせず、以後の質問・報告・review は intercom で root が窓口を持つ。
+`kstack-interface-first-development` の引き継ぎを、root が herdr でも Tern でもない素の端末で動いているときに行う最後の手段。root は repo 本体の checkout の default branch のまま動き、子は user が 1 回だけ手で起動する。起動と prompt の貼り付け以外は user の作業にせず、以後の質問・報告・review は intercom で root が窓口を持つ。
+
+端末の中で root を特定できるなら、この手順に降りない。端末の操作が失敗したときも手動に切り替えず、何が失敗したかを user に報告して止まる。手動経路は、起動のたびに user の手が要り、子の状態も root から見えないため。
 
 ## 前提を確かめる
 
-1. **root の位置** — `git rev-parse --show-toplevel` が `git worktree list` の 1 行目の path で、`git branch --show-current` が default branch。違えば、repo 本体の checkout で起動し直すよう user に伝えて止まる
-2. **intercom** — `intercom({ action: "status" })` が `Connected: Yes`。root は status の `Session ID`（子からの宛先）を控える。`intercom({ action: "list" })` で子の一覧と状態を読む
-3. **足りなければ止まる** — どちらか欠けたら、何が足りないかを user に伝えて止まる。intercom plugin が無ければ、その導入と omp の再起動を伝える。子が user に直接聞く運用や、user が pane の文面を運ぶ運用に黙って切り替えない
+1. **端末** — Herdr か Tern に判定できるなら、`skill://kstack-handoff/references/terminal-cli.md` の手順に戻る。Tern で root の block が 1 つに定まらないときも、同じ file の「root の場所を控える」の停止手順に従い、この手順には降りない
+2. **root の位置** — `git rev-parse --show-toplevel` が `git worktree list` の 1 行目の path で、`git branch --show-current` が default branch。違えば、repo 本体の checkout で起動し直すよう user に伝えて止まる
+3. **intercom** — `intercom({ action: "status" })` が `Connected: Yes`。root は status の `Session ID`（子からの宛先）を控える。`intercom({ action: "list" })` で子の一覧と状態を読む
+4. **足りなければ止まる** — どれか欠けたら、何が足りないかを user に伝えて止まる。intercom plugin が無ければ、その導入と omp の再起動を伝える。子が user に直接聞く運用や、user が pane の文面を運ぶ運用に黙って切り替えない
 
-完了条件: toplevel・default branch・root の `Session ID` がそろい、intercom が `Connected`
+完了条件: 端末が herdr にも Tern にも判定できないことを user に説明でき、toplevel・default branch・root の `Session ID` がそろい、intercom が `Connected`
 
 ```text
 Bad: intercom が無いので、user が 2 つの pane の文面を運ぶ運用に切り替える

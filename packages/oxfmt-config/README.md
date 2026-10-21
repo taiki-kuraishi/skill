@@ -215,4 +215,4 @@ oxfmt で表せる規約は無い。live review を足した変更で入った�
 
 ### kstack-handoff
 
-oxfmt で表せる規約は無い。全規約が agent の作業・対話手順か Git・herdr の操作で、整形の選択肢に無い。規約の一覧は `@taiki-kuraishi/oxlint-config` の README の kstack-handoff の節と同じ。
+oxfmt で表せる規約は無い。全規約が agent の作業・対話手順か Git・Herdr／Tern の操作で、整形の選択肢に無い。規約の一覧は `@taiki-kuraishi/oxlint-config` の README の kstack-handoff の節と同じ。
