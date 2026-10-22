@@ -218,6 +218,10 @@ oxfmt で表せる規約は無い。live review を足した変更で入った�
 
 oxfmt で表せる規約は無い。全規約が agent の作業・対話手順か Git・Herdr／Tern の操作で、整形の選択肢に無い。規約の一覧は `@taiki-kuraishi/oxlint-config` の README の kstack-handoff の節と同じ。
 
+### kstack-worktree-diff
+
+oxfmt で表せる規約は無い。endpoint・package・画面ごとのフェーズ分割と計画・レビュー確認は作業手順で、整形では分割や差分の分離を行わない。全規約の対応は `@taiki-kuraishi/oxlint-config` の README の kstack-worktree-diff の節を参照。
+
 ### kstack-terraform / kstack-gcp-service-usage
 
 設定は作らない。Terraform の既存規約の対応は `@taiki-kuraishi/oxlint-config` の README にある kstack-terraform の表を再利用する。
