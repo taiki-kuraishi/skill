@@ -157,7 +157,7 @@ oxfmt で表せる規約は無い。整形の選択肢しか持たず、route �
 
 ### kstack-testing
 
-oxfmt で表せる規約は無い。整形の選択肢しか持たず、Arrange / Act / Assert のコメントの有無、テストデータをどこで作るか、テストの本数と assert に何を書くか、`it` / `test` の名前と `describe` の名前の言語は決められない（6 規約の Bad / Good に `oxfmt --check` は差分を出さない）。
+oxfmt で表せる規約は無い。整形の選択肢しか持たず、Arrange / Act / Assert のコメントの有無、テストデータをどこで作るか、テストの本数と assert に何を書くか、`it` / `test` の名前と `describe` の名前の言語は決められない（6 規約の Bad / Good に `oxfmt --check` は差分を出さない）。追加した「route 定義ファイル 1 つにつき spec 1 つ」も表せない。spec をどの route に対応させるかは整形の選択肢に無く、機能横断 spec に集約した Bad と route 定義ファイルごとに分けた Good のどちらも `oxfmt --check` は差分を出さず、ファイルも分割しない。
 
 ### kstack-playwright
 
