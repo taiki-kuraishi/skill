@@ -147,18 +147,27 @@ loader の結果をコンポーネントの hook が `useQuery` で読む、と�
 
 設定は作らない。oxlint は JavaScript / TypeScript だけを lint するので、HCL（`.tf`・`.tflint.hcl`）の規約はどれも表せない。root の output 禁止は SKILL に載せた tflint-ruleset-opa のポリシーで lint し、それ以外はレビューで確かめる。
 
-| 規約                                                                                | ルール / 表せない理由                                                                                                                                                         |
-| ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| リテラル値に名前を付けるときは locals ではなく default 付きの variable              | 表せない。HCL は oxlint の対象外                                                                                                                                              |
-| module はサービス単位で切り、root に resource を残さない                            | 表せない。HCL は oxlint の対象外                                                                                                                                              |
-| root module の分け方は user と相談して決める                                        | 表せない。HCL は oxlint の対象外。agent の作業手順で、ディレクトリの分け方の正否も構文から決まらない                                                                          |
-| provider ブロックは provider.tf に置き、versions.tf は terraform ブロックだけにする | 表せない。HCL は oxlint の対象外（`oxlint provider.tf` は `No files found to lint` になる）                                                                                   |
-| root に output を書かず、module の output は呼び出し側で使うものだけ                | 表せない。HCL は oxlint の対象外。root の output は tflint-ruleset-opa の Rego（SKILL に記載）で lint できる。module の未参照 output は既存の tflint ruleset に検出手段が無い |
-| module の中は主リソースごとにファイルを分ける                                       | 表せない。HCL は oxlint の対象外                                                                                                                                              |
-| resource 名は種類ではなく個体を指す                                                 | 表せない。HCL は oxlint の対象外                                                                                                                                              |
-| 固定の一覧から resource を作るときは for_each・count を使わず 1 つずつ定義する      | 表せない。HCL は oxlint の対象外                                                                                                                                              |
-| secret の名前に使う側の都合を入れない                                               | 表せない。HCL は oxlint の対象外                                                                                                                                              |
-| tflint に provider 公式の ruleset を入れ、deep_check を有効にする                   | 表せない。`.tflint.hcl` は oxlint の対象外                                                                                                                                    |
+| 規約                                                                                               | ルール / 表せない理由                                                                                                                                                         |
+| -------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| リテラル値に名前を付けるときは locals ではなく default 付きの variable                             | 表せない。HCL は oxlint の対象外                                                                                                                                              |
+| module はサービス単位で切り、root に resource を残さない                                           | 表せない。HCL は oxlint の対象外                                                                                                                                              |
+| root module の分け方は user と相談して決める                                                       | 表せない。HCL は oxlint の対象外。agent の作業手順で、ディレクトリの分け方の正否も構文から決まらない                                                                          |
+| provider ブロックは provider.tf に置き、versions.tf は terraform ブロックだけにする                | 表せない。HCL は oxlint の対象外（`oxlint provider.tf` は `No files found to lint` になる）                                                                                   |
+| root に output を書かず、module の output は呼び出し側で使うものだけ                               | 表せない。HCL は oxlint の対象外。root の output は tflint-ruleset-opa の Rego（SKILL に記載）で lint できる。module の未参照 output は既存の tflint ruleset に検出手段が無い |
+| module の中は主リソースごとにファイルを分ける                                                      | 表せない。HCL は oxlint の対象外                                                                                                                                              |
+| resource 名は種類ではなく個体を指す                                                                | 表せない。HCL は oxlint の対象外                                                                                                                                              |
+| 固定の一覧から resource を作るときは for_each・count を使わず 1 つずつ定義する                     | 表せない。HCL は oxlint の対象外                                                                                                                                              |
+| secret の名前に使う側の都合を入れない                                                              | 表せない。HCL は oxlint の対象外                                                                                                                                              |
+| tflint に provider 公式の ruleset を入れ、deep_check を有効にする                                  | 表せない。`.tflint.hcl` は oxlint の対象外                                                                                                                                    |
+| 属性参照で表れる依存には depends_on を重ねず、参照で表せない実行順序だけ理由コメント付きで指定する | 表せない。HCL は oxlint の対象外。依存の重複と、参照に現れない実行順序の必要性には意味の判断も要る                                                                            |
+
+### kstack-gcp-service-usage
+
+設定は作らない。HCL・Markdown・シェルは oxlint の対象外で、API 有効化を初回 apply 前に実施したかは実行履歴の確認が要る。
+
+| 規約                                                                                                                                                | ルール / 表せない理由                                                                                    |
+| --------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| GCP API を google_project_service で管理せず、初回 apply 前に gcloud services enable で有効化し、対象 API と実行手順を当該 repo の AGENTS.md に置く | 表せない。Bad の `.tf` と Good の `.md`・`.sh` は lint 対象外。実施順序と文書の充足も AST から決まらない |
 
 ### kstack-monorepo
 

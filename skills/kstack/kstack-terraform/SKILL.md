@@ -1,11 +1,39 @@
 ---
 name: kstack-terraform
-description: Terraform（.tf ファイル、HCL）と tflint 設定（.tflint.hcl、tflint-ruleset-opa の Rego ポリシー）を書く・修正する・レビューするときの規約。リテラル値に名前を付けるときは locals ではなく default 付きの variable にすること、resource を S3・KMS・IAM のようにサービス名の module にまとめて root に resource を残さないこと、root module（state の単位）の分け方とディレクトリ名を agent が決めずに user と相談すること、provider ブロックを provider.tf に置き versions.tf を terraform ブロックだけにすること、root に output を書かず module の output を呼び出し側で参照するものだけにすること、module 内を bucket などの主リソースごとのファイルに分けること、同じ種類の resource が増えても衝突しない名前を付けること、固定の一覧から resource を作るときに for_each や count を使わず 1 つずつ resource ブロックで定義すること、Secret Manager などの secret 名に tf-var のような使う側の prefix を入れないこと、tflint に provider 公式の ruleset plugin を version・source 付きで入れ deep_check を有効にすることを扱う。AWS・GCP・Cloudflare などのインフラや root module（stack）の追加、module 化やファイル分割のリファクタリング、lint 設定、レビュー指摘への対応でも発火させる。
+description: Terraform（.tf ファイル、HCL）と tflint 設定（.tflint.hcl、tflint-ruleset-opa の Rego ポリシー）を書く・修正する・レビューするときの規約。リテラル値に名前を付けるときは locals ではなく default 付きの variable にすること、resource を S3・KMS・IAM のようにサービス名の module にまとめて root に resource を残さないこと、root module（state の単位）の分け方とディレクトリ名を agent が決めずに user と相談すること、provider ブロックを provider.tf に置き versions.tf を terraform ブロックだけにすること、root に output を書かず module の output を呼び出し側で参照するものだけにすること、module 内を bucket などの主リソースごとのファイルに分けること、同じ種類の resource が増えても衝突しない名前を付けること、固定の一覧から resource を作るときに for_each や count を使わず 1 つずつ resource ブロックで定義すること、Secret Manager などの secret 名に tf-var のような使う側の prefix を入れないこと、属性参照による依存には depends_on を重ねず参照で表せない実行順序だけ理由コメント付きで指定すること、tflint に provider 公式の ruleset plugin を version・source 付きで入れ deep_check を有効にすることを扱う。AWS・GCP・Cloudflare などのインフラや root module（stack）の追加、module 化やファイル分割のリファクタリング、lint 設定、レビュー指摘への対応でも発火させる。
 ---
 
 # kstack-terraform
 
 [Terraform](https://developer.hashicorp.com/terraform/language) を書くときの規約。理由を理解した上で適用すること。
+
+## 属性参照で表れる依存には depends_on を重ねない
+
+resource / module の属性参照で依存が表れていれば、`depends_on` を重ねない。参照で表せない実行順序が必要な場合のみ、その理由をコメントに書いて使う。
+
+```hcl
+# Bad: 属性参照と同じ依存を重ねる
+module "archive" {
+  source     = "./modules/archive"
+  bucket_id  = module.s3.archive_bucket_id
+  depends_on = [module.s3]
+}
+
+# Good: 属性参照で依存を表す
+module "archive" {
+  source    = "./modules/archive"
+  bucket_id = module.s3.archive_bucket_id
+}
+
+# Good: 属性参照で表せない実行順序だけ明示する
+module "worker" {
+  source = "./modules/worker"
+  # worker の起動前に、属性を受け渡さない IAM policy の設定を完了させる必要がある
+  depends_on = [module.iam]
+}
+```
+
+なぜ: Terraform は属性参照から依存関係を解決するため、同じ依存の明示は不要になる。参照に現れない実行順序は自動では伝わらないので、理由付きの `depends_on` で補う。
 
 ## リテラル値に名前を付けるときは locals ではなく default 付きの variable にする
 
