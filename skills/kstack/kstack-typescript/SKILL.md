@@ -1,6 +1,6 @@
 ---
 name: kstack-typescript
-description: TypeScript コードを書く・修正する・レビューするときの規約。ts ファイルや TypeScript の関数・class を扱う場面すべてで使用すること — return 型アノテーションやそのためだけの interface・type を書かず導出に任せること、else を使わない早期 return、if の前の空行、引数・this・env のプロパティを読むためだけに分割代入せず元のオブジェクトから参照すること（型の絞り込みのためでも同じ）、class でしか使わない関数を private method にすること、class・error・定数・型が同居するファイルをディレクトリに分けて index.ts から export することなど。コード生成、リファクタリング、ファイル分割、バグ修正、レビュー指摘への対応でも発火させる。
+description: TypeScript コードを書く・修正する・レビューするときの規約。ts ファイルや TypeScript の関数・class を扱う場面すべてで使用すること — return 型アノテーションやそのためだけの interface・type を書かず導出に任せること、else を使わない早期 return、if の前の空行、引数・this・env のプロパティを読むためだけに分割代入せず元のオブジェクトから参照すること（型の絞り込みのためでも同じ）、既に名前がある値を短縮のためだけに別名へ移さないこと、class でしか使わない関数を private method にすること、class・error・定数・型が同居するファイルをディレクトリに分けて index.ts から export することなど。コード生成、リファクタリング、ファイル分割、バグ修正、レビュー指摘への対応でも発火させる。
 disable-model-invocation: false
 ---
 
@@ -217,6 +217,8 @@ class Api {
 
 引数・`this`・`env` のように既に名前で参照できるオブジェクトは、`const { ... } = args.update` で変数に移さず、`args.update.userId` のように元のオブジェクトから読む。`if` での型の絞り込みも `this.session` のままでできる。関数呼び出しの戻り値を受けるときの分割代入（`const { data } = useQuery(...)`）は対象外。
 
+短く書くためだけに、既に名前がある値を `a`・`i` などの別名へ移さず、元の名前で参照する。ループカウンターの `i` や SQL の self-join で役割を区別する別名は対象外。
+
 ```ts
 // Bad: プロパティを読むためだけに、同じ値の別名を作っている
 const open = (args: { update: Update }) => {
@@ -248,9 +250,16 @@ public received(text: string) {
   }
   return this.handle({ session: this.session, text });
 }
+
+// Bad: 既に名前がある値を短く書くためだけに別名へ移している
+const i = categoryItems;
+query.from(i);
+
+// Good: 元の名前で参照する
+query.from(categoryItems);
 ```
 
-なぜ: 分割代入は同じ値の別名を増やすだけで、読み手は変数がどのオブジェクトの何かを宣言まで遡って確かめ、別名と元のどちらを読むべきかも追わされる。`args.update.userId` なら出どころがその場で読め、TypeScript は `this.session` のようなプロパティの参照も `if` で絞り込める。
+なぜ: 読むだけの分割代入や短縮別名は同じ値の名前を増やすだけで、読み手は出どころを宣言まで遡って確かめ、別名と元のどちらを読むべきかも追わされる。元の名前なら出どころがその場で読め、TypeScript は `this.session` のようなプロパティの参照も `if` で絞り込める。
 
 ## class でしか使わない関数は private method にする
 
