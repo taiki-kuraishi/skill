@@ -1,11 +1,28 @@
 ---
 name: kstack-testing
-description: テストコードを書く・修正する・レビューするときの規約。spec ファイルやテスト関数を扱う場面すべてで使用すること — テスト本体に Arrange / Act / Assert のコメントを付ける構造化、テストデータを seed スクリプトや共有 fixture ではなく各テストケースの Arrange で作り、beforeEach / afterEach で DB を毎回まっさらに戻す方針、テストケースの選び方（正常系 1 件と use case / HTTP 応答の振る舞いごとに 1 件、入力 validation のテストは書かない）、行われないこと（呼ばれない・insert されない・ログが出ない）を assert しない方針、テスト名の言語（it / test の第 1 引数は日本語、describe の第 1 引数は英語。VRT の test は kstack-playwright に従う）など。テストの新規作成、修正、ケースの追加・削減、DB を使うテストの準備、レビュー指摘への対応でも発火させる。
+description: テストコードを書く・修正する・レビューするときの規約。spec ファイルやテスト関数を扱う場面すべてで使用すること — API テストを route 定義ファイルごとに 1 spec にまとめる配置、テスト本体に Arrange / Act / Assert のコメントを付ける構造化、テストデータを seed スクリプトや共有 fixture ではなく各テストケースの Arrange で作り、beforeEach / afterEach で DB を毎回まっさらに戻す方針、テストケースの選び方（正常系 1 件と use case / HTTP 応答の振る舞いごとに 1 件、入力 validation のテストは書かない）、行われないこと（呼ばれない・insert されない・ログが出ない）を assert しない方針、テスト名の言語（it / test の第 1 引数は日本語、describe の第 1 引数は英語。VRT の test は kstack-playwright に従う）など。テストの新規作成、修正、ケースの追加・削減、DB を使うテストの準備、レビュー指摘への対応でも発火させる。
 ---
 
 # kstack-testing
 
 テストコードを書くときの規約。理由を理解した上で適用すること。
+
+## API テストは route 定義ファイル 1 つにつき spec 1 つにする
+
+API のテストは route を定義するファイルごとに 1 つの spec にまとめ、追加ケースは対応する既存 spec に足す。複数の route 定義ファイルのテストを機能横断 spec に集約しない。分割単位は endpoint ではなく route 定義ファイルとし、この配置規約を一般の unit テストや E2E 全般へ広げない。
+
+```text
+Bad:
+  routes/posts.ts と routes/comments.ts の API テストを
+  test/moderation.spec.ts に集約する
+
+Good:
+  routes/posts.ts（GET /posts、POST /posts）→ test/posts.spec.ts
+  routes/comments.ts → test/comments.spec.ts
+  posts の追加ケース → 既存の test/posts.spec.ts に足す
+```
+
+なぜ: route 定義ファイルと spec が対応していれば、API の変更時に追加・修正先が分かり、既存ケースと追加ケースを一緒に確認できる。機能横断の別 spec に集約すると、同じ route のテストが分散する。
 
 ## テスト本体には Arrange / Act / Assert のコメントを付ける
 
