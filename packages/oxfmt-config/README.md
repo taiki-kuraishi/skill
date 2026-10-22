@@ -157,7 +157,7 @@ oxfmt で表せる規約は無い。整形の選択肢しか持たず、route �
 
 ### kstack-testing
 
-oxfmt で表せる規約は無い。整形の選択肢しか持たず、Arrange / Act / Assert のコメントの有無、テストデータをどこで作るか、テストの本数と assert に何を書くか、`it` / `test` の名前と `describe` の名前の言語は決められない（6 規約の Bad / Good に `oxfmt --check` は差分を出さない）。
+oxfmt で表せる規約は無い。整形の選択肢しか持たず、Arrange / Act / Assert のコメントの有無、テストデータをどこで作るか、テストの本数と assert に何を書くか、`it` / `test` の名前と `describe` の名前の言語は決められない（6 規約の Bad / Good に `oxfmt --check` は差分を出さない）。追加した「route 定義ファイル 1 つにつき spec 1 つ」も表せない。spec をどの route に対応させるかは整形の選択肢に無く、機能横断 spec に集約した Bad と route 定義ファイルごとに分けた Good のどちらも `oxfmt --check` は差分を出さず、ファイルも分割しない。
 
 ### kstack-playwright
 
@@ -217,3 +217,12 @@ oxfmt で表せる規約は無い。live review を足した変更で入った�
 ### kstack-handoff
 
 oxfmt で表せる規約は無い。全規約が agent の作業・対話手順か Git・Herdr／Tern の操作で、整形の選択肢に無い。規約の一覧は `@taiki-kuraishi/oxlint-config` の README の kstack-handoff の節と同じ。
+
+### kstack-terraform / kstack-gcp-service-usage
+
+設定は作らない。Terraform の既存規約の対応は `@taiki-kuraishi/oxlint-config` の README にある kstack-terraform の表を再利用する。
+
+| 規約                                                                                                                                                | 設定 / 表せない理由                                                                              |
+| --------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| 属性参照で表れる依存には depends_on を重ねず、参照で表せない実行順序だけ理由コメント付きで指定する                                                  | 表せない。HCL は oxfmt の対象外で、実行順序の必要性も整形では判断できない                        |
+| GCP API を google_project_service で管理せず、初回 apply 前に gcloud services enable で有効化し、対象 API と実行手順を当該 repo の AGENTS.md に置く | 表せない。HCL・シェルは対象外。Markdown の整形も対象 API・手順を書き足さず、実施順序を検証しない |
