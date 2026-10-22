@@ -280,12 +280,13 @@ live review を足した変更で入った規約だけを載せる。設定は�
 
 設定は作らない。oxlint・oxfmt は `.gitignore` を扱わない（`oxlint .gitignore` は `No files found to lint`、`oxfmt --check .gitignore` は `Expected at least one target file` になる）。commit と PR の規約は Git の操作手順で、ソースコードに現れない。
 
-| 規約                                    | ルール / 表せない理由                                                                                                                         |
-| --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| .gitignore は repo root に 1 つだけ置く | 表せない。`.gitignore` は oxlint の対象外で、ファイルの置き場所も 1 ファイルの AST から決まらない                                             |
-| commit の書き方                         | 表せない。commit message と stage する範囲、commit 前の `git diff --cached` の確認は Git の操作で、oxlint の対象のファイルに現れない          |
-| PR の作り方                             | 表せない。branch・title・body・draft・assignee と、作成後の subagent による確認は GitHub と agent の操作で、oxlint の対象のファイルに現れない |
-| PR を merge する                        | 表せない。merge の指示を待つことと、CI・approve の確認は GitHub と agent の操作で、oxlint の対象のファイルに現れない                          |
+| 規約                                                                 | ルール / 表せない理由                                                                                                                         |
+| -------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| .gitignore は repo root に 1 つだけ置く                              | 表せない。`.gitignore` は oxlint の対象外で、ファイルの置き場所も 1 ファイルの AST から決まらない                                             |
+| その場の検証だけに使った script・診断 SQL を commit・push に含めない | 表せない。同じコードでも一時検証か依頼された恒常運用用かは AST から判定できず、README への貼り付けも oxlint の対象外                          |
+| commit の書き方                                                      | 表せない。commit message と stage する範囲、commit 前の `git diff --cached` の確認は Git の操作で、oxlint の対象のファイルに現れない          |
+| PR の作り方                                                          | 表せない。branch・title・body・draft・assignee と、作成後の subagent による確認は GitHub と agent の操作で、oxlint の対象のファイルに現れない |
+| PR を merge する                                                     | 表せない。merge の指示を待つことと、CI・approve の確認は GitHub と agent の操作で、oxlint の対象のファイルに現れない                          |
 
 ### kstack-rest-api
 

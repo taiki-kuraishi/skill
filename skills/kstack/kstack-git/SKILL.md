@@ -1,6 +1,6 @@
 ---
 name: kstack-git
-description: Git の規約。.gitignore など git の設定ファイルを書く・修正する・レビューするときと、commit・PR を作る・PR を merge するときに使う。.gitignore を repo root に 1 つだけ置き、サブディレクトリの除外パターンも root の .gitignore に書くこと、commit message（英語 1 行・prefix・gitmoji）と stage する範囲、PR の branch・title・body・draft・assignee、merge は user の明示の指示を待ち CI と approve を確かめてから行うことを扱う。Terraform・Node.js などの stack や package を足して除外したいファイル（.terraform/、state、build 成果物、node_modules など）が増えたとき、サブディレクトリに .gitignore を作りたくなったとき、ツールが .gitignore を生成したとき、変更を commit するとき、PR を作成するとき、PR を merge するか迷ったとき・merge を指示されたとき、開発フローのフェーズ承認後に commit するとき、レビュー指摘への対応でも発火させる。
+description: Git の規約。.gitignore など git の設定ファイルを書く・修正する・レビューするときと、commit・PR を作る・PR を merge するときに使う。.gitignore を repo root に 1 つだけ置き、サブディレクトリの除外パターンも root の .gitignore に書くこと、その場の検証だけに使った script・診断 SQL を README への貼り付けも含め commit・push に残さないこと、commit message（英語 1 行・prefix・gitmoji）と stage する範囲、PR の branch・title・body・draft・assignee、merge は user の明示の指示を待ち CI と approve を確かめてから行うことを扱う。Terraform・Node.js などの stack や package を足して除外したいファイル（.terraform/、state、build 成果物、node_modules など）が増えたとき、サブディレクトリに .gitignore を作りたくなったとき、ツールが .gitignore を生成したとき、検証用の script・診断 SQL を残すか判断するとき、変更を commit するとき、PR を作成するとき、PR を merge するか迷ったとき・merge を指示されたとき、開発フローのフェーズ承認後に commit するとき、レビュー指摘への対応でも発火させる。
 ---
 
 # kstack-git
@@ -26,6 +26,17 @@ infra/cloudflare/.gitignore   # .terraform/ と *.tfstate*
 なぜ: 除外のルールが 1 ファイルで読め、あるファイルがなぜ追跡されないかを探して回らなくて済む。ディレクトリの改名・削除で .gitignore を取りこぼしたり、同じパターンが複数のファイルで重複・食い違ったりしない。
 
 サブディレクトリの `.gitignore` を root に移したら、`git check-ignore -v <path>` で、除外したいファイルが root のパターンで除外され、lock ファイルなど追跡したいファイルが除外されていないことを確かめる。
+
+## その場の検証だけに使った script・診断 SQL を commit・push に含めない
+
+その場の検証だけに使った script・診断 SQL は、commit・push の対象に含めない。README に貼り付ける形でも残さない。依頼された恒常運用用の script や手順は対象外。
+
+```text
+Bad: 一時検証の check-data.ts を commit する / 手動診断 SQL を README に貼り付けて push する
+Good: 一時検証は /tmp で実行して結果を報告し、script・診断 SQL を commit・push に残さない
+```
+
+なぜ: その場の確認だけに使ったものを残すと、保守対象の script や恒常的な運用手順と区別できなくなる。
 
 ## commit の書き方
 
