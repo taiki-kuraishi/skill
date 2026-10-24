@@ -295,6 +295,7 @@ live review を足した変更で入った規約だけを載せる。設定は�
 | .gitignore は repo root に 1 つだけ置く                              | 表せない。`.gitignore` は oxlint の対象外で、ファイルの置き場所も 1 ファイルの AST から決まらない                                             |
 | その場の検証だけに使った script・診断 SQL を commit・push に含めない | 表せない。同じコードでも一時検証か依頼された恒常運用用かは AST から判定できず、README への貼り付けも oxlint の対象外                          |
 | commit の書き方                                                      | 表せない。commit message と stage する範囲、commit 前の `git diff --cached` の確認は Git の操作で、oxlint の対象のファイルに現れない          |
+| push した commit の CI を完了まで監視する                            | 表せない。push した SHA と CI の実行状態・監視・報告は GitHub と agent の操作で、ソースコードの AST に現れない                                |
 | PR の作り方                                                          | 表せない。branch・title・body・draft・assignee と、作成後の subagent による確認は GitHub と agent の操作で、oxlint の対象のファイルに現れない |
 | PR を merge する                                                     | 表せない。merge の指示を待つことと、CI・approve の確認は GitHub と agent の操作で、oxlint の対象のファイルに現れない                          |
 

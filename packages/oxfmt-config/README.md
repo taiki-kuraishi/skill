@@ -148,6 +148,7 @@ oxfmt で表せる規約は無い。`.gitignore` は oxfmt の整形対象では
 | .gitignore は repo root に 1 つだけ置く                              | 表せない。`.gitignore` は整形対象ではなく、ファイルの置き場所も整形の選択肢に無い                               |
 | その場の検証だけに使った script・診断 SQL を commit・push に含めない | 表せない。oxfmt は一時検証か恒常運用用かを判断せず、ファイルや README 内の SQL を配布対象から除くこともできない |
 | commit の書き方                                                      | 表せない。commit message と stage する範囲は整形対象のファイルに現れない                                        |
+| push した commit の CI を完了まで監視する                            | 表せない。push 後の CI の監視・結果報告は整形対象のファイルに現れない                                           |
 | PR の作り方                                                          | 表せない。PR の title・body・assignee と作成後の subagent による確認は整形対象のファイルに現れない              |
 | PR を merge する                                                     | 表せない。merge の判断と CI・approve の確認は整形対象のファイルに現れない                                       |
 

@@ -1,6 +1,6 @@
 {
   "name": "@taiki-kuraishi/oxfmt-config",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "SKILL の規約を表す oxfmt の共有設定。",
   "repository": {
     "type": "git",

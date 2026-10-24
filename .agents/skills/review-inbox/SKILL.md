@@ -23,12 +23,13 @@ metadata:
 
 - crit はフックを、crit を起動した agent の env で動かす。`KSTACK_SKILL_REPO` が無い agent から approve すると、フックは exit 127 で失敗し、指摘も保存されない。login shell で読まれる場所に設定し、設定より前に起動した agent と crit は起動し直す
 - 設定できたかは、crit を起動する agent の shell で `test -x "$KSTACK_SKILL_REPO/.agents/skills/review-inbox/scripts/on_finish_approved.sh"` と `jq -e '.hooks.on_finish_approved' ~/.crit.config.json` の両方が通ることで確かめる
+- 通知先は profile 間で共通の `~/.pi/agent` に固定する。フック内で `PI_CODING_AGENT_DIR` を切り替えるので、approve 元の agent の profile はそのままでよい
 - `~/.pi/agent/intercom/config.json` に `busyDelivery` を `"human-first"` で足す（他のキーは消さない）。既定の `steer` だと、子を監督している最中の turn に通知が割り込む
 - フックは `jq`・`git`・`node`（`~/.omp/plugins/node_modules/.bin/pi-intercom` は `node` で動く）を使う。crit の daemon の PATH に `jq` か `git` が無いと保存もされず、`node` が無いと保存だけされて通知が届かない
 
 ## 常駐 root を起動する
 
-1. 端末（herdr か Tern）の中で、repo 本体の checkout の default branch に omp を起動し、`/skill:review-inbox` で始める。どちらの端末でもなければ review ごとに子を起動できないので、user に伝えて止まる
+1. 端末（herdr か Tern）の中で、repo 本体の checkout の default branch に、profile を指定せず `PI_CODING_AGENT_DIR="$HOME/.pi/agent" omp` で root を起動し、`/skill:review-inbox` で始める。どちらの端末でもなければ review ごとに子を起動できないので、user に伝えて止まる
 2. 導入済みの `kstack-handoff` の `SKILL.md` を読み、手順 1「確かめる」を行い、root の `Session ID`・checkout・default branch を控える。参照ファイルは handoff 本文の案内に従って読む
 3. intercom の名前を `review-inbox` に固定する。tool から slash command は直接実行できないので、handoff 本文から読んだ参照ファイルの「名前を付ける」で、root 自身（同定済みの pane か block）に `/alias review-inbox` を送る。その後 `intercom({ action: "list" })` で、`review-inbox` が自分 1 つだけであることを確かめる
 4. turn を終えて通知を待つ

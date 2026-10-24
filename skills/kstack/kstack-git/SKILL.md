@@ -1,6 +1,6 @@
 ---
 name: kstack-git
-description: Git の規約。.gitignore など git の設定ファイルを書く・修正する・レビューするときと、commit・PR を作る・PR を merge するときに使う。.gitignore を repo root に 1 つだけ置き、サブディレクトリの除外パターンも root の .gitignore に書くこと、その場の検証だけに使った script・診断 SQL を README への貼り付けも含め commit・push に残さないこと、commit message（英語 1 行・prefix・gitmoji）と stage する範囲、PR の branch・title・body・draft・assignee、merge は user の明示の指示を待ち CI と approve を確かめてから行うことを扱う。Terraform・Node.js などの stack や package を足して除外したいファイル（.terraform/、state、build 成果物、node_modules など）が増えたとき、サブディレクトリに .gitignore を作りたくなったとき、ツールが .gitignore を生成したとき、検証用の script・診断 SQL を残すか判断するとき、変更を commit するとき、PR を作成するとき、PR を merge するか迷ったとき・merge を指示されたとき、開発フローのフェーズ承認後に commit するとき、レビュー指摘への対応でも発火させる。
+description: Git の規約。.gitignore など git の設定ファイルを書く・修正する・レビューするときと、commit・push・PR 作成・PR の merge を行うときに使う。.gitignore を repo root に 1 つだけ置き、サブディレクトリの除外パターンも root の .gitignore に書くこと、その場の検証だけに使った script・診断 SQL を README への貼り付けも含め commit・push に残さないこと、commit message（英語 1 行・prefix・gitmoji）と stage する範囲、push した commit の CI を完了まで監視して結果を報告すること、PR の branch・title・body・draft・assignee、merge は user の明示の指示を待ち CI と approve を確かめてから行うことを扱う。Terraform・Node.js などの stack や package を足して除外したいファイル（.terraform/、state、build 成果物、node_modules など）が増えたとき、サブディレクトリに .gitignore を作りたくなったとき、ツールが .gitignore を生成したとき、検証用の script・診断 SQL を残すか判断するとき、変更を commit・push するとき、PR を作成するとき、PR を merge するか迷ったとき・merge を指示されたとき、開発フローのフェーズ承認後に commit するとき、レビュー指摘への対応でも発火させる。
 ---
 
 # kstack-git
@@ -52,6 +52,19 @@ Good: git add skills/kstack/kstack-git/SKILL.md && git commit -m "📝 docs: add
 ```
 
 なぜ: 1 行の message は `git log --oneline` で一覧でき、prefix と emoji で変更の種類が見て分かる。`git commit` は stage 済みのものをすべて含み、`git add <path>` はファイル内の作業前の差分も含むので、stage を絞って commit 前に確かめないと、作業前からある差分や別の作業の変更が紛れる。
+
+## push した commit の CI を完了まで監視する
+
+push のたびに、merge の指示や PR の有無にかかわらず、push した commit の CI を完了まで監視し、結果と実行 URL を user（子なら root）に報告する。PR 作成を伴う場合は、PR を作成してから監視する。
+
+GitHub Actions は `gh run list --commit <push した SHA> --branch <push 先 branch>` で対象の run を特定し、各 run を `gh run watch <run-id> --exit-status` で監視する。古い commit の成功や、push 直後に run がまだ無いことを成功扱いしない。実行対象が無い・監視できない場合は、その状態を報告する。失敗したら原因と修正案を報告し、指示なしに修正・再 push しない。
+
+```text
+Bad: push の成功だけを報告して終わる / merge を頼まれるまで CI を確認しない
+Good: push した SHA の CI を完了まで監視し、成功・失敗と実行 URL を報告する
+```
+
+なぜ: push の成功は CI の成功を意味しない。merge する段階まで確認を遅らせると、失敗した変更が放置される。
 
 ## PR の作り方
 

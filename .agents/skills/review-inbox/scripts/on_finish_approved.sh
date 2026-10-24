@@ -3,6 +3,8 @@ set -eu
 
 inbox_name=review-inbox
 intercom="$HOME/.omp/plugins/node_modules/.bin/pi-intercom"
+# approve 元の profile ではなく、常駐 root の連絡網で宛先を探す
+export PI_CODING_AGENT_DIR="$HOME/.pi/agent"
 
 skill_repo=$(cd "$(dirname "$(readlink -f "$0")")" && git rev-parse --path-format=absolute --git-common-dir)
 # $PWD は daemon の値のままなので、実体の cwd を使う
