@@ -1,11 +1,51 @@
 ---
 name: kstack-terraform
-description: Terraform（.tf ファイル、HCL）と tflint 設定（.tflint.hcl、tflint-ruleset-opa の Rego ポリシー）を書く・修正する・レビューするときの規約。リテラル値に名前を付けるときは locals ではなく default 付きの variable にすること、resource を S3・KMS・IAM のようにサービス名の module にまとめて root に resource を残さないこと、root module（state の単位）の分け方とディレクトリ名を agent が決めずに user と相談すること、provider ブロックを provider.tf に置き versions.tf を terraform ブロックだけにすること、root に output を書かず module の output を呼び出し側で参照するものだけにすること、module 内を bucket などの主リソースごとのファイルに分けること、同じ種類の resource が増えても衝突しない名前を付けること、固定の一覧から resource を作るときに for_each や count を使わず 1 つずつ resource ブロックで定義すること、Secret Manager などの secret 名に tf-var のような使う側の prefix を入れないこと、属性参照による依存には depends_on を重ねず参照で表せない実行順序だけ理由コメント付きで指定すること、tflint に provider 公式の ruleset plugin を version・source 付きで入れ deep_check を有効にすることを扱う。AWS・GCP・Cloudflare などのインフラや root module（stack）の追加、module 化やファイル分割のリファクタリング、lint 設定、レビュー指摘への対応でも発火させる。
+description: Terraform（.tf ファイル、HCL）と tflint 設定（.tflint.hcl、tflint-ruleset-opa の Rego ポリシー）を書く・修正する・レビューするときの規約。リテラル値に名前を付けるときは locals ではなく default 付きの variable にすること、環境ごとの差分は呼び出し側で確定した値を module の引数にし、条件式や if による構成の切り替えをしないこと、resource を S3・KMS・IAM のようにサービス名の module にまとめて root に resource を残さないこと、root module（state の単位）の分け方とディレクトリ名を agent が決めずに user と相談すること、provider ブロックを provider.tf に置き versions.tf を terraform ブロックだけにすること、root に output を書かず module の output を呼び出し側で参照するものだけにすること、module 内を bucket などの主リソースごとのファイルに分けること、同じ種類の resource が増えても衝突しない名前を付けること、固定の一覧から resource を作るときに for_each や count を使わず 1 つずつ resource ブロックで定義すること、Secret Manager などの secret 名に tf-var のような使う側の prefix を入れないこと、属性参照による依存には depends_on を重ねず参照で表せない実行順序だけ理由コメント付きで指定すること、tflint に provider 公式の ruleset plugin を version・source 付きで入れ deep_check を有効にすることを扱う。AWS・GCP・Cloudflare などのインフラや root module（stack）の追加、module 化やファイル分割のリファクタリング、lint 設定、レビュー指摘への対応でも発火させる。
 ---
 
 # kstack-terraform
 
 [Terraform](https://developer.hashicorp.com/terraform/language) を書くときの規約。理由を理解した上で適用すること。
+
+## 環境差分は module の引数にし、条件分岐で構成を切り替えない
+
+環境ごとに変わる値は呼び出し側の root module の入力として確定し、意味のある引数名で module に渡す。module は環境名から値を選ばず、受け取った値をそのまま使う。root の分け方やディレクトリ名は、この規約のために変えず、下の「root module の分け方は user と相談して決める」に従う。
+
+Terraform の値・リソース構成の切り替えに、条件式（`条件 ? A : B`）、`for` 式の `if`、template の `%{ if ... }` を使わない。条件付きの `count`・`for_each`・`dynamic`、環境名をキーにした map / `lookup` も使わず、呼び出し側に具体的な値・構成を宣言する。root 側へ条件式を移すだけにもせず、入力の妥当性を確かめる `validation`・`precondition` などの真偽式とは区別する。
+
+```hcl
+# Bad: module が環境名を解釈して値を選ぶ
+locals {
+  allowed_origin = var.env == "prd" ? "https://example.com" : "https://dev.example.com"
+}
+
+# Good: 呼び出し側の main.tf
+module "waf" {
+  source         = "./modules/waf"
+  allowed_origin = var.allowed_origin
+}
+
+# 呼び出し側の variables.tf
+variable "allowed_origin" {
+  type        = string
+  description = "ブラウザからのアクセスを許可する origin"
+  default     = "https://dev.example.com"
+}
+
+# modules/waf/variables.tf
+variable "allowed_origin" {
+  type        = string
+  description = "ブラウザからのアクセスを許可する origin"
+}
+
+# modules/waf/main.tf の response_header ブロック
+response_header {
+  name  = "Access-Control-Allow-Origin"
+  value = var.allowed_origin
+}
+```
+
+なぜ: 環境の判断を module に持たせると、環境を足すたびに共通実装を変える必要がある。呼び出し側に具体的な値と構成を宣言すれば、その環境で何を設定するかを条件の評価なしで読める。
 
 ## 属性参照で表れる依存には depends_on を重ねない
 
