@@ -1,6 +1,6 @@
 ---
 name: kstack-typescript
-description: TypeScript コードを書く・修正する・レビューするときの規約。ts ファイルや TypeScript の関数・class を扱う場面すべてで使用すること — return 型アノテーションやそのためだけの interface・type を書かず導出に任せること、else を使わない早期 return、if の前の空行、引数・this・env のプロパティを読むためだけに分割代入せず元のオブジェクトから参照すること（型の絞り込みのためでも同じ）、既に名前がある値を短縮のためだけに別名へ移さないこと、class でしか使わない関数を private method にすること、class・error・定数・型が同居するファイルをディレクトリに分けて index.ts から export することなど。コード生成、リファクタリング、ファイル分割、バグ修正、レビュー指摘への対応でも発火させる。
+description: TypeScript コードを書く・修正する・レビューするときの規約。ts ファイルや TypeScript の関数・class を扱う場面すべてで使用すること — return 型アノテーションやそのためだけの interface・type を書かず導出に任せること、Promise.all・Promise の then を使わず async/await で逐次展開すること、else を使わない早期 return、if の前の空行、引数・this・env のプロパティを読むためだけに分割代入せず元のオブジェクトから参照すること（型の絞り込みのためでも同じ）、既に名前がある値を短縮のためだけに別名へ移さないこと、class でしか使わない関数を private method にすること、class・error・定数・型が同居するファイルをディレクトリに分けて index.ts から export することなど。コード生成、リファクタリング、ファイル分割、バグ修正、レビュー指摘への対応でも発火させる。
 disable-model-invocation: false
 ---
 
@@ -27,6 +27,27 @@ const load = () => fetchContent();
 なぜ: 手書きの型は導出元と同じ情報を二重に持つだけで、内部実装の変更時に 2 箇所のメンテが必要になる。型の名前が要る呼び出し側は `Awaited<ReturnType<typeof load>>` のように導出元から取ればよい。
 
 例外は TypeScript が戻り値を導出できない場合（自身の戻り値に依存する再帰関数など）だけ。公開 API・RPC・package の境界であることや、依存先の型から独立させたいことは書く理由にならない。境界でも導出した型がそのまま呼び出し側へ伝わる。
+
+## Promise.all・Promise の then を使わず、async/await で逐次展開する
+
+非同期処理は `Promise.all` や Promise の `.then()` で組まず、`async` 関数の中で 1 つずつ `await` して上から順に書く。独立した処理も同じ。失敗時の処理はその場に残し、後続処理へ進ませない。
+
+```ts
+// Bad: 非同期処理と後続処理をコールバックに詰めている
+const load = () =>
+  Promise.all([fetchProfile(), fetchSettings()]).then(([profile, settings]) =>
+    buildPage({ profile, settings }),
+  );
+
+// Good: 処理を上から順に読める
+const load = async () => {
+  const profile = await fetchProfile();
+  const settings = await fetchSettings();
+  return buildPage({ profile, settings });
+};
+```
+
+なぜ: コールバックのネストをなくし、処理順と失敗時にどこで抜けるかを上から追えるようにする。独立処理の並列実行による待ち時間の短縮より、この読みやすさを優先する。
 
 ## else・三項演算子を使わない。早期 return する
 
