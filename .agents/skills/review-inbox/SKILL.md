@@ -1,13 +1,13 @@
 ---
 name: review-inbox
-description: "このリポジトリで常駐する root session が、他のリポジトリの Crit review が approve されたときに crit のフックから intercom で届く通知を受け、review ごとに kstack-handoff で子 session を起動して skill-from-review を回させる運用手順。常駐 root の起動・セットアップ、フックの通知（skill://review-inbox を読むよう求める message）を受けたときに使用する。"
+description: "このリポジトリで常駐する root session が、他のリポジトリの Crit review が approve されたときに crit のフックから intercom で届く通知を受け、root 自身が default branch の上で skill-from-review を回し、commit・push まで行う運用手順。常駐 root の起動・セットアップ、フックの通知（skill://review-inbox を読むよう求める message）を受けたときに使用する。"
 metadata:
   internal: true
 ---
 
 # review-inbox
 
-他のリポジトリの Crit review が approve されると、`scripts/on_finish_approved.sh`（crit の global フック）がコメントを保存し、名前が `review-inbox` の omp session に保存先を intercom で送る。その session（root）は review ごとに子を 1 つ起動し、子が `skill-from-review` を回す。root は振り分けと、user との窓口だけを持つ。
+他のリポジトリの Crit review が approve されると、`scripts/on_finish_approved.sh`（crit の global フック）がコメントを保存し、名前が `review-inbox` の omp session に保存先を intercom で送る。その session（root）は子を起動せず、review を 1 件ずつ自分で処理する。repo 本体の checkout の default branch のまま `skill-from-review` を回し、default branch に commit・push する。
 
 ## セットアップ（マシンごとに 1 回）
 
@@ -24,13 +24,13 @@ metadata:
 - crit はフックを、crit を起動した agent の env で動かす。`KSTACK_SKILL_REPO` が無い agent から approve すると、フックは exit 127 で失敗し、指摘も保存されない。login shell で読まれる場所に設定し、設定より前に起動した agent と crit は起動し直す
 - 設定できたかは、crit を起動する agent の shell で `test -x "$KSTACK_SKILL_REPO/.agents/skills/review-inbox/scripts/on_finish_approved.sh"` と `jq -e '.hooks.on_finish_approved' ~/.crit.config.json` の両方が通ることで確かめる
 - 通知先は profile 間で共通の `~/.pi/agent` に固定する。フック内で `PI_CODING_AGENT_DIR` を切り替えるので、approve 元の agent の profile はそのままでよい
-- `~/.pi/agent/intercom/config.json` に `busyDelivery` を `"human-first"` で足す（他のキーは消さない）。既定の `steer` だと、子を監督している最中の turn に通知が割り込む
+- `~/.pi/agent/intercom/config.json` に `busyDelivery` を `"human-first"` で足す（他のキーは消さない）。既定の `steer` だと、前の review を処理している最中の turn に次の通知が割り込む
 - フックは `jq`・`git`・`node`（`~/.omp/plugins/node_modules/.bin/pi-intercom` は `node` で動く）を使う。crit の daemon の PATH に `jq` か `git` が無いと保存もされず、`node` が無いと保存だけされて通知が届かない
 
 ## 常駐 root を起動する
 
-1. 端末（herdr か Tern）の中で、repo 本体の checkout の default branch に、profile を指定せず `PI_CODING_AGENT_DIR="$HOME/.pi/agent" omp` で root を起動し、`/skill:review-inbox` で始める。どちらの端末でもなければ review ごとに子を起動できないので、user に伝えて止まる
-2. 導入済みの `kstack-handoff` の `SKILL.md` を読み、手順 1「確かめる」を行い、root の `Session ID`・checkout・default branch を控える。参照ファイルは handoff 本文の案内に従って読む
+1. 端末（herdr か Tern）の中で、repo 本体の checkout の default branch に、profile を指定せず `PI_CODING_AGENT_DIR="$HOME/.pi/agent" omp` で root を起動し、`/skill:review-inbox` で始める。どちらの端末でもなければ root 自身に名前を付けられないので、user に伝えて止まる
+2. 導入済みの `kstack-handoff` の `SKILL.md` を読み、手順 1「確かめる」で root の端末（pane か block）を同定し、checkout と default branch を控える。参照ファイルは handoff 本文の案内に従って読む。子は起動しないので、handoff の「起動」以降は使わない
 3. intercom の名前を `review-inbox` に固定する。tool から slash command は直接実行できないので、handoff 本文から読んだ参照ファイルの「名前を付ける」で、root 自身（同定済みの pane か block）に `/alias review-inbox` を送る。その後 `intercom({ action: "list" })` で、`review-inbox` が自分 1 つだけであることを確かめる
 4. turn を終えて通知を待つ
 
@@ -48,47 +48,32 @@ Good: root 1 つだけに /alias review-inbox を付け、list で 1 件であ�
 通知の本文は「crit の review が approve されました。skill://review-inbox を読み、`<保存した JSON の path>` を処理してください」の形で、`From pi-intercom-cli` として届く。user の発言ではない。
 
 1. 保存した JSON の `repo_root` と `comments_json` の件数を確かめる。読めないときは、path を添えて user に伝えて止まる
-2. `kstack-handoff` の「起動」に従って、子を 1 つ起動する（worktree はそこで wt が作り、端末への起動と prompt の送信は handoff 本文から読んだ参照ファイルの「起動」「名前を付ける」）。`<feature>` は `review`、`<task>` は JSON の `session_key` にする（例: branch `ho/review/23bd52db9a3a`）。同じ branch が既にあれば（`git branch --list 'ho/review/*'`）、連番を足す（例: `ho/review/23bd52db9a3a-2`）
-3. 引き継ぎ prompt は下の形にし、後ろに kstack-handoff の「子との取り決め」を足す
-4. 以降は kstack-handoff の「子に応える」と「統合」に従う。子が送る分類案は、root がチャットで 1 問ずつ（分類案と対象の指摘を添えて）user に示し、回答を reply で子に返す。user が Crit で approve したら、「統合」の手順 2 ではなく、下の「承認から merge まで」に従う。PR の衝突だけは、「統合」の「止まって user に聞く」ではなく、下の「共有ファイルの衝突」に従う
+2. default branch にいて、未 commit の変更が無いことを `git status --short` で確かめ、`git pull --ff-only` で最新にする。変更が残っているか fast-forward できなければ、状態を添えて user に伝えて止まる
+3. `skill://skill-from-review` を読み、保存した JSON を入力として手順を最後まで回す。分類案と、追記か新規作成かの案は、書く前に root がチャットで 1 問ずつ（分類案と対象の指摘を添えて）user に示し、承認されなかった指摘は SKILL 化しない
+4. skill-from-review の手順 7 で user が Crit で approve したら、下の「承認から push まで」に従う
 
-```md
-`<保存した JSON の path>` は、`<repo_root>` の Crit review の approve 時のコメントです。`skill://skill-from-review` を読み、その手順を最後まで回してください。
-
-- 手順 1・2 の分類と、追記か新規作成かの案ができたら、書く前に `intercom({ action: "ask" })` で root に送り、user の承認を待つ。承認されなかった指摘は SKILL 化しない
-- skill-from-review の中で user に聞くこと（テストを回すか、など）は、user にチャットで聞かず、root に ask する
-- 手順 7 の user review は自分で依頼せず、完了報告として root に送る
-```
-
-review が続けて届いたら、前の子を待たずに、review ごとに子を起動する。
-
-## 承認から merge まで
-
-review-inbox では、user が Crit で approve したことを、push・PR 作成・merge までの user の明示指示として扱う。root は承認を受けたら、kstack-handoff の「統合」の手順 2（push・PR・merge を user に確かめる）を省き、子に次をまとめて指示する。
-
-- commit（`skill://kstack-git` の「commit の書き方」）
-- push と PR 作成（`skill://kstack-git` の「PR の作り方」。subagent の確認を含む）
-- merge（`skill://kstack-git` の「PR を merge する」で CI と GitHub の approve を確かめる。揃わなければ merge せず root に返す）
-
-merge できずに返ったときと、merge 後の片付けは、kstack-handoff の「統合」に従う。承認の後に子が足した差分（漏れの補足、衝突の解消など）は、この指示に含まれない。root が Crit で user に再 review を依頼し、approve を受けてから同じ流れで進める。
+前の review を処理している間に届いた通知は、`busyDelivery` により今の turn が終わるまで待たされる。review は届いた順に 1 件ずつ、push まで終えてから次に進む。
 
 ```text
-Bad: approve の後に「push・PR・merge のどれを行いますか」と user に聞く / 承認後に子が足した差分をそのまま merge させる
-Good: approve を受けたら commit から merge までを子にまとめて指示し、承認後に足した差分は Crit で再 review の approve を受けてから同じ流れで進める
+Bad: 前の review の差分が未 commit のまま、次の review の SKILL を書き始める
+Good: 前の review を push まで終え、git status が空の default branch から次の review を始める
 ```
 
-なぜ: review-inbox が扱うのはこの skill repo の SKILL で、repo は merge 前の approve を求めない。user は Crit の approve で中身を確かめ終えていて、毎回 merge を聞くと往復が増えるだけ。merge の前提（CI・GitHub の approve）は kstack-git の手順が確かめる。
+なぜ: すべての review が同じ checkout の default branch を使うので、差分が混ざると review ごとの承認範囲と commit が切り分けられなくなる。
 
-## 共有ファイルの衝突
+## 承認から push まで
 
-並列の子は、`skills/kstack/kstack-skill-review/SKILL.md` の一覧、linter package の設定と README、同じ `kstack-*` の SKILL を同時に書き換えうる。`kstack-interface-first-development` の「1 ファイルは 1 フェーズだけが担当する」とは違い、ここでは衝突を merge のときに解く。
+review-inbox では、user が Crit で approve したことを、default branch への commit と push までの user の明示指示として扱う。PR は作らない。root は承認を受けたら確認を挟まず、次を続けて行う。
 
-- 先に承認された子から統合する。後の子の PR が衝突したら、root がその子に「`origin/<default branch>` を取り込み、衝突を解いて、解いた差分を報告して」と send する
-- 解いた差分は、承認後の未 review の変更として扱う。root が user に再 review を依頼してから merge させる
+- commit（`skill://kstack-git` の「commit の書き方」）。その review で書いた変更だけを含める
+- default branch への push（`git push origin HEAD`）。non-fast-forward で拒否されたら `git pull --rebase` で取り込む。衝突したら解かずに止まり、状態を添えて user に聞く
+- push した commit の CI の監視（`skill://kstack-git` の「push した commit の CI を完了まで監視する」）。結果と実行 URL を user に報告する
+
+承認の後に足した差分（漏れの補足、CI の失敗の修正など）は、この指示に含まれない。Crit で user に再 review を依頼し、approve を受けてから同じ流れで commit・push する。
 
 ```text
-Bad: 衝突を子に解かせ、そのまま merge させる
-Good: 解いた差分を root が受け取り、kstack-review-request で user に再 review を依頼してから merge させる
+Bad: approve の後に「commit・push しますか」と user に聞く / topic branch を切って PR を作る / 承認後に足した差分をそのまま push する
+Good: approve を受けたら default branch に commit・push して CI を見届け、承認後に足した差分は Crit で再 review の approve を受けてから同じ流れで進める
 ```
 
-なぜ: review は散発的に届くので、前の子の merge を待つと指摘がたまる。一方で、衝突の解き方で既存の規約が消えうるので、解いた結果は user が確かめる。
+なぜ: review-inbox が扱うのはこの skill repo の SKILL で、user は Crit の approve で中身を確かめ終えている。毎回 push を聞いたり PR を挟んだりすると往復が増えるだけ。default branch に直接載るので、壊れていないかは push 後の CI で確かめる。

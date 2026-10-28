@@ -11,7 +11,7 @@ skill_repo=$(cd "$(dirname "$(readlink -f "$0")")" && git rev-parse --path-forma
 review_root=$(pwd -P)
 review_repo=$(git -C "$review_root" rev-parse --path-format=absolute --git-common-dir 2>/dev/null || true)
 
-# 子 session は linked worktree で review を受けるので、worktree も含めてこの repo の review を除く
+# root はこの repo の checkout で user に review を依頼するので、worktree も含めてこの repo の review を除く
 [ "$review_repo" = "$skill_repo" ] && exit 0
 
 payload=$(cat)
