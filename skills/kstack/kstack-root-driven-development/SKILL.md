@@ -97,7 +97,7 @@ Good: 書く前に止め、「スキーマの内部構造に依存する / カ�
 | テスト・挙動検証     | `worker` に no-edit を明示 / 静的確認は `reviewer` | `general-purpose` に no-edit を明示 |
 | 手順 5 の review     | `reviewer`                                         | `general-purpose` に no-edit を明示 |
 
-各依頼に `目的 / cwd / 対象範囲 / read-only 境界 / 完了条件 / 必要な証拠 / 報告形式` を含める。手順 5 の依頼では `kstack-skill-review`・`kstack-drift-review`・`ponytail-review` のどれを使うかを指示し（SKILL として呼べない subagent には SKILL.md の path を渡す）、報告形式はその SKILL の形式にする。`ponytail-review` が環境に入っていなければ、root が代わりに review せず、入っていないことを gate の `未解決事項` に書く。`worker` / `general-purpose` は編集 tool を持ち得るため、read-only は agent 名でなく dispatch の権限境界として明示する。subagent は編集、stage、commit、user への質問を行わない。独立した依頼だけを並列化する。subagent 経路が使えない場合は exact failure を user に報告し、root が黙って代行しない。
+各依頼に `目的 / cwd / 対象範囲 / read-only 境界 / 完了条件 / 必要な証拠 / 報告形式` を含める。依頼するのは事実の収集・検証と手順 5 の review だけにし、案の比較・設計や方針の検討・おすすめの作成は依頼しない。判断は root が subagent の証拠から行う。手順 5 の依頼では `kstack-skill-review`・`kstack-drift-review`・`ponytail-review` のどれを使うかを指示し（SKILL として呼べない subagent には SKILL.md の path を渡す）、報告形式はその SKILL の形式にする。`ponytail-review` が環境に入っていなければ、root が代わりに review せず、入っていないことを gate の `未解決事項` に書く。`worker` / `general-purpose` は編集 tool を持ち得るため、read-only は agent 名でなく dispatch の権限境界として明示する。subagent は編集、stage、commit、user への質問を行わない。独立した依頼だけを並列化する。subagent 経路が使えない場合は exact failure を user に報告し、root が黙って代行しない。
 
 ## Red flags
 
@@ -105,6 +105,7 @@ Good: 書く前に止め、「スキーマの内部構造に依存する / カ�
 | ------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------- |
 | 「root-driven は指揮だけ。worker が実装してよい」                                    | root が全編集を行う。subagent は証拠だけを返す                                                                                         |
 | 「承認前に checkpoint commit しておけば安全」                                        | 承認前に commit しない。user は未 commit の差分を review し、commit は承認後に現在のフェーズの変更だけで行う                           |
+| 「案の比較や設計の検討は subagent に任せ、おすすめをもらう方が速い」                 | 比べて決めるのは root。subagent には比較に要る事実だけを集めさせる。結論ごと受け取ると、root は根拠を確かめないまま user に案を示す    |
 | 「緊急なので review 中に次へ進む」                                                   | 緊急性を user へ伝え、現在の gate で止まる                                                                                             |
 | 「20秒のテストなら root が直接回す方が速い」                                         | 必要性を決めるのは root、検証コマンドを実行するのは subagent。速さ・root の最終責任・併用を理由にした hybrid も不可                    |
 | 「承認済みフェーズは commit せずに次フェーズを始めてもよい」                         | 承認済みの変更を commit してから次のフェーズに触れる。未 commit のまま進めると、次の review に承認済みの差分が混ざる                   |

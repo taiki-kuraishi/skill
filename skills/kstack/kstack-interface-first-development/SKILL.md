@@ -14,7 +14,7 @@ root は repo 本体の checkout（linked worktree ではない）の default br
 
 ## 手順
 
-1. **要件を固める** — root が repo 本体の checkout の default branch にいること（`git rev-parse --show-toplevel` が `git worktree list` の 1 行目の path で、`git branch --show-current` が default branch）を確かめ、違えば、そこで起動し直すよう user に伝えて止まる。依頼と既存コードを読み、作るもの（画面・endpoint・データ・設定など）、使える既存のもの、ファイル配置の規約をつかむ。調査が広ければ subagent に任せ、root の context は設計に残す。設計が分かれる要件は user に聞く。そのうえで、完了条件を満たすためにこの session でやらなければならないことを 1 項目 1 行の一覧にし、todo に書く（compaction の後も残る）。小さな判断は、仮置きの値を添えて項目に書き留め、効くフェーズの案で「決めてほしいこと」に入れる。フェーズの分け方と各項目の設計は、ここでは決めない。完了条件: 作るものと対象外が決まり、やることの一覧がある
+1. **要件を固める** — root が repo 本体の checkout の default branch にいること（`git rev-parse --show-toplevel` が `git worktree list` の 1 行目の path で、`git branch --show-current` が default branch）を確かめ、違えば、そこで起動し直すよう user に伝えて止まる。依頼と既存コードを読み、作るもの（画面・endpoint・データ・設定など）、使える既存のもの、ファイル配置の規約をつかむ。調査が広ければ事実の収集だけを subagent に任せ、root の context は設計に残す。案の比較・フェーズの分け方・つなぎ目の設計は root が決め、subagent には検討させない。設計が分かれる要件は user に聞く。そのうえで、完了条件を満たすためにこの session でやらなければならないことを 1 項目 1 行の一覧にし、todo に書く（compaction の後も残る）。小さな判断は、仮置きの値を添えて項目に書き留め、効くフェーズの案で「決めてほしいこと」に入れる。フェーズの分け方と各項目の設計は、ここでは決めない。完了条件: 作るものと対象外が決まり、やることの一覧がある
 2. **次のフェーズ案を作る** — 前のフェーズが merge 済みなら、root の checkout を、`git fetch` して `merge --ff-only` で default branch の最新に進め（`kstack-handoff` で委任したなら「統合」で済んでいる）、そのコードと結果に合わせて一覧を直す。一覧から、下の「フェーズの分け方」で今回のフェーズだけを切り出し、下の「フェーズ案」の形で組む。完了条件: 次をすべて満たす
    - 今回のどのフェーズも、前提がすべて merge 済みである
    - 今回のどのファイルも、1 つのフェーズだけが担当する
