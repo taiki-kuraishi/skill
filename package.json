@@ -4,6 +4,7 @@
   "workspaces": ["packages/*"],
   "devDependencies": {
     "@taiki-kuraishi/oxlint-config": "workspace:*",
+    "bun-types": "1.4.2",
     "typescript": "^7.0.2",
     "vite-plus": "^1.1.0"
   }
