@@ -1,4 +1,5 @@
 {
+  "name": "@taiki-kuraishi/skill",
   "private": true,
   "type": "module",
   "workspaces": ["packages/*"],
@@ -7,5 +8,8 @@
     "bun-types": "1.4.2",
     "typescript": "^7.0.2",
     "vite-plus": "^1.1.0"
+  },
+  "omp": {
+    "extensions": ["./skills/kstack/kstack-super-agent/scripts/compact-reread.js"]
   }
 }

@@ -59,6 +59,10 @@ lead の起動・停止と台帳への書き込みは、すべて `scripts/super
 
 ## 状態を失ったとき
 
+自動復旧を有効にするには、router と同じ profile で `omp install <この repo の checkout の絶対パス>` を実行し、omp を再起動する。router を named profile で起動した場合は、起動時の指定方法にかかわらず同じ名前を `OMP_PROFILE` に指定して実行する。SKILL のインストールとは別の設定で、リンク元の checkout は移動・削除せずに残す。
+
+extension は成功した compaction または自動 shake が履歴を書き換えた後、session 名が厳密に `superagent` の場合だけ、この SKILL の再読と `list` での状態確認を促す followUp を送る。名前は `/alias superagent` で設定する。ほかの session 名や `/new` は自動復旧の対象にしない。
+
 compaction の後、`/new` の後、何を待っているか曖昧になったときは、記憶で答えずに `list` と台帳を読み直す。台帳が正で、router の会話の記憶はその写しに過ぎない。
 
 ## Red flags
