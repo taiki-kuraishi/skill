@@ -1,6 +1,14 @@
 #!/usr/bin/env bun
-import { execFileSync } from "node:child_process";
-import { appendFileSync, existsSync, mkdirSync, readFileSync } from "node:fs";
+import { execFileSync, spawn } from "node:child_process";
+import {
+  appendFileSync,
+  existsSync,
+  mkdirSync,
+  readdirSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import { homedir } from "node:os";
 import path from "node:path";
 import { parseArgs } from "node:util";
@@ -22,7 +30,8 @@ type Entry =
       ask?: { id: string; text: string };
       delivered: boolean;
     }
-  | { at: string; kind: "reply"; to: string; text: string; delivered: boolean };
+  | { at: string; kind: "reply"; to: string; text: string; delivered: boolean }
+  | { at: string; kind: "stop" };
 
 /**
  * 理由を stderr に出して終了コード 1 を返す。
@@ -95,6 +104,18 @@ export function ledgerPath(args: { cwd: string; feature: string }) {
 }
 
 /**
+ * 指定した profile の broker に登録されている session の一覧を返す。
+ */
+function roster(agentDir: string) {
+  const env = { ...process.env, PI_CODING_AGENT_DIR: agentDir };
+  // 同梱の pi-intercom CLI の list --json の出力形で、外部入力ではない
+  const parsed: { sessions: { name: string; id: string; status: string }[] } = JSON.parse(
+    execFileSync(INTERCOM, ["list", "--json"], { env, encoding: "utf8" }),
+  );
+  return parsed.sessions;
+}
+
+/**
  * 宛先の profile の broker で生きている同名 session に送り、届いたかを返す。
  * 1. 同名の live session がちょうど 1 つでなければ送らない
  * 2. idle を求められていて作業中なら送らない
@@ -103,12 +124,7 @@ export function ledgerPath(args: { cwd: string; feature: string }) {
 function send(args: { peer: Peer; text: string; requireIdle: boolean }) {
   const env = { ...process.env, PI_CODING_AGENT_DIR: args.peer.agentDir };
   try {
-    const roster = JSON.parse(
-      execFileSync(INTERCOM, ["list", "--json"], { env, encoding: "utf8" }),
-    ) as {
-      sessions: { name: string; id: string; status: string }[];
-    };
-    const matches = roster.sessions.filter((session) => session.name === args.peer.name);
+    const matches = roster(args.peer.agentDir).filter((session) => session.name === args.peer.name);
 
     // Step 1: 同名の live session がちょうど 1 つでなければ送らない
     if (matches.length !== 1) {
@@ -164,7 +180,7 @@ function report(argv: string[]) {
     return fail(`台帳がありません: ${file}`);
   }
   const entries = readLedger(file);
-  const lead = entries.find((entry) => entry.kind === "lead");
+  const lead = entries.findLast((entry) => entry.kind === "lead");
 
   if (!lead) {
     return fail(`台帳に lead の行がありません: ${file}`);
@@ -224,7 +240,7 @@ function reply(argv: string[]) {
   if (refusal) {
     return fail(refusal);
   }
-  const lead = entries.find((entry) => entry.kind === "lead");
+  const lead = entries.findLast((entry) => entry.kind === "lead");
 
   if (!lead) {
     return fail(`台帳に lead の行がありません: ${parsed.values.ledger}`);
@@ -253,12 +269,206 @@ function reply(argv: string[]) {
   return 0;
 }
 
+/**
+ * Lead の intercom 上の status を返す。broker に届かなければ unknown を返す。
+ */
+function leadStatus(lead: Peer) {
+  try {
+    return roster(lead.agentDir).find((entry) => entry.name === lead.name)?.status ?? "absent";
+  } catch {
+    // その profile の broker が無くても、他の feature の行は出す
+    return "unknown";
+  }
+}
+
+/**
+ * Worktree で非対話の lead を起動し、台帳に記録する。
+ */
+function start(argv: string[]) {
+  const parsed = parseArgs({
+    args: argv,
+    options: {
+      feature: { type: "string" },
+      worktree: { type: "string" },
+      prompt: { type: "string" },
+      router: { type: "string", default: "superagent" },
+    },
+  });
+
+  if (!parsed.values.feature || !parsed.values.worktree || !parsed.values.prompt) {
+    return fail(
+      "usage: start --feature <name> --worktree <path> --prompt <file> [--router <name>]",
+    );
+  }
+
+  if (!existsSync(parsed.values.prompt)) {
+    return fail(`prompt のファイルがありません: ${parsed.values.prompt}`);
+  }
+  const file = ledgerPath({ cwd: parsed.values.worktree, feature: parsed.values.feature });
+
+  if (existsSync(file)) {
+    const entries = readLedger(file);
+
+    // 同名の lead を 2 つ生かすと回答の宛先が決まらないので、停止を挟ませる
+    if (entries.some((entry) => entry.kind === "lead") && entries.at(-1)?.kind !== "stop") {
+      return fail(`${parsed.values.feature} の lead が停止されていません。先に stop してください`);
+    }
+  }
+  const fifo = file.replace(/\.md$/, ".in");
+  const frames = file.replace(/\.md$/, ".frames");
+  const name = `lead-${parsed.values.feature}`;
+  let profile = "";
+  try {
+    // Profile は direnv の OMP_PROFILE だけで決まり、omp はそれを agent dir に読み替える
+    profile = execFileSync(
+      "direnv",
+      ["exec", parsed.values.worktree, "sh", "-c", 'printf %s "$OMP_PROFILE"'],
+      { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] },
+    );
+  } catch {
+    return fail(
+      `direnv exec ${parsed.values.worktree} に失敗しました。.envrc の allow と worktree を確かめてください`,
+    );
+  }
+  let agentDir = path.join(homedir(), ".pi/agent");
+
+  if (profile) {
+    agentDir = path.join(homedir(), ".omp/profiles", profile, "agent");
+  }
+  mkdirSync(path.dirname(file), { recursive: true });
+  // 位置引数の /alias は rpc モードでは実行されないので、名前は stdin の frame で付ける
+  writeFileSync(
+    frames,
+    `${JSON.stringify({ type: "set_session_name", name })}\n${JSON.stringify({ type: "prompt", message: readFileSync(parsed.values.prompt, "utf8") })}\n`,
+  );
+  rmSync(fifo, { force: true });
+  execFileSync("mkfifo", [fifo]);
+  // Stdin が閉じると rpc モードの omp は終了するので、sleep に FIFO の書き手を持たせ続ける。
+  // Frame も子の cat に書かせ、omp が起動しなくても start 自身は FIFO を開いて止まらないようにする
+  const child = spawn(
+    "sh",
+    [
+      "-c",
+      'sleep infinity > "$1" & cat "$4" > "$1" & exec direnv exec "$2" omp --mode rpc --no-ui --cwd "$2" < "$1" > "$3" 2>&1',
+      "sh",
+      fifo,
+      parsed.values.worktree,
+      file.replace(/\.md$/, ".jsonl"),
+      frames,
+    ],
+    { detached: true, stdio: "ignore" },
+  );
+  child.unref();
+
+  if (!child.pid) {
+    return fail("lead を起動できませんでした");
+  }
+  appendLedger({
+    file,
+    entry: {
+      at: new Date().toISOString(),
+      kind: "lead",
+      lead: { name, agentDir, worktree: parsed.values.worktree, pgid: child.pid },
+      router: {
+        name: parsed.values.router,
+        agentDir: process.env.PI_CODING_AGENT_DIR ?? path.join(homedir(), ".pi/agent"),
+      },
+    },
+  });
+  console.log(file);
+  return 0;
+}
+
+/**
+ * Cwd の repo の全 feature について、状態・未回答の質問・lead の生存を表にして出す。
+ */
+function list() {
+  const dir = path.dirname(ledgerPath({ cwd: process.cwd(), feature: "_" }));
+
+  if (!existsSync(dir)) {
+    return 0;
+  }
+  const rows = ["| feature | state | 未回答の質問 | lead | 台帳 |", "|---|---|---|---|---|"];
+  for (const name of readdirSync(dir).filter((entry) => entry.endsWith(".md"))) {
+    const file = path.join(dir, name);
+    const entries = readLedger(file);
+    const lead = entries.findLast((entry) => entry.kind === "lead");
+    const state = entries.findLast((entry) => entry.kind === "report")?.state ?? "starting";
+    const open = entries
+      .flatMap((entry) => {
+        if (entry.kind !== "report" || !entry.ask) {
+          return [];
+        }
+        return [entry.ask.id];
+      })
+      .filter((id) => !replyRefusal({ entries, id }))
+      .join(" ");
+    let alive = "stopped";
+
+    if (lead && entries.at(-1)?.kind !== "stop") {
+      alive = leadStatus(lead.lead);
+    }
+    rows.push(`| ${name.slice(0, -3)} | ${state} | ${open} | ${alive} | ${file} |`);
+  }
+  console.log(rows.join("\n"));
+  return 0;
+}
+
+/**
+ * Lead をプロセスグループごと止め、台帳に記録する。
+ */
+function stop(argv: string[]) {
+  const parsed = parseArgs({ args: argv, options: { feature: { type: "string" } } });
+
+  if (!parsed.values.feature) {
+    return fail("usage: stop --feature <name>");
+  }
+  const file = ledgerPath({ cwd: process.cwd(), feature: parsed.values.feature });
+
+  if (!existsSync(file)) {
+    return fail(`台帳がありません: ${file}`);
+  }
+  const entries = readLedger(file);
+
+  // 停止済みの pgid は別のプロセスグループに再利用されうるので、もう送らない
+  if (entries.at(-1)?.kind === "stop") {
+    console.error(`${parsed.values.feature} の lead は停止済みです`);
+    return 0;
+  }
+  const lead = entries.findLast((entry) => entry.kind === "lead");
+
+  if (!lead) {
+    return fail(`台帳に lead の行がありません: ${file}`);
+  }
+
+  // Pgid が 0 以下だと kill が自分のプロセスグループに届く
+  if (lead.lead.pgid <= 0) {
+    return fail(`台帳の pgid が不正です: ${lead.lead.pgid}`);
+  }
+  try {
+    // Omp だけを止めると、FIFO の書き手の sleep と起動した sh が残る
+    process.kill(-lead.lead.pgid, "SIGTERM");
+  } catch {
+    console.error(`pgid ${lead.lead.pgid} は既に終了しています`);
+  }
+  appendLedger({ file, entry: { at: new Date().toISOString(), kind: "stop" } });
+  // 読み手のいない FIFO を開くと書き込みが止まるので、開かずに消す
+  rmSync(file.replace(/\.md$/, ".in"), { force: true });
+  return 0;
+}
+
 if (import.meta.main) {
-  const commands: Record<string, (argv: string[]) => number> = { report, reply };
+  const commands: Record<string, (argv: string[]) => number> = {
+    report,
+    reply,
+    start,
+    list,
+    stop,
+  };
   const command = commands[process.argv[2] ?? ""];
 
   if (!command) {
-    process.exit(fail("usage: superagent.ts <report|reply> ..."));
+    process.exit(fail("usage: superagent.ts <report|reply|start|list|stop> ..."));
   }
   process.exit(command(process.argv.slice(3)));
 }
