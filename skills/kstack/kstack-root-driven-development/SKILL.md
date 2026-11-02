@@ -6,15 +6,15 @@ disable-model-invocation: true
 
 # kstack-root-driven-development
 
-root が会話・判断・すべての編集を持ち、subagent は判断材料だけを返す。root は test code を書くが、その実行を含む検証作業は subagent が行う。user が現在のフェーズを承認するまで working tree を次のフェーズへ進めない。subagent は agent の組み込み tool で起動するため、このフローは Herdr・Tern の有無に依存しない。実装を子 session に渡す `kstack-handoff` は使わない。
+root が会話・判断・すべての編集を持ち、subagent は判断材料だけを返す。root は test code を書き、format・生成・snapshot の更新のような短い書き換えコマンドも実行するが、test suite などの検証は subagent が行う（手順 4）。user が現在のフェーズを承認するまで working tree を次のフェーズへ進めない。subagent は agent の組み込み tool で起動するため、このフローは Herdr・Tern の有無に依存しない。実装を子 session に渡す `kstack-handoff` は使わない。
 
 ## 責務
 
-| 担当     | 責務                                                                                                                                        |
-| -------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| root     | user との会話、要件整理、やることの整理、次のフェーズの設計、source / test / docs の実装と指摘修正、user review の依頼・承認管理            |
-| subagent | 必要になった調査・探索・検証コマンドの実行と、gate 前の skill-review・drift-review・ponytail-review を read-only で行い、証拠を root へ返す |
-| user     | 要件・やること・各フェーズの合意、user review、フェーズ承認（承認済みフェーズの commit の許可を兼ねる）、push・PR・merge の判断             |
+| 担当     | 責務                                                                                                                                                         |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| root     | user との会話、要件整理、やることの整理、次のフェーズの設計、source / test / docs の実装と指摘修正、短い書き換えコマンドの実行、user review の依頼・承認管理 |
+| subagent | 必要になった調査・探索・検証コマンドの実行と、gate 前の skill-review・drift-review・ponytail-review を read-only で行い、証拠を root へ返す                  |
+| user     | 要件・やること・各フェーズの合意、user review、フェーズ承認（承認済みフェーズの commit の許可を兼ねる）、push・PR・merge の判断                              |
 
 この Skill の実行中はこの役割分担を優先する。`orchestrating-development`、`delegating-small-tasks`、`subagent-driven-development`、`executing-plans` に実装を渡さない。TDD などの技法は root が使い、テスト実行のような検証は下記の分担に従う。
 
@@ -23,7 +23,7 @@ root が会話・判断・すべての編集を持ち、subagent は判断材料
 1. **開始状態を固定する**
    - repository の status を読み、開始前からある差分を記録する。現在の branch が default branch かも記録する。
    - 既存差分を今回の成果として扱わず、フェーズの commit にも含めない。
-   - `status` / `diff` など read-only の VCS 確認と、`kstack-review-request` に従う user review の依頼・結果受領は workflow 管理なので root が直接実行してよい。test / build / lint / 再現 / 動作確認は検証として subagent へ委譲する。
+   - `status` / `diff` など read-only の VCS 確認と、`kstack-review-request` に従う user review の依頼・結果受領は workflow 管理なので root が直接実行してよい。test / build / lint / 再現 / 動作確認は、手順 4 の分担に従う。
 
 2. **要件を合意する**
    - root が必要な質問をチャットで user へ聞く。omp の ask tool（選択式の質問 UI）は使わない。背景を書く場所が狭く、user は判断材料を見ないまま、用意された選択肢の中から選ぶことになるため。
@@ -47,7 +47,8 @@ root が会話・判断・すべての編集を持ち、subagent は判断材料
    - root が対象ファイルを読み、source / test / docs のすべての編集を行う。
    - 合意に無い「既存パターンから外れる実装」が要ると分かったら、書く前に止めて user に承認を求める。gate での事後報告で済ませない。
    - 具体的な未知事項が生じた時だけ、調査・探索・検証を subagent へ委譲する。毎フェーズの儀式として verifier を起動しない。
-   - 検証が必要だと判断した後は、短い test / build / lint / 再現コマンドでも subagent が実行する。root は先に試さず、並行して同じ確認をせず、結果だけを解釈する。
+   - 検証が必要だと判断した後は、test suite・build・型検査や lint の一式・再現・動作確認のように時間がかかるか出力の解析が要るものを、subagent が実行する。短い test でも同じ。root は先に試さず、並行して同じ確認をせず、結果だけを解釈する。
+   - format・依存の install・型や code の生成・snapshot の更新のように、出力を絞れる短い書き換えコマンドは、root が終了コードとエラーだけを見る形で実行する。snapshot の更新後に差分が意図どおりかを確かめる検証は subagent に回す。委譲の依頼と報告は直接実行の出力より root の context を多く使い、待ちも長いので、root の context は結論の解釈と編集に使う。
    - subagent の報告を判断材料にし、必要な変更は root が行う。
 
 5. **skill-review・drift-review・ponytail-review でズレを直す**
@@ -107,7 +108,7 @@ Good: 書く前に止め、「スキーマの内部構造に依存する / カ�
 | 「承認前に checkpoint commit しておけば安全」                                        | 承認前に commit しない。user は未 commit の差分を review し、commit は承認後に現在のフェーズの変更だけで行う                           |
 | 「案の比較や設計の検討は subagent に任せ、おすすめをもらう方が速い」                 | 比べて決めるのは root。subagent には比較に要る事実だけを集めさせる。結論ごと受け取ると、root は根拠を確かめないまま user に案を示す    |
 | 「緊急なので review 中に次へ進む」                                                   | 緊急性を user へ伝え、現在の gate で止まる                                                                                             |
-| 「20秒のテストなら root が直接回す方が速い」                                         | 必要性を決めるのは root、検証コマンドを実行するのは subagent。速さ・root の最終責任・併用を理由にした hybrid も不可                    |
+| 「短い test なら root が回す方が速い」                                               | test は長さによらず subagent が回し、root は結論だけを受け取る。root が直接回すのは手順 4 の短い書き換えコマンドだけ                   |
 | 「承認済みフェーズは commit せずに次フェーズを始めてもよい」                         | 承認済みの変更を commit してから次のフェーズに触れる。未 commit のまま進めると、次の review に承認済みの差分が混ざる                   |
 | 「全フェーズを先に決めた方が見通しが良い」                                           | 切り出すのは次の 1 フェーズだけ。前のフェーズを実装すると状況が変わり、先に決めた後のフェーズは古くなる                                |
 | 「小さい変更なので手順 5 の review は省く」                                          | 規約や文書のズレ、要らないコードは変更の大きさと関係なく user の review に混ざる。gate に初めて出す前に 1 回 subagent に review させる |
