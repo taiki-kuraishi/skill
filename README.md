@@ -8,6 +8,16 @@ vercel-labs/skills 互換の SKILL 配布リポジトリ。
 bunx skills add taiki-kuraishi/skill
 ```
 
+### omp extension
+
+`kstack-super-agent` の compaction 後の自動復旧は、この repo の checkout を router と同じ profile にリンクして利用する。
+
+```bash
+omp install /absolute/path/to/skill
+```
+
+有効化と復旧の手順は [kstack-super-agent](skills/kstack/kstack-super-agent/SKILL.md#状態を失ったとき) を参照。
+
 ## lint 設定の利用
 
 SKILL の規約のうち lint で表せるものは、GitHub Packages の `@taiki-kuraishi/oxlint-config` として配布する。SKILL ごとに `kstack-` を除いた名前の設定（`kstack-typescript` → `typescript`）を export する。対応する規約と表せない規約は [packages/oxlint-config/README.md](packages/oxlint-config/README.md) の対応表にある。
