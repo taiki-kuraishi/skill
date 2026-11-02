@@ -1,4 +1,5 @@
 #!/usr/bin/env bun
+import { createHash } from "node:crypto";
 import { execFileSync, spawn } from "node:child_process";
 import {
   appendFileSync,
@@ -316,7 +317,9 @@ function start(argv: string[]) {
   }
   const fifo = file.replace(/\.md$/, ".in");
   const frames = file.replace(/\.md$/, ".frames");
-  const name = `lead-${parsed.values.feature}`;
+  // Intercom の名前は broker 全体で一意でないと届かないので、repo ごとの台帳 dir から短いハッシュを付ける
+  const repoKey = createHash("sha256").update(path.dirname(file)).digest("hex").slice(0, 6);
+  const name = `lead-${parsed.values.feature}-${repoKey}`;
   let profile = "";
   try {
     // Profile は direnv の OMP_PROFILE だけで決まり、omp はそれを agent dir に読み替える

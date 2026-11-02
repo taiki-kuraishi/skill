@@ -24,7 +24,7 @@ lead の起動・停止と台帳への書き込みは、すべて `scripts/super
 
 | コマンド                                                           | 使う人 | 内容                                                                       |
 | ------------------------------------------------------------------ | ------ | -------------------------------------------------------------------------- |
-| `bun <script> start --feature <f> --worktree <wt> --prompt <file>` | router | lead `lead-<f>` を非対話で起動し、台帳に記録する                           |
+| `bun <script> start --feature <f> --worktree <wt> --prompt <file>` | router | lead `lead-<f>-<repo ごとのハッシュ>` を非対話で起動し、台帳に記録する     |
 | `bun <script> list`                                                | router | cwd の repo の全 feature の state・未回答の質問・lead の status を表で出す |
 | `bun <script> stop --feature <f>`                                  | router | lead をプロセスグループごと止める                                          |
 | `bun <script> reply --ledger <file> --to <qN> --text <答え>`       | router | user の答えを lead に送る                                                  |
