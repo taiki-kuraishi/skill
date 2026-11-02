@@ -72,7 +72,7 @@ tern process <block> --json
 
 ## 名前を付ける
 
-intercom 名を子の端末名にそろえる。slash command は turn を始めないので、完了を待たない。`review-inbox` の root 自身に名前を付ける場合は、以下の宛先を「端末を選ぶ」で同定した root の pane／block id、alias を `review-inbox` に置き換え、prompt 本体は送らない。
+intercom 名を子の端末名にそろえる。slash command は turn を始めないので、完了を待たない。
 
 ### Herdr で名前を付ける
 
@@ -87,8 +87,8 @@ tern send <block> paste '/alias ho-<feature>-<task>'
 tern send <block> keys Enter
 ```
 
-- Tern の宛先は同定済みの block id で指定する。`@focused` では別の session に入力しかねない。Herdr も root の alias 設定では同定済みの pane id を使う
-- 子への prompt は、入力可能な画面と alias 設定の結果を capture または intercom の list で確かめてから送る。root 自身への alias 設定では、自分の turn の終了を待つコマンドを使わない
+- Tern の宛先は同定済みの block id で指定する。`@focused` では別の session に入力しかねない
+- 子への prompt は、入力可能な画面と alias 設定の結果を capture または intercom の list で確かめてから送る
 - prompt 本体は改行・引用符・backtick を shell の quote で壊さないよう、`kstack-handoff` の「起動」と同じく file から渡す
 
 ```bash
