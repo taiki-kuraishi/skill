@@ -29,7 +29,7 @@ bun <script> report --feature <feature> --state <state> --summary "<user が読�
 | `implementing` | 実装中に、既存パターンから外れる実装の承認などを求める         |
 | `review`       | Crit の user review を依頼する                                 |
 | `blocked`      | 自分では進められない（下の「止まる」）                         |
-| `done`         | フェーズを commit し終え、この ticket を閉じる                 |
+| `done`         | フェーズと許可済みの操作を終え、この ticket を閉じる           |
 
 ## user review
 
@@ -37,11 +37,29 @@ Crit の窓口は lead 自身が持つ。`skill://kstack-review-request` に従�
 
 UI が変わるフェーズは、root-driven の手順 6 のとおりコードの review の前に live review を回す。dev server を background job で起動し、`kstack-review-request` の「live review で起動する」の URL を同じ形で report する。
 
-push・PR・merge は承認から推測せず、`--ask` で 1 問ずつ許可を求める。
+## 承認後の操作
+
+原則は、Crit approve を現在のフェーズの commit の許可とし、push・PR・merge は `--ask` で 1 問ずつ許可を求める。user が引き継ぎ prompt の依頼で操作を明示許可していれば、その範囲に従う。
+
+例外として、作業先が **taiki-kuraishi/skill** のときは、user の取り決めにより、現在のフェーズの Crit approve を次の一連の操作の許可として扱う。review-inbox 由来か、通常の feature かは問わない。作業先は自分の worktree の repo で判断し、入力 JSON の `repo_root`（指摘元 repo）では判断しない。この節の許可は `kstack-root-driven-development` と `kstack-git` の追加の許可確認を置き換え、それ以外の commit・PR・CI・merge の手順は同 SKILL に従う。
+
+1. `skill://kstack-git` に従って、そのフェーズの変更だけを topic branch に commit し、push して main 向けの PR を作る。default branch に直接 push しない
+2. push した SHA の CI と PR の check を完了まで監視する。run が無い・監視できない状態を成功と扱わず、対象の CI がすべて pass したことを確かめる
+3. `kstack-git` の「PR を merge する」に従い、required review と merge 可能な状態を確認して merge する。追加の許可確認は挟まないが、branch protection は迂回しない
+4. PR・CI の URL と merge commit を report してから ticket を閉じる
+
+CI 失敗・競合・merge 条件未達・操作の失敗では、未完了の操作と証拠を `blocked` で report し、何が必要かを 1 問で user に聞く。並行 lead の変更を取り込むための競合解消も勝手に行わない。approve 後に追加・変更する差分（CI 修正を含む）は、そのまま push せず、Crit の再 review で approve を受けてからこの流れを再開する。
+
+```text
+Bad: 指摘元 repo の approve だけで新しい SKILL を push する / 他 repo でも approve を merge 許可にする
+Good: skill repo の変更を Crit で approve されたら PR・全 CI の確認・merge まで進め、他 repo は許可の範囲だけ操作する
+```
+
+なぜ: user が skill repo に限って許可した自動化と、その他の repo の個別承認を切り分けるため。
 
 ## 1 ticket は 1 フェーズまで
 
-承認されたフェーズを commit したら、次のフェーズを切り出さずに止まる。一覧に残りがあれば、残りの一覧を `--summary` に書き、`--state done --ask "残りを新しい ticket として始めますか？"` で report して turn を終える。答えが来ても次のフェーズには進まない。router が新しい lead を起動する。
+承認されたフェーズを commit し、上の「承認後の操作」で許可された操作を終えたら、次のフェーズを切り出さずに止まる。一覧に残りがあれば、残りの一覧を `--summary` に書き、`--state done --ask "残りを新しい ticket として始めますか？"` で report して turn を終える。残りが無ければ `--ask` なしで `done` を report する。答えが来ても次のフェーズには進まない。router が新しい lead を起動する。
 
 なぜ: 1 つの lead が複数のフェーズを抱えると context が溢れ、compaction で経緯を失う。フェーズの区切りは承認と commit が済んでいて、引き継ぎに必要な状態がすべて repo と台帳にある。
 
