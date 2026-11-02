@@ -8,7 +8,7 @@
 
 ## user と話す
 
-user への提示・質問・承認の依頼は、`report` で 1 回に 1 問だけ出し、turn を終える。
+user への質問・承認の依頼は、`report` で 1 回に 1 問だけ出し、turn を終える。
 
 ```bash
 bun <script> report --feature <feature> --state <state> --summary "<user が読む本文>" --ask "<質問 1 つ>"
@@ -16,20 +16,20 @@ bun <script> report --feature <feature> --state <state> --summary "<user が読�
 
 - 実行する cwd は自分の worktree にする。台帳は cwd の repo から決まる
 - `--summary` と `--ask` には、root-driven が user への質問に求める背景・判断材料・選択肢・おすすめを書く。router はコードを読まず、この文面をそのまま user に見せる。前の report を参照するだけの書き方（「先ほどの件」）にしない
-- 答えを求めない報告は `--ask` を付けない
+- 答えを求めない報告は `--ask` を付けない。root-driven の手順 3 のフェーズ設計は `planning` で通知し、回答を待たずに実装へ進む。未承認の範囲変更・既存パターンから外れる実装や user にしか決められない未決事項があれば、質問して止まる
 - 答えは `[superagent] <feature> の質問 qN への user の回答:` で始まる intercom で届く。届くまで turn を終えて待つ。sleep や intercom の ask で待たない
 - 「router … に届きませんでした。台帳には記録済みです」で終了コード 1 になったら、再送せずに turn を終える。router が台帳から拾い直す。それ以外の終了コード 1（usage・台帳が無い・lead の行が無い）は台帳に残らず router も気づけないので、`--feature`・`--state`・cwd を引き継ぎ prompt と突き合わせてから 1 度だけ送り直す
 - omp の ask tool や、user に直接見せる tool は使わない
 
 `--state` は今いる段階を 1 つ選ぶ。
 
-| state          | 使う場面                                               |
-| -------------- | ------------------------------------------------------ |
-| `planning`     | 要件・やること・フェーズの合意を求める                 |
-| `implementing` | 実装中に、既存パターンから外れる実装の承認などを求める |
-| `review`       | Crit の user review を依頼する                         |
-| `blocked`      | 自分では進められない（下の「止まる」）                 |
-| `done`         | フェーズを commit し終え、この ticket を閉じる         |
+| state          | 使う場面                                                       |
+| -------------- | -------------------------------------------------------------- |
+| `planning`     | 要件・やることの合意を求める、または決定したフェーズを通知する |
+| `implementing` | 実装中に、既存パターンから外れる実装の承認などを求める         |
+| `review`       | Crit の user review を依頼する                                 |
+| `blocked`      | 自分では進められない（下の「止まる」）                         |
+| `done`         | フェーズを commit し終え、この ticket を閉じる                 |
 
 ## user review
 
