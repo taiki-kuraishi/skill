@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import compactReread from "./compact-reread.js";
+import compactReread from "../src/compact-reread.js";
 
 describe("compactReread", () => {
   it("compaction ごとに現在の名前を読み、superagent にだけ復旧を配送する", () => {

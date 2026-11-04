@@ -74,7 +74,7 @@ lead の起動・停止と台帳への書き込みは、すべて `scripts/super
 
 ## 状態を失ったとき
 
-自動復旧を有効にするには、router と同じ profile で `omp install <この repo の checkout の絶対パス>` を実行し、omp を再起動する。router を named profile で起動した場合は、起動時の指定方法にかかわらず同じ名前を `OMP_PROFILE` に指定して実行する。SKILL のインストールとは別の設定で、リンク元の checkout は移動・削除せずに残す。
+自動復旧を有効にするには、[omp-extensions のセットアップ](https://github.com/taiki-kuraishi/skill/blob/main/packages/omp-extensions/README.md#セットアップ)に従って GitHub Packages の認証を設定し、router と同じ profile で `omp install @taiki-kuraishi/omp-extensions` を実行して omp を再起動する。router を named profile で起動した場合は、起動時の指定方法にかかわらず同じ名前を `OMP_PROFILE` に指定して実行する。SKILL のインストールとは別の設定。以前 checkout を link していた場合は、同 README の「既存 link からの移行」に従って切り替える。
 
 extension は成功した compaction または自動 shake が履歴を書き換えた後、session 名が厳密に `superagent` の場合だけ、この SKILL の再読と `list` での状態確認を促す followUp を送る。名前は `/alias superagent` で設定する。ほかの session 名や `/new` は自動復旧の対象にしない。
 
