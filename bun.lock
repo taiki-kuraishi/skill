@@ -10,8 +10,8 @@
         "vite-plus": "^1.1.0",
       },
     },
-    "packages/omp-extensions": {
-      "name": "@taiki-kuraishi/omp-extensions",
+    "packages/omp-skill-reread": {
+      "name": "@taiki-kuraishi/omp-skill-reread",
       "version": "0.1.0",
     },
     "packages/oxfmt-config": {
@@ -281,7 +281,7 @@
 
     "@shaderfrog/glsl-parser": ["@shaderfrog/glsl-parser@7.0.1", "", {}, "sha512-8mpfsoPeRhesY3pOrzNZBL8uG6N5GVX1EHLBYbd4gzKs+c7vaEIqpTNK5VrffU33qQN4cwpP2v3u4aPPBU32sw=="],
 
-    "@taiki-kuraishi/omp-extensions": ["@taiki-kuraishi/omp-extensions@workspace:packages/omp-extensions"],
+    "@taiki-kuraishi/omp-skill-reread": ["@taiki-kuraishi/omp-skill-reread@workspace:packages/omp-skill-reread"],
 
     "@taiki-kuraishi/oxfmt-config": ["@taiki-kuraishi/oxfmt-config@workspace:packages/oxfmt-config"],
 

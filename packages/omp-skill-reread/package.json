@@ -1,0 +1,19 @@
+{
+  "name": "@taiki-kuraishi/omp-skill-reread",
+  "version": "0.1.0",
+  "description": "session で読み込んだ SKILL を compaction 後に読み直させる omp extension。",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/taiki-kuraishi/skill.git",
+    "directory": "packages/omp-skill-reread"
+  },
+  "license": "Apache-2.0",
+  "type": "module",
+  "files": [
+    "src",
+    "NOTICE"
+  ],
+  "omp": {
+    "extensions": ["./src/skill-reread.js"]
+  }
+}
