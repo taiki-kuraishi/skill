@@ -1,4 +1,4 @@
-# @taiki-kuraishi/omp-extensions
+# @taiki-kuraishi/omp-skill-reread
 
 kstack のワークフローを補助する omp extension を GitHub Packages から配布する。
 
@@ -23,13 +23,13 @@ omp は利用 repo ではなく profile の plugins ディレクトリで依存�
 router と同じ profile で install し、omp を再起動する。
 
 ```bash
-omp install @taiki-kuraishi/omp-extensions
+omp install @taiki-kuraishi/omp-skill-reread
 ```
 
 named profile の場合は、以降の install・更新・移行コマンドにも同じ `OMP_PROFILE` を付ける。
 
 ```bash
-OMP_PROFILE=your-profile omp install @taiki-kuraishi/omp-extensions
+OMP_PROFILE=your-profile omp install @taiki-kuraishi/omp-skill-reread
 ```
 
 ## 使い方
@@ -41,24 +41,25 @@ SKILL は別途 `bunx skills add taiki-kuraishi/skill` でインストールす�
 版を指定する場合は npm package の version を指定する。
 
 ```bash
-omp install @taiki-kuraishi/omp-extensions@0.1.0
+omp install @taiki-kuraishi/omp-skill-reread@0.1.0
 ```
 
 最新の公開版へ更新する場合:
 
 ```bash
-omp plugin upgrade @taiki-kuraishi/omp-extensions
+omp plugin upgrade @taiki-kuraishi/omp-skill-reread
 ```
 
 更新後は omp を再起動する。
 
-### 既存 link からの移行
+### 旧 package・既存 link からの移行
 
-以前 `omp install /absolute/path/to/skill` で checkout を link した場合は、同じ profile で新 package の install が成功してから旧 plugin の登録を解除し、omp を再起動する。
+以前 `@taiki-kuraishi/omp-extensions` を install した場合、または `omp install /absolute/path/to/skill` で checkout を link した場合は、同じ profile で新 package の install が成功してから旧 plugin の登録を解除し、omp を再起動する。
 
 ```bash
-omp install @taiki-kuraishi/omp-extensions
-omp plugin uninstall @taiki-kuraishi/skill
+omp install @taiki-kuraishi/omp-skill-reread
+omp plugin uninstall @taiki-kuraishi/omp-extensions   # 旧 package の場合
+omp plugin uninstall @taiki-kuraishi/skill            # 既存 link の場合
 ```
 
 SKILL のインストールはそのまま維持する。extension のために checkout を link し続ける必要はない。

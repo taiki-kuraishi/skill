@@ -13,10 +13,10 @@ bunx skills add taiki-kuraishi/skill
 `kstack-super-agent` の compaction 後の自動復旧は、GitHub Packages の package を router と同じ profile に install して利用する。
 
 ```bash
-omp install @taiki-kuraishi/omp-extensions
+omp install @taiki-kuraishi/omp-skill-reread
 ```
 
-認証・版指定・更新・既存 link からの移行は [omp-extensions](packages/omp-extensions/README.md)、復旧の手順は [kstack-super-agent](skills/kstack/kstack-super-agent/SKILL.md#状態を失ったとき) を参照。
+認証・版指定・更新・旧 package・既存 link からの移行は [omp-skill-reread](packages/omp-skill-reread/README.md)、復旧の手順は [kstack-super-agent](skills/kstack/kstack-super-agent/SKILL.md#状態を失ったとき) を参照。
 
 ## lint 設定の利用
 

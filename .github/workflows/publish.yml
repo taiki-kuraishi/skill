@@ -52,7 +52,7 @@ jobs:
           NPM_CONFIG_REGISTRY: https://npm.pkg.github.com
           NPM_CONFIG_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: bun publish --tolerate-republish
-        working-directory: packages/omp-extensions
+        working-directory: packages/omp-skill-reread
         env:
           NPM_CONFIG_REGISTRY: https://npm.pkg.github.com
           NPM_CONFIG_TOKEN: ${{ secrets.GITHUB_TOKEN }}

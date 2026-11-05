@@ -1,11 +1,11 @@
 {
-  "name": "@taiki-kuraishi/omp-extensions",
+  "name": "@taiki-kuraishi/omp-skill-reread",
   "version": "0.1.0",
   "description": "kstack のワークフローを補助する omp extension。",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/taiki-kuraishi/skill.git",
-    "directory": "packages/omp-extensions"
+    "directory": "packages/omp-skill-reread"
   },
   "license": "Apache-2.0",
   "type": "module",
