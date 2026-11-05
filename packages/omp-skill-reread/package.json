@@ -1,7 +1,7 @@
 {
   "name": "@taiki-kuraishi/omp-skill-reread",
   "version": "0.1.0",
-  "description": "kstack のワークフローを補助する omp extension。",
+  "description": "session で読み込んだ SKILL を compaction 後に読み直させる omp extension。",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/taiki-kuraishi/skill.git",
@@ -14,6 +14,6 @@
     "NOTICE"
   ],
   "omp": {
-    "extensions": ["./src/compact-reread.js"]
+    "extensions": ["./src/skill-reread.js"]
   }
 }

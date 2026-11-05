@@ -1,11 +1,11 @@
 # @taiki-kuraishi/omp-skill-reread
 
-kstack のワークフローを補助する omp extension を GitHub Packages から配布する。
+session で読み込んだ SKILL を compaction 後に読み直させる omp extension を GitHub Packages から配布する。
 
 ## 責務
 
-- 実装すること: omp のイベントを受け、`kstack-super-agent` の圧縮後の復旧を促す extension。
-- 実装しないこと: SKILL のインストール、router / lead の起動と台帳管理、lint 設定の配布。
+- 実装すること: compaction（成功した自動 shake を含む）の後に、現在の branch で `read` した `skill://<name>` と、`/skill:<name>` で起動した、または autoload された SKILL（`skill-prompt` の message）を集め、その再読を促す followUp を送る extension。
+- 実装しないこと: SKILL の本文の再注入、SKILL ごとの復旧手順（各 SKILL に書く）、物理パスで読んだ `SKILL.md` の検出、SKILL のインストール、lint 設定の配布。名前空間付きの SKILL（`skill://<ns>/<name>`）は URL だけでは SKILL 内のファイルと区別できないため、先頭の `<ns>` を名前として扱い、正しく読み直させられない。
 
 ## セットアップ
 
@@ -20,7 +20,7 @@ GitHub Packages は public package の install にも認証を求める。`read:
 
 omp は利用 repo ではなく profile の plugins ディレクトリで依存を install するため、利用 repo の `.npmrc` だけでは認証設定が反映されない。
 
-router と同じ profile で install し、omp を再起動する。
+SKILL を使う session と同じ profile で install し、omp を再起動する。
 
 ```bash
 omp install @taiki-kuraishi/omp-skill-reread
@@ -34,7 +34,7 @@ OMP_PROFILE=your-profile omp install @taiki-kuraishi/omp-skill-reread
 
 ## 使い方
 
-SKILL は別途 `bunx skills add taiki-kuraishi/skill` でインストールする。router の session 名を `/alias superagent` で設定する。復旧の条件と操作は [kstack-super-agent](https://github.com/taiki-kuraishi/skill/blob/main/skills/kstack/kstack-super-agent/SKILL.md#状態を失ったとき) を参照。
+install すると、どの session でも有効になる。compaction の後、`/clear` より後に読み込んだ SKILL があれば、`compaction 前に読み込んだ SKILL を読み直してください: skill://<name>, …` という followUp を 1 通送る。読み直した後の復旧手順（例: [kstack-super-agent](https://github.com/taiki-kuraishi/skill/blob/main/skills/kstack/kstack-super-agent/SKILL.md#状態を失ったとき) の `list`）は各 SKILL に書く。
 
 ### 版指定と更新
 
