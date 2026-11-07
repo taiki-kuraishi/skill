@@ -16,7 +16,7 @@ session で読み込んだ SKILL を compaction 後に読み直させる extensi
 omp install @taiki-kuraishi/omp-skill-reread
 ```
 
-認証・版指定・更新・旧 package・既存 link からの移行は [omp-skill-reread](packages/omp-skill-reread/README.md)、読み直した後の `kstack-super-agent` の復旧手順は [kstack-super-agent](skills/kstack/kstack-super-agent/SKILL.md#状態を失ったとき) を参照。
+認証・版指定・更新・旧 package・既存 link からの移行は [omp-skill-reread](packages/omp-skill-reread/README.md) を参照。
 
 ## lint 設定の利用
 

@@ -20,7 +20,6 @@ export default defineConfig({
       fmt: "vp fmt",
       "fmt-check": "vp fmt --check",
       "type-check": "tsc --noEmit",
-      test: "bun test skills",
     },
   },
 });

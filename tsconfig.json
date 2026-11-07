@@ -14,7 +14,6 @@
     "vite.config.ts",
     "packages/*/src",
     "packages/*/test",
-    "packages/*/vite.config.ts",
-    "skills/*/*/scripts"
+    "packages/*/vite.config.ts"
   ]
 }
