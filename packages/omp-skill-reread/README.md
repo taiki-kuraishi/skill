@@ -34,7 +34,7 @@ OMP_PROFILE=your-profile omp install @taiki-kuraishi/omp-skill-reread
 
 ## 使い方
 
-install すると、どの session でも有効になる。compaction の後、`/clear` より後に読み込んだ SKILL があれば、`compaction 前に読み込んだ SKILL を読み直してください: skill://<name>, …` という followUp を 1 通送る。読み直した後の復旧手順（例: [kstack-super-agent](https://github.com/taiki-kuraishi/skill/blob/main/skills/kstack/kstack-super-agent/SKILL.md#状態を失ったとき) の `list`）は各 SKILL に書く。
+install すると、どの session でも有効になる。compaction の後、`/clear` より後に読み込んだ SKILL があれば、`compaction 前に読み込んだ SKILL を読み直してください: skill://<name>, …` という followUp を 1 通送る。読み直した後の復旧手順は各 SKILL に書く。
 
 ### 版指定と更新
 
