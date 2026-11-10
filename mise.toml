@@ -44,3 +44,8 @@ run = [
   "lefthook validate",
   "renovate-config-validator --strict renovate.json",
 ]
+
+[tasks.review-inbox]
+description = "Start the resident review-inbox root session"
+run = 'omp "skill://review-inbox を読み、その手順に従って常駐 root として開始する"'
+raw = true

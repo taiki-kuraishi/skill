@@ -29,7 +29,7 @@ metadata:
 
 ## 常駐 root を起動する
 
-1. 端末（herdr か Tern）の中で、repo 本体の checkout の default branch に、profile を指定せず `PI_CODING_AGENT_DIR="$HOME/.pi/agent" omp` で root を起動し、`/skill:review-inbox` で始める。どちらの端末でもなければ root 自身に名前を付けられないので、user に伝えて止まる
+1. 端末（herdr か Tern）の中で、repo 本体の checkout の default branch から `mise run review-inbox` で root を起動する。task は profile を指定せずに omp を起動し、最初の turn で `skill://review-inbox` を読ませる。どちらの端末でもなければ root 自身に名前を付けられないので、user に伝えて止まる
 2. 導入済みの `kstack-handoff` の `SKILL.md` を読み、手順 1「確かめる」で root の端末（pane か block）を同定し、checkout と default branch を控える。参照ファイルは handoff 本文の案内に従って読む。子は起動しないので、handoff の「起動」以降は使わない
 3. intercom の名前を `review-inbox` に固定する。tool から slash command は直接実行できないので、handoff 本文から読んだ参照ファイルの「名前を付ける」で、root 自身（同定済みの pane か block）に `/alias review-inbox` を送る。その後 `intercom({ action: "list" })` で、`review-inbox` が自分 1 つだけであることを確かめる
 4. turn を終えて通知を待つ
