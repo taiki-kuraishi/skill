@@ -42,7 +42,7 @@ run = "markdownlint-cli2"
 
 ## 1 つの package・app に閉じるタスクは、そのディレクトリの mise.toml に書く
 
-1 つの package・app の中だけで動くタスクは、そのディレクトリの `mise.toml` に `[tasks.*]` で書く。root の `mise.toml` に `monorepo_root = true` を書き、そのディレクトリを `[monorepo] config_roots` に入れる。呼び出しは `//<path>:<task>`、まとめて回すときは `//apps/...:test`、config root の中から root のタスクを呼ぶときは `//:<task>` にする。タスクを持たないディレクトリは `config_roots` に入れない。一覧は `mise tasks --all` で見る。
+1 つの package・app の中だけで動くタスクは、そのディレクトリの `mise.toml` に `[tasks.*]` で書く。root の `mise.toml` に `monorepo_root = true` を書き、そのディレクトリを `[monorepo] config_roots` に入れる。呼び出しは `//<path>:<task>`、まとめて回すときは `//apps/...:test`、config root の中から root のタスクを呼ぶときは `//:<task>` にする。一覧は `mise tasks --all` で見る。
 
 ```toml
 # Bad: root のタスクから package のディレクトリに入って動かす
@@ -182,9 +182,9 @@ run = "bun run migrate"
 
 なぜ: `secrets` で受け取ると mise が値を知っているので、そのタスクの出力から値を伏せ、依存タスクには渡さない。タスクの中で CLI から読むと、mise は値を知らず出力を伏せられない。供給元を root の 1 か所に置けば、どの config root のタスクも同じ設定で受け取れる。
 
-## タスクの使い方は description と usage に書き、README・AGENTS.md に並べない
+## タスクの使い方は description と usage に書き、README・AGENTS.md に一覧を並べない
 
-タスクの目的・引数・前提（要る認証など）は `description` と `usage` に書き、一覧は `mise tasks --all` で見る。README・AGENTS.md にはタスク名や実行例を並べない。
+タスクの目的・引数・前提（要る認証など）は `description` と `usage` に書き、一覧は `mise tasks --all` で見る。README・AGENTS.md には、タスクの一覧や、中身・引数・オプションの説明を並べない。README でタスクに触れるのは環境構築の手順（`mise run install` など）だけにし、AGENTS.md では承認や認証が要る操作の手順の中で、実行するタスク名を出すだけにする（`kstack-readme`・`kstack-agents-md`）。
 
 ```toml
 # Bad: description が無く、-u の使い方が README にしか書かれていない
@@ -197,7 +197,7 @@ description = "Compare VRT snapshots; -- -u updates changed snapshots"
 run = "bun playwright test"
 ```
 
-なぜ: README に並べた一覧や実行例は、タスクの追加・改名で古くなっても気づかれない。`description` はタスクと同じ場所にあり、`mise tasks` にそのまま出る。
+なぜ: README・AGENTS.md に並べた一覧や引数の説明は、タスクの追加・改名で古くなっても気づかれない。`description` はタスクと同じ場所にあり、`mise tasks` にそのまま出る。環境構築の入口と、承認の要る操作がどのタスクかは一覧を見ても分からないので、その手順の中でだけ名前を出す。
 
 ## 自動修正は format 側だけで行い、lint は検査だけにする
 
