@@ -1,9 +1,9 @@
 ---
-name: kstack-mise
+name: kstack-mise-actions
 description: mise（mise.toml、jdx/mise-action）でツールを管理するリポジトリの規約。GitHub Actions の jdx/mise-action を、依存の install を包む composite action（setup-bun など）に入れず job の steps で composite action より前に呼ぶこと、install_args にその job の実行に要る最低限のツールだけを書くことを扱う。mise-action を使う workflow や composite action（.github/actions/*/action.yml）を書く・修正する・レビューするとき、CI の job・step の追加、composite action の作成・分割、レビュー指摘への対応でも発火させる。
 ---
 
-# kstack-mise
+# kstack-mise-actions
 
 [mise](https://mise.jdx.dev/) を使うときの規約。理由を理解した上で適用すること。
 
