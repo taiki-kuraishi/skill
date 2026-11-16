@@ -5,7 +5,7 @@ description: "mise のタスク定義（mise.toml の [tasks]、.config/mise/tas
 
 # kstack-mise-tasks
 
-[mise のタスク](https://mise.jdx.dev/tasks/)を分割して定義するときの規約。理由を理解した上で適用すること。CI の `jdx/mise-action` の規約は `kstack-mise-actions` にある。
+[mise のタスク](https://mise.jdx.dev/tasks/)を分割して定義するときの規約。理由を理解した上で適用すること。CI の `jdx/mise-action` の規約は `kstack-mise-actions` に、lefthook の job からタスクと同じ検査を回す規約は `kstack-lefthook` にある。
 
 ## root の mise.toml には設定だけを書き、タスクは .config/mise/tasks/ に入口ごとのファイルで書く
 
