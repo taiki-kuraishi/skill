@@ -14,7 +14,7 @@ metadata:
 ## 手順
 
 1. **指摘を分類する** — Crit の結果は下の「Crit の指摘を読む」で読み、指摘を 1 件ずつ「どのライブラリ / 言語 / ツールを書くときに効く規約か」で分類する。同じ対象に属する指摘は 1 つの SKILL にまとめる。例: 「関数の返型を書かない」「早期 return」→ `kstack-typescript`、「Result.gen の書き方」→ `kstack-better-result`
-2. **追記 or 新規作成を決める** — `skills/` 配下に `kstack-<対象ライブラリ名>` の SKILL があれば追記、なければ新規作成にする
+2. **追記 or 新規作成を決める** — `skills/kstack/kstack-<対象ライブラリ名>/` に SKILL があれば追記、なければ新規作成にする。入れ子に分けたライブラリ（直下に SKILL.md が無く `<topic>/SKILL.md` があるもの）は、扱う topic の SKILL に追記し、どの topic にも当たらなければ `<topic>/` を新しく作る。親の直下に SKILL.md は作らない
 3. **skill-creator で書く** — skill-creator を読み込み、対象 SKILL ごとにその手順を回して SKILL.md を書く。新規作成は「Creating a skill」、追記は「Improving the skill」（baseline は追記前の snapshot）として進め、各段階に下の「skill-creator への渡し方」を適用する。完了条件: SKILL.md が書き上がり、テストを回したなら user が結果に満足している。skill-creator の手順を終えたら手順 4 に戻る
 4. **一覧に登録する** — 新規作成したら `skills/kstack/kstack-skill-review/SKILL.md` の SKILL 一覧と `description` に名前を追記する。一覧に無い SKILL はレビューで読まれない
 5. **linter 化する** — 作成・追記した SKILL について `skill-to-linter` を読み込み、その手順を回して規約を oxlint / oxfmt のルール・設定に写す。完了条件: `skill-to-linter` の手順をすべて終え、package の README の対応表にその SKILL の全規約が載っている
@@ -47,7 +47,8 @@ skill-creator の既定と食い違うところは、ここと「リポジトリ
 ## リポジトリ規約
 
 - ディレクトリ: `skills/kstack/kstack-<library-name>/SKILL.md`（`kstack-` prefix を付け、`<library-name>` は lowercase、hyphen 区切り）
-- フロントマターは `name`（ディレクトリ名と一致）と `description` のみ必須
+  - 1 つのライブラリの規約を複数の SKILL に分けるときは `skills/kstack/kstack-<library-name>/<topic>/SKILL.md` に置き、`kstack-<library-name>/` の直下には SKILL.md を置かない（例: `kstack-mise/actions/`）。`bunx skills add` は `skills/` の下を 3 階層までしか探さず、浅い階層の SKILL.md を見つけるとその下を探さない
+- フロントマターは `name` と `description` のみ必須。`name` は平らに置く SKILL ではディレクトリ名と一致させ、入れ子の SKILL では `kstack-<library-name>-<topic>` にする（例: `kstack-mise/actions/` は `kstack-mise-actions`）。`bunx skills add` は `name` の名前で平らに install し、omp・Claude Code は skills ディレクトリの 1 階層下しか探さないため
 - `description` の発火条件には、ライブラリ名、扱う概念、依頼種別（作成 / 修正 / レビュー）を入れる。追記で扱う概念が増えたら `description` にも足す
 - `description` に ASCII のコロン（`file:line` など）を含むときは値全体をシングルクォートで括る。裸のコロンは YAML パースエラーになり、SKILL が黙ってスキップされる
 - 各規約に Bad / Good のコード例と「なぜ」を 1〜2 文添える
