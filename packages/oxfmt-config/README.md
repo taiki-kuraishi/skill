@@ -171,9 +171,12 @@ oxfmt で表せる規約は無い。命名と matcher の部分検出は `@taiki
 | Docker を使うのは VRT だけ                                                                        | 表せない。oxfmt は実行環境を決めない                                            |
 | VRT のテスト名は英語で書き、日本語はコメントで添える                                              | 表せない。oxfmt はタイトルを翻訳せずコメントも足さない                          |
 | E2E の Assert は `toHaveURL` だけにし、表示・文言・件数を expect しない。locator の操作は許可する | 表せない。oxfmt は matcher や操作を置き換えない                                 |
-| テストケースは URL を変える操作 1 つにつき 1 ケースにする                                         | 表せない。oxfmt はテストを分割しない                                            |
+| テストケースは URL を変える操作・状態 1 つにつき 1 ケースにする                                   | 表せない。oxfmt はテストを分割しない                                            |
 | VRT の Assert は `toHaveScreenshot` だけにし、文言や要素表示を別 expect で重複検証しない          | 表せない。oxfmt は expect を削除しない（Bad / Good の両方を整形済みと判定した） |
 | 撮影状態まで要素の構造を使った `locator.waitFor()` で待つ                                         | 表せない。oxfmt は待機処理を足し引きしない                                      |
+| VRT は URL を開いた外見だけを撮り、画面を操作しない                                               | 表せない。oxfmt は操作を削除しない                                              |
+| VRT の認可状態は前提データとして describe 単位で固定する                                          | 表せない。oxfmt は test を describe に分けない                                  |
+| Playwright で確かめるのは VRT の見た目と E2E の URL だけにする                                    | 表せない。oxfmt はテストを削除しない                                            |
 
 ### kstack-drizzle-orm
 
