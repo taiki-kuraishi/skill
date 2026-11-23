@@ -15,18 +15,20 @@ gcloud を使う repo（monorepo なら GCP を扱うディレクトリ）の `m
 # Bad: CLOUDSDK_CONFIG だけを分ける（Terraform の google provider は共有の ~/.config/gcloud の ADC を読む）
 [env]
 CLOUDSDK_CONFIG = "{{env.HOME}}/.config/gcloud-acme"
+```
 
+```toml
 # Good
 [env]
 CLOUDSDK_CONFIG = "{{env.HOME}}/.config/gcloud-acme"
 GOOGLE_APPLICATION_CREDENTIALS = "{{env.HOME}}/.config/gcloud-acme/application_default_credentials.json"
 ```
 
-なぜ: 既定の `~/.config/gcloud` はマシンで 1 つなので、ある repo で login すると、別のアカウントで動いている他の repo の session の認証を上書きする。ADC を読む側（Terraform の google provider、Google API のクライアントライブラリ）は `CLOUDSDK_CONFIG` を見ず、`GOOGLE_APPLICATION_CREDENTIALS`、既定の `~/.config/gcloud`、metadata server の順に探すので、`CLOUDSDK_CONFIG` だけでは gcloud CLI しか分かれない。
+なぜ: 既定の `~/.config/gcloud` はマシンで 1 つなので、ある repo で login すると、別のアカウントで動いている他の repo の session の認証を上書きする。ADC を読む側には `CLOUDSDK_CONFIG` を見ないものがある（Terraform の google provider や Go・Node のクライアントライブラリは `GOOGLE_APPLICATION_CREDENTIALS`、既定の `~/.config/gcloud`、metadata server の順に探す）ので、`GOOGLE_APPLICATION_CREDENTIALS` も向けて、どの読み手も同じファイルを読むようにする。
 
 ## login は mise タスクで実行し、gcloud CLI と ADC の両方を取る
 
-login は `[env]` と同じ `mise.toml` に置いたタスクから実行し、素の shell で `gcloud auth login`・`gcloud auth application-default login` を打たない。gcloud CLI の認証と ADC は別物なので、タスクで両方を取る。repo root からは `mise run //<path>:login` で呼ぶ。
+login は `[env]` と同じ設定から env が入るタスクで実行し、素の shell で `gcloud auth login`・`gcloud auth application-default login` を打たない。gcloud CLI の認証と ADC は別物なので、タスクで両方を取る。タスクの置き場所と呼び出し方は `kstack-mise-tasks` に従う（repo root なら `.config/mise/tasks/` に置いて `mise run login`、monorepo の config root なら `[env]` と同じ `mise.toml` に置いて repo root から `mise run //<path>:login`）。
 
 ```toml
 # Good: infra/gcp/mise.toml
