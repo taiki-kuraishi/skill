@@ -14,7 +14,7 @@ bot が依頼を受けて最後まで自分で進めるための開発フロー�
 | 既存パターンから外れる実装は書く前に承認を取る    | 手順 2: 既存に倣う案で書き、外れる案は PR の `未解決事項` に残す |
 | 手順 6: Crit の user review gate で承認まで止まる | 手順 3: gh stack の PR に出し、承認を待たずに次のフェーズへ進む  |
 
-`kstack-review-request`（Crit）は使わない。commit・PR の書き方は `skill://kstack-git` に従う。
+root-driven-development の手順 3・4・5 にある「前のフェーズが承認されてから切り出す」「範囲の変更や未決事項は聞いて止まる」「書く前に user の承認を求める」「gate で user に聞く」も、この SKILL では止まらずに進め、判断したことと user に決めてほしいことをそのフェーズの PR の `未解決事項` に書く。止まって聞くのは下の手順 1・2 の場合だけにする。`kstack-review-request`（Crit）は使わない。commit・PR の書き方は `skill://kstack-git` に従う。
 
 ## Workflow
 
@@ -61,6 +61,6 @@ Good: 指摘された PR の branch で直し、--upstack で上の層に伝え�
 
 ## merge
 
-merge は user の明示の指示があるときだけ行う。指示された範囲の各 PR で `kstack-git` の「PR を merge する」の手順 1〜3（`gh pr ready`、CI、approve と merge できる状態）を確かめてから、`gh stack merge <指示された最上段の PR 番号> --squash --yes`（repo が squash を許さなければ許されている方法）で下の層からまとめて merge する。approve や指摘の解消を merge の許可とみなさない。
+merge は user の明示の指示があるときだけ行う。指示された PR とその下の層のすべての PR で `kstack-git` の「PR を merge する」の手順 1〜3（`gh pr ready`、CI、approve と merge できる状態）を確かめてから、`gh stack merge <指示された PR 番号> --squash --yes`（repo が squash を許さなければ許されている方法）で下の層からまとめて merge する。approve や指摘の解消を merge の許可とみなさない。
 
 なぜ: `gh stack merge` は draft でないことしか事前に確かめず、指定した PR より下の層をすべて一度に merge する。確かめずに実行すると、CI や approve を確かめていない下の層まで default branch に入る。
