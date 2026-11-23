@@ -1,9 +1,11 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["config:recommended", ":dependencyDashboardApproval"],
+  "extends": ["config:recommended"],
   "timezone": "Asia/Tokyo",
+  "schedule": ["* * * * 1"],
+  "prHourlyLimit": 0,
+  "prConcurrentLimit": 1,
   "platformAutomerge": false,
-  "ignoreTests": false,
   "reviewers": ["taiki-kuraishi"],
   "assignAutomerge": true,
   "osvVulnerabilityAlerts": true,
@@ -16,20 +18,20 @@
   },
   "packageRules": [
     {
-      "description": "Dashboard承認後のminor・digest更新は全CI成功後に自動マージする",
-      "matchUpdateTypes": ["minor", "digest"],
+      "description": "major以外は全CI成功後に自動マージする。patchはvulnerabilityAlertsで再有効化されたsecurity patchのために含める。ブランチは月曜だけ作る（top-levelのschedule）",
+      "matchUpdateTypes": ["minor", "patch", "digest"],
       "automerge": true
     },
     {
-      "description": "通常patchは作らない。vulnerabilityAlertsで再有効化されたsecurity patchは自動マージする",
-      "matchUpdateTypes": ["patch"],
-      "enabled": false,
-      "automerge": true
-    },
-    {
-      "description": "majorはsecurity修正でも手動マージにする",
+      "description": "majorは壊れうるので手動マージにし、Dependency Dashboardで承認したものだけPRにする。開いたmajorが1つしかないPR枠を塞ぐのを防ぐ",
       "matchUpdateTypes": ["major"],
-      "automerge": false
+      "automerge": false,
+      "dependencyDashboardApproval": true
+    },
+    {
+      "description": "通常patchは作らない。security patchはvulnerabilityAlerts.enabled=trueがalert由来の更新を再有効化するので出る",
+      "matchUpdateTypes": ["patch"],
+      "enabled": false
     }
   ],
   "customManagers": [
