@@ -206,6 +206,10 @@ oxfmt で表せる規約は無い。聞き直しと一部回答の扱い、UI �
 | 聞き直すときも背景から書き直し、一部の回答は答えた分で進めて残りを次の 1 問にし、adviser・子・subagent と決めたことは user に見える形で書く                        | 表せない。agent の対話手順で、整形の選択肢に無い（Bad / Good の Markdown に `oxfmt --check` は差分を出さない） |
 | UI が変わるフェーズは live review → 指摘の修正 → コード review の順にし、子は dev server の URL を報告して review 中は止めない。省くなら理由を `未解決事項` に書く | 表せない。agent の作業手順で、整形の選択肢に無い                                                               |
 
+### kstack-bot-driven-development
+
+設定は作らない。規約の一覧は `@taiki-kuraishi/oxlint-config` の README の kstack-bot-driven-development の節と同じ。全規約が agent の作業手順と Git・GitHub の操作で、整形の選択肢に無い。
+
 ### kstack-root-driven-development
 
 oxfmt で表せる規約は無い。聞き直しと一部回答の扱い、UI のフェーズの live review の規約だけを載せる。
