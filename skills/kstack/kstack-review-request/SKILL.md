@@ -41,10 +41,10 @@ Good: 開発フローは kstack-review-request に対象と証拠を渡し、そ
 
 1. **対象を固定する** — cwd、フェーズ、変更ファイル、検証結果、未解決事項をそろえる。承認済みのフェーズは呼び出し元が commit しているので、未コミット差分の review は下の「公開 URL で起動する」のとおり `HEAD` を基点にする。開始前の差分が同じ review に含まれるなら、今回見てほしい範囲と分けて示す
 2. **session を選ぶ** — 同じ対象で自分が管理する session があれば `--session <id>` で再利用する。所有者や対象が不明な session は、停止や重複起動の前に窓口を確認する
-3. **起動して依頼する** — 下の「公開 URL で起動する」で起動し、`できるようになったこと / 変更ファイル / 検証と証拠 / 未解決事項` と `REVIEW_URL` を書いて、コメントを書き Finish Review を押すよう頼む
+3. **起動して依頼する** — 下の「公開 URL で起動する」で起動し、`できるようになったこと / 変更ファイル / 検証と証拠 / 未解決事項` と `REVIEW_URL` を日本語で書いて、コメントを書き Finish Review を押すよう頼む
 4. **結果を受け取る** — review 待ちの todo を block にして turn を終え、job の終了を待つ。結果は `skill://crit` の手順で読む。Finish Review 以外の終了は中断として user に報告し、再開の意思を確認する。失敗・中断・結果未受領は承認ではない
 5. **指摘に応える** — `approved: false` なら、未解決の指摘をすべて呼び出し元のフローで修正・再検証し、`skill://crit-cli` に従って各指摘へ `--session <id> --reply-to` で返信する（`--author 'root'`）。子が実装するフローでは、root が指摘を子に渡し、対応結果と返信文を受け取って返信する。自分で resolve しない
-6. **再レビューする** — 同じ session を background job で再開し、`REVIEW_URL` を再掲して手順 4 に戻る
+6. **再レビューする** — 同じ session を background job で再開し、`REVIEW_URL` を再掲して手順 4 に戻る。待っている間に daemon が落ちていることがあるので、URL を出し直す前に `crit status --json` で記録した session が動いているかを確かめ、止まっていれば同じ `--session <id>` で新しい `PORT` に起動し直して、新しい `REVIEW_URL` を伝える
 7. **承認して閉じる** — `approved: true` を承認として呼び出し元へ返す。daemon が残っていれば、自分が起動した session の PID だけを止める
 
 ## 公開 URL で起動する
@@ -54,7 +54,7 @@ user は別の端末から review するので、user に渡す URL は必ず公
 Crit は Finish Review まで終わらないので、`skill://crit` の foreground 実行ではなく、出力と終了を受け取れる background job で起動する（omp なら `async: true`・`timeout: 0`）。job の出力は終了まで届かないため、URL は Crit の出力から拾わず、起動前に同期で決める。
 
 ```bash
-PORT=$(python3 -c 'import socket; s = socket.socket(); s.bind(("127.0.0.1", 0)); print(s.getsockname()[1]); s.close()')
+PORT=$(node -e 'const s = require("net").createServer().listen(0, "127.0.0.1", () => { console.log(s.address().port); s.close() })')
 REVIEW_URL="${CRIT_PUBLIC_URL:-http://127.0.0.1}"
 REVIEW_URL="${REVIEW_URL%/}:$PORT"
 echo "PORT=$PORT REVIEW_URL=$REVIEW_URL"
@@ -75,7 +75,7 @@ Bad: user に http://127.0.0.1:<port> や localhost の URL を渡す / job の�
 Good: CRIT_PUBLIC_URL と PORT から REVIEW_URL を決め、--public-url に同じ値を渡し、起動を確認してから REVIEW_URL を書く
 ```
 
-なぜ: loopback の URL は user の端末から開けない。`--public-url` は Host の許可と表示 URL を変えるだけで port の転送は作らないため、listen は loopback のまま既存の転送経路に任せる。port を先に決めると、URL を事前に確定でき、複数の review が同時に動いても衝突しない。
+なぜ: loopback の URL は user の端末から開けない。`--public-url` は Host の許可と表示 URL を変えるだけで port の転送は作らないため、listen は loopback のまま既存の転送経路に任せる。port を先に決めると、URL を事前に確定でき、複数の review が同時に動いても衝突しない。port は node で取る。python3 は shim だけで版が未設定の環境があり、起動のたびに 1 往復失う。
 
 ## live review で起動する
 
