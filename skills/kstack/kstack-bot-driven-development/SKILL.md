@@ -8,6 +8,8 @@ disable-model-invocation: true
 
 bot が依頼を受けて最後まで自分で進めるための開発フロー。フェーズの切り出し・実装・review subagent の回し方は `skill://kstack-root-driven-development` の手順 1・3・4・5 に従い、この SKILL は次の 3 点を置き換える。user が見るのは PR だけにし、bot は user の返事を待って止まらない。
 
+作業を始める前に `skill://kstack-root-driven-development` を全文読む。この SKILL は手順 1・3・4・5 の詳細（フェーズの切り出し方、subagent への頼み方、review の指摘の扱い）を参照に留めていて、読まずに進めるとそれが抜ける。このフローごと別の session（worker など）に任せるときは、その session が root になる。依頼文に、両方の SKILL を読むことと、PR の前に手順 5 の review を回すことを書く。
+
 | root-driven-development                           | この SKILL                                                       |
 | ------------------------------------------------- | ---------------------------------------------------------------- |
 | 手順 2: 要件を user と 1 問ずつ合意する           | 手順 1: 依頼から root が決め、通知して進む                       |
@@ -20,7 +22,7 @@ root-driven-development の手順 3・4・5 にある「前のフェーズが承
 
 1. **目的を決めて通知する** — 依頼から `目的 / 対象 / 完了条件 / 対象外` を root が決め、依頼元に通知して承認を待たずに進む。依頼から目的か完了条件が決められないときだけ、背景と判断材料を添えて 1 問だけ聞いて止まる。root-driven-development 手順 3 のフェーズの通知も同じく承認を待たない
 2. **既存パターンから外れそうなら既存に倣う** — root-driven-development の「既存パターンから外れる実装」に当たる案は書かず、既存に倣う案で実装する。外れる案とその代償は、そのフェーズの PR の `未解決事項` に 1 行で書く。既存に倣う案が無いときだけ、両案を示して止まって聞く
-3. **フェーズを PR に出して次へ進む** — root-driven-development 手順 5 の review で直した後、下の「フェーズを stack に積む」で PR を出し、依頼元に PR の URL を通知する。承認を待たずに手順 3（root-driven-development）に戻り、次のフェーズを切り出す。一覧に残りが無ければ、全 PR の URL を下の層から順に並べて終わる
+3. **フェーズを PR に出して次へ進む** — 実装が終わったら、PR を出す前に root-driven-development 手順 5 の review（`kstack-skill-review`・`kstack-drift-review`・`ponytail-review` の subagent を、そのフェーズの変更範囲を示して並行に 1 回）を回して直す。その後、下の「フェーズを stack に積む」で PR を出し、依頼元に PR の URL を通知する。承認を待たずに手順 3（root-driven-development）に戻り、次のフェーズを切り出す。一覧に残りが無ければ、全 PR の URL を下の層から順に並べて終わる
 
 ```text
 Bad: フェーズの PR を出した後、user の approve を待って止まる / 依頼の解釈を user に確認してから始める
