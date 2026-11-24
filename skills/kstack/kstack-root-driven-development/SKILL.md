@@ -96,11 +96,14 @@ Good: 書く前に止め、「スキーマの内部構造に依存する / カ�
 | 目的                 | Pi                                                 | Claude Code                         |
 | -------------------- | -------------------------------------------------- | ----------------------------------- |
 | コードベース探索     | `scout`                                            | `Explore`                           |
+| コマンドが要る調査   | `worker` に no-edit を明示                         | `general-purpose` に no-edit を明示 |
 | 外部・ライブラリ調査 | `researcher`                                       | 調査可能な read-only agent          |
 | テスト・挙動検証     | `worker` に no-edit を明示 / 静的確認は `reviewer` | `general-purpose` に no-edit を明示 |
 | 手順 5 の review     | `reviewer`                                         | `general-purpose` に no-edit を明示 |
 
 各依頼に `目的 / cwd / 対象範囲 / read-only 境界 / 完了条件 / 必要な証拠 / 報告形式` を含める。依頼するのは事実の収集・検証と手順 5 の review だけにし、案の比較・設計や方針の検討・おすすめの作成は依頼しない。判断は root が subagent の証拠から行う。手順 5 の依頼では `kstack-skill-review`・`kstack-drift-review`・`ponytail-review` のどれを使うかを指示し（SKILL として呼べない subagent には SKILL.md の path を渡す）、報告形式はその SKILL の形式にする。`ponytail-review` が環境に入っていなければ、root が代わりに review せず、入っていないことを gate の `未解決事項` に書く。`worker` / `general-purpose` は編集 tool を持ち得るため、read-only は agent 名でなく dispatch の権限境界として明示する。subagent は編集、stage、commit、user への質問を行わない。独立した依頼だけを並列化する。subagent 経路が使えない場合は exact failure を user に報告し、root が黙って代行しない。
+
+Pi の `scout` は shell を持たないので、kubectl・ログ・API など、コマンドを実行しないと集まらない証拠の収集には使わない。出した後で shell が無いと分かり、待った時間ごと無駄になるため。
 
 ## Red flags
 
