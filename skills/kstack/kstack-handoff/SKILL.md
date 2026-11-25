@@ -8,8 +8,6 @@ disable-model-invocation: true
 
 root session は repo 本体の checkout の default branch で動く。委任するタスクごとに wt CLI で worktree を作り、Herdr なら root の下の子 workspace、Tern なら main の omp が動く root パネルに紐づく floating パネルで omp（子）を起動し、引き継ぎ prompt を送る。子は作業が止まる疑問を intercom で root に聞き、root は答えられなければ user に聞いて子に返す。子は終わったら commit せずに root に報告し、root が未コミット差分の user review を依頼する。user が承認したら、root がそれを子に伝え、子が commit して commit hash を root に返す。push・PR 作成・merge は、root が user に確かめ、user が明示した操作だけを子に指示する。repo によっては merge の前に approve が要り、review の承認は merge の許可ではないため。merge されたら、root は自分の checkout を merge 後の default branch に進めて片付け、前提がそろったタスクを起動する。1 タスクは 1 PR にする。root はやり取りと統合を持ち、実装と commit は子に任せる。
 
-`kstack-interface-first-development` の「引き継いで監督する」から来たら、今回のフェーズごとの引き継ぎ prompt と、並列に始めるフェーズの組（例: `2 と 3 を並列`）をそのまま使う。後のフェーズは、今回のフェーズがすべて merge された後に、ifd が次の回として渡す。
-
 端末ごとの操作（子の起動・prompt の送信・画面の読み方・片付け）は [terminal-cli](references/terminal-cli.md) に置く。herdr と Tern のどちらの手順を使うかもそこで決め、ここには端末に依らない段取りだけを書く。
 
 参照ファイルの相対 path は、実際に読み込んだこの `SKILL.md` の親ディレクトリを基準に解決する。`references/terminal-cli.md` はその配下にある。agent が示した SKILL の実ファイル path を使い、作業 repo・呼び出し元 SKILL のディレクトリ・固定の `~/.agents/skills` を基準にしない。URI 経由で参照を読めなければ、その実ファイル path から読む。
@@ -36,8 +34,8 @@ root session は repo 本体の checkout の default branch で動く。委任�
 | Tern の子パネル          | root のパネル上に floating。block id で管理        | `pip.owner` が root の block id |
 | herdr agent・intercom 名 | `ho-<feature>-<task>`                              | `ho-invite-p2-api`              |
 
-- `<feature>`: 委任のもとになった機能の英小文字 slug。1 回の委任で全タスク共通（ifd ならフェーズ案の機能の名前。例 `invite`）
-- `<task>`: タスクの slug。ifd のフェーズは `p<N>-<フェーズ名>`（例 `p1-types`、`p3-form`）
+- `<feature>`: 委任のもとになった機能の英小文字 slug。1 回の委任で全タスク共通（例 `invite`）
+- `<task>`: タスクの slug（例 `p2-api`）
 - 使う文字は `a-z`・`0-9`・`-`。herdr の agent 名は `[a-z][a-z0-9_-]{0,31}` なので、`<feature>-<task>` は 29 文字以内
 - Tern の子は root と同じ session・tab に置き、floating パネルの block id と intercom 名を対応付ける。タスクごとの session は作らない
 
@@ -104,7 +102,7 @@ Good: 子が何で止まっているか、これまでに決まったこと、�
 
 - **開始の報告** — 子の full Session ID を task・worktree・branch とともに todo に記録する。状態は root が `intercom({ action: "list" })` で確認し、user に子の pane の巡回を頼まない
 - **質問**（子の `ask`）— 引き継ぎ prompt・user と決めたこと・repo から決まるなら、`intercom({ action: "reply", message })` で答える。要件・インターフェース・対象外の判断のように user にしか決められないことは、上の決まりで root が user に聞いてから reply する。決まったことは、後から起動する子の引き継ぎ prompt にも書き足し、同じことを聞かずに済むようにする。子の ask が 10 分で timeout した後の reply も、子に届いて次の turn を始める。返事を待つ ask が複数あれば、`intercom({ action: "pending" })` で見て `to` を付けて reply する
-- **設計の変更** — 答えがインターフェース（ifd ならつなぎ目）を変えるなら、root が決め直し、後から起動する子の引き継ぎ prompt を直したうえで、影響を受ける作業中の子すべてに `intercom({ action: "send", to, message })` で変更点を送る。決め直すのは root だけにする
+- **設計の変更** — 答えがインターフェースを変えるなら、root が決め直し、後から起動する子の引き継ぎ prompt を直したうえで、影響を受ける作業中の子すべてに `intercom({ action: "send", to, message })` で変更点を送る。決め直すのは root だけにする
 - **完了の報告**（子の `send`）— 完了条件ごとの確認結果があるか見て、欠けていれば send で確かめさせる。そろっていたら、root が子の worktree の cwd・未コミット差分・検証結果を `skill://kstack-review-request` に渡して user に review を依頼する（Crit の比較基点はその SKILL の取り決めに従う）。依頼を子に任せない。turn を終えて待つ間も、ほかの子の message には応えられる。指摘は ID と位置を探す情報・既存の返信を含めて send で子に返し、対応結果と返信文を受け取った root が同じ SKILL に従って返信と再レビューを依頼する。その SKILL から承認結果を受け取ったタスクだけを統合へ進める
 - **様子を見る** — user に状況を聞かれたら、`intercom({ action: "list" })` で子の状態と宛先を見る。報告が無いまま止まっている子や、端末で止まって見える子は、[terminal-cli の「様子を見る」](references/terminal-cli.md#様子を見る) で画面を読み、send で報告を求めるか答えを送る。端末の `working` や画面の静止は、完了の証拠にしない（完了は子の報告と review で確かめる）
 
