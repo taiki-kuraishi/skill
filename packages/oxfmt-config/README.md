@@ -210,6 +210,10 @@ oxfmt で表せる規約は無い。聞き直しと一部回答の扱い、UI �
 | 聞き直すときも背景から書き直し、一部の回答は答えた分で進めて残りを次の 1 問にし、adviser・subagent と決めたことは user に見える形で書く              | 表せない。agent の対話手順で、整形の選択肢に無い（Bad / Good の Markdown に `oxfmt --check` は差分を出さない） |
 | UI が変わるフェーズは root が dev server を起動して live review を先に回し、指摘を直してからコード review に進む。省くなら理由を `未解決事項` に書く | 表せない。agent の作業手順で、整形の選択肢に無い                                                               |
 
+### kstack-review-exemption
+
+設定は作らない。規約の一覧は `@taiki-kuraishi/oxlint-config` の README の kstack-review-exemption の節と同じ。全規約が agent の作業手順と Git・GitHub の操作で、整形の選択肢に無い。
+
 ### kstack-review-request
 
 oxfmt で表せる規約は無い。live review を足した変更で入った規約は agent の作業手順で、整形の選択肢に無い。規約の一覧は `@taiki-kuraishi/oxlint-config` の README の kstack-review-request の節と同じ。
