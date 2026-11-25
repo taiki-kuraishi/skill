@@ -1,6 +1,6 @@
 ---
 name: kstack-review-request
-description: Crit で実装・修正したコードや PR、動く画面（dev server の live review）を user にレビュー依頼・再依頼し、承認を受け取る共通手順。呼び出し側とツール固有手順を分離し、root-driven-development・interface-first-development・handoff の user review gate で使用する。agent によるコード・文書レビューでは規約として読むだけで、レビューは開始しない。
+description: Crit で実装・修正したコードや PR、動く画面（dev server の live review）を user にレビュー依頼・再依頼し、承認を受け取る共通手順。呼び出し側とツール固有手順を分離し、root-driven-development・handoff の user review gate で使用する。agent によるコード・文書レビューでは規約として読むだけで、レビューは開始しない。
 ---
 
 # kstack-review-request
@@ -14,7 +14,7 @@ user review の窓口を 1 session に置き、Crit の起動から指摘の返�
 | フロー                                                             | user への依頼と Crit の管理                       |
 | ------------------------------------------------------------------ | ------------------------------------------------- |
 | root-driven-development                                            | root                                              |
-| interface-first-development / handoff                              | root。起動方式によらず子の worktree を cwd にする |
+| handoff                                                            | root。起動方式によらず子の worktree を cwd にする |
 | 単独で user から実装を依頼された session（親 root の配下ではない） | その session                                      |
 
 root から実装を委任された子は、完了条件の確認結果と変更内容（PR があれば URL）を root に報告して待つ。user への review 依頼、Crit の起動・返信・再開・停止は root が行う。root の連絡先が欠けているなら review を始めず、呼び出し元で連絡経路を確定する。
