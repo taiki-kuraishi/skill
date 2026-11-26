@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 # kstack-playbooks
 
-`kstack-agent-mode`（単独の session）と `kstack-bot-mode`（bot）が、作業の最初に全文読む。下の原則を作業の間ずっと使い、依頼を振り分け表で 1 つの playbook か開発フローに渡す。playbook は `playbooks/<名前>.md` にあり、この SKILL.md と同じディレクトリから読む（omp なら `skill://kstack-playbooks/playbooks/<名前>.md`）。要件の確かめ方、user への聞き方、agent の使い方は mode ごとに違うので、読み込んだ mode に従う。
+`kstack-agent-mode`（単独の session）と `kstack-bot-mode`（bot）が、作業の最初に全文読む。下の原則を作業の間ずっと使い、依頼を振り分け表で 1 つの playbook か開発フローに渡す。playbook は `playbooks/<名前>.md` にあり、この SKILL.md と同じディレクトリから読む（omp なら `skill://kstack-playbooks/playbooks/<名前>.md`）。要件の確かめ方、user に聞いて止まるか進むか、agent の使い方は mode ごとに違うので、読み込んだ mode に従う。聞くときの書き方は `kstack-user-question` に従う。
 
 ## 原則
 
@@ -56,7 +56,7 @@ Good: 依頼を目的・背景・完了条件から書き、直ったかは同�
 ## playbook の回し方
 
 1. 選んだ playbook の手順を、要約も並べ替えもせずに todo へ写してから始める。完了条件: todo に playbook の全手順が並んでいる
-2. 手順の途中で、SKILL にも playbook にも決まっていない判断が要ったら、その判断だけを読み込んだ mode の決まりで user に聞く。`kstack-root-driven-development` の「既存パターンから外れる実装」、期待する動きがどこにも書かれていないこと、データを消すなどの戻せない操作、UI の見た目がこれに当たる。判断が目的や対象を変えるなら、下の「playbook に当たらない依頼」に切り替える
+2. 手順の途中で、SKILL にも playbook にも決まっていない判断が要ったら、その判断だけを読み込んだ mode の決まりで扱い、user に聞くときは `kstack-user-question` の書き方にする。`kstack-root-driven-development` の「既存パターンから外れる実装」、期待する動きがどこにも書かれていないこと、データを消すなどの戻せない操作、UI の見た目がこれに当たる。判断が目的や対象を変えるなら、下の「playbook に当たらない依頼」に切り替える
 3. コードか文書を変えたら、出す前に `kstack-root-driven-development` 手順 5 の 3 つの review を subagent で回して直す。playbook の作業でも省かない
 4. user review を省けるかは `kstack-review-exemption` の「mode から使うとき」で決める
 5. 報告は playbook の「報告」の項目を、目的と背景から書く
