@@ -51,22 +51,34 @@ export default defineConfig({
 
 ## CI では task-cache を依存の install の後に復元する
 
-CI の runner は毎回まっさらな状態で始まるので、`vp run` にしただけではキャッシュが毎回空になる。`node_modules/.vite/task-cache` を依存の install の後に `actions/cache/restore` で復元し、検査の後に `actions/cache/save` で保存する。
+CI の runner は毎回まっさらな状態で始まるので、`vp run` にしただけではキャッシュが毎回空になる。`node_modules/.vite/task-cache` を依存の install の後に復元し、検査の後に保存する。restore・save は `kstack-github-actions` の「キャッシュの restore・save は composite action に切り出す」に従い、1 つの composite action を `mode` で 2 回呼ぶ。
 
 ```yaml
-- run: bun ci
-- uses: actions/cache/restore@v6
-  id: vite-task-cache
+# job（setup-bun は依存の install までを持つ composite action）
+- uses: ./.github/actions/setup-bun
+- uses: ./.github/actions/vite-task-cache
+  with:
+    mode: restore
+- run: bun vp run lint
+- if: success()
+  uses: ./.github/actions/vite-task-cache
+  with:
+    mode: save
+```
+
+```yaml
+# .github/actions/vite-task-cache/action.yml の steps（name・description・inputs は省略）
+- if: inputs.mode == 'restore'
+  uses: actions/cache/restore@v6
   with:
     path: node_modules/.vite/task-cache
     key: vite-task-${{ runner.os }}-${{ runner.arch }}-${{ github.run_id }}-${{ github.run_attempt }}
     restore-keys: vite-task-${{ runner.os }}-${{ runner.arch }}-
-- run: bun vp run lint
-- uses: actions/cache/save@v6
-  if: success()
+- if: inputs.mode == 'save'
+  uses: actions/cache/save@v6
   with:
     path: node_modules/.vite/task-cache
-    key: ${{ steps.vite-task-cache.outputs.cache-primary-key }}
+    key: vite-task-${{ runner.os }}-${{ runner.arch }}-${{ github.run_id }}-${{ github.run_attempt }}
 ```
 
 なぜ: install は `node_modules` を作り直しうるので、復元はその後に置く。GitHub の cache は同じ key に上書きできないので key は run ごとに変え、入力の変化は Vite Task が task ごとに判定するので lockfile やソースの hash は key に入れない（key で絞ると、hit できた task の分まで復元されなくなる）。
