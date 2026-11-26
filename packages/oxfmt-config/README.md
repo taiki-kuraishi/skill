@@ -197,6 +197,10 @@ oxfmt で表せる規約は無い。
 | 実装の事実ではなく、コードに現れないリポジトリの規約を書く | 表せない。Markdown は整形の選択肢しか持たず、何を書くかは決められない                                                |
 | 日本語で書き、upstream から取り込んだものは原文のまま残す  | 表せない。oxfmt は文章の言語を変えない（英語の Bad と日本語の Good の Markdown に `oxfmt --check` は差分を出さない） |
 
+### kstack-agent-mode
+
+設定は作らない。規約の一覧は `@taiki-kuraishi/oxlint-config` の README の kstack-agent-mode の節と同じ。全規約が agent の対話・作業手順で、整形の選択肢に無い。
+
 ### kstack-bot-driven-development
 
 設定は作らない。規約の一覧は `@taiki-kuraishi/oxlint-config` の README の kstack-bot-driven-development の節と同じ。全規約が agent の作業手順と Git・GitHub の操作で、整形の選択肢に無い。
