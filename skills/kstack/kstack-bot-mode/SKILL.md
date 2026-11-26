@@ -1,6 +1,6 @@
 ---
 name: kstack-bot-mode
-description: bot（Orca の bot など、user と対話しながら作業しない agent）の入口。kstack-bot-driven-development の通知に背景と選んだ playbook を足し、kstack-playbooks の原則を使い、依頼を playbook に振り分けて bot-driven の draft PR で進める。playbook と kstack SKILL で決まっている作業は kstack-review-exemption の判定を通れば user review なしで出し、どの playbook にも当たらない依頼は設計とフェーズを依頼元と確かめてから進める。別の session に任せるときは、依頼の最初の行でこの SKILL を読ませる
+description: bot（Orca の bot など、user と対話しながら作業しない agent）の入口。kstack-bot-driven-development の通知に背景と選んだ playbook か SKILL を足し、kstack-playbooks の原則を使い、依頼を playbook に振り分けて bot-driven の draft PR で進める。playbook と kstack SKILL で決まっている作業は kstack-review-exemption の判定を通れば user review なしで出し、どの playbook にも当たらない依頼は設計とフェーズを依頼元と確かめてから進める。別の session に任せるときは、依頼の最初の行でこの SKILL を読ませる
 disable-model-invocation: true
 ---
 
