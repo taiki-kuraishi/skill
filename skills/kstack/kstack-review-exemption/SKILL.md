@@ -1,12 +1,12 @@
 ---
 name: kstack-review-exemption
-description: kstack-root-driven-development・kstack-bot-driven-development と一緒に読み込み、taiki-kuraishi/skill の kstack SKILL で書き方が決まっているコードだけのフェーズで user review を省く追加の取り決め。省けるフェーズの条件（変更したファイルがすべてコメント以外の kstack SKILL の対象、今回の変更への gate 前の review の指摘がすべて解消、既存パターンから外れる実装・未決事項・UI の変更が無い）を fresh-context の subagent に判定させ、すべて満たすときに差分と従った規約を対にして示して「review を飛ばしてもいいですか」と user に確かめ、省いてよいと答えたときだけ省くこと、root-driven では Crit の gate を開かずに commit すること、bot-driven では答えを PR の merge の指示として ready にし gh stack merge することを扱う
+description: kstack-root-driven-development・kstack-bot-driven-development と一緒に読み込み、taiki-kuraishi/skill の kstack SKILL で書き方が決まっているコードだけのフェーズで user review を省く追加の取り決め。省けるフェーズの条件（変更したファイルがすべてコメント以外の kstack SKILL の対象、今回の変更への gate 前の review の指摘がすべて解消、既存パターンから外れる実装・未決事項・UI の変更が無い）を fresh-context の subagent に判定させ、すべて満たすときに差分と従った規約を対にして示して「review を飛ばしてもいいですか」と user に確かめ、省いてよいと答えたときだけ省くこと、root-driven では Crit の gate を開かずに commit すること、bot-driven では答えを PR の merge の指示として ready にし gh stack merge することを扱う。kstack-agent-mode・kstack-bot-mode から使うときは、kstack-playbooks の playbook の手順で決まった変更も条件 1 に数え、条件を満たせば聞かずに省いて差分と規約・手順の対を記録する
 disable-model-invocation: true
 ---
 
 # kstack-review-exemption
 
-`kstack-root-driven-development` か `kstack-bot-driven-development` と一緒に読み込んで使う。kstack SKILL に書き方が決まっているコードは、規約との突き合わせを手順 5 の review（`kstack-skill-review`・`kstack-drift-review`・`ponytail-review`）が受け持つので、user が同じことを見直さなくてよい。下の条件を満たすフェーズは、差分とそれが従った規約を示して user に review を省いてよいか確かめ、user が省いてよいと答えたときだけ省く。それ以外は、読み込んだ開発フローのとおり user review に出す。
+`kstack-root-driven-development` か `kstack-bot-driven-development` と一緒に読み込んで使う。kstack SKILL に書き方が決まっているコードは、規約との突き合わせを手順 5 の review（`kstack-skill-review`・`kstack-drift-review`・`ponytail-review`）が受け持つので、user が同じことを見直さなくてよい。下の条件を満たすフェーズは、差分とそれが従った規約を示して user に review を省いてよいか確かめ、user が省いてよいと答えたときだけ省く。それ以外は、読み込んだ開発フローのとおり user review に出す。`kstack-agent-mode`・`kstack-bot-mode` から使うときは、下の「mode から使うとき」が条件 1 と確かめ方を置き換える。
 
 ## user review を省けるフェーズ
 
@@ -49,6 +49,25 @@ Good: 差分は「users テーブルの検索を UserRepository の findByEmail 
 user が省いてよいと答えたら、下の「root-driven-development で省くとき」「bot-driven-development で省くとき」のうち、読み込んだ開発フローの節で進める。省かないと答えたとき、別の指摘を返したときは、開発フローのとおり user review に出す（指摘があれば同じフェーズで直す）。
 
 なぜ: 条件を満たしても、user が見たい変更かどうかは user にしか分からない。差分と規約を対にして見せれば、user は差分を読まずに「その規約に任せてよいか」だけで決められ、review より短い時間で済む。
+
+## mode から使うとき
+
+`kstack-agent-mode`・`kstack-bot-mode` で作業しているときは、次の 2 点を置き換える。条件 2〜4 と「条件を subagent に判定させる」はそのまま使う。
+
+- **条件 1** — 変更したファイルごとに、コメント以外の kstack SKILL が「適用」になっているか、`kstack-playbooks` の playbook の手順で決まった変更である。playbook で決まった変更とは、使った playbook の commit・push より前の手順をすべて終え、各手順の完了条件を満たした変更をいう。判定の依頼には、使った playbook と、各変更が従った手順を加える
+- **確かめ方** — 判定がすべて「満たす」なら、user に聞かずに省く。上の「省いてよいか user に確かめる」の形で、差分と、それが従った kstack SKILL の規約か playbook の手順を対にし、subagent の判定と根拠を添えて記録する。`kstack-agent-mode` では commit の通知に、`kstack-bot-mode` では PR の body の `確認方法` に書く
+
+省いた後は次のとおり進める。1 つでも「満たさない」なら、読み込んだ開発フローのとおり user review に出す。
+
+- `kstack-agent-mode`: 下の「root-driven-development で省くとき」の、答えを受け取った後の手順で commit する
+- `kstack-bot-mode`: PR は draft のまま出し、merge は `kstack-git` の「PR を merge する」のとおり user の明示の指示を待つ。下の「bot-driven-development で省くとき」の問いは送らず、答えを merge の指示とみなす取り決めも使わない
+
+```text
+Bad: mode で作業していても「review を飛ばしてもいいですか？」と聞いて止まる / 記録を残さずに省く / 省いたので merge する
+Good: 判定がすべて「満たす」なら聞かずに commit・PR に進み、差分と規約・手順の対と判定を通知か PR に書く。merge は指示を待つ
+```
+
+なぜ: mode は、SKILL と playbook で決まっている作業を user の確認なしに進めるための入口である。SKILL の無いファイルでも、playbook の手順（再現・原因の確かめ・同じ方法での確認）が変更の正しさを決めている。どちらにも決まっていない変更・判断・UI は条件 1〜4 で外れるので、user が見るべき変更は残る。対を記録しておけば、user は後から何に任せたかを確かめられる。merge は review と別の判断なので、省いても指示を待つ。
 
 ## root-driven-development で省くとき
 
