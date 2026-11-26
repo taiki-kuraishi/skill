@@ -51,7 +51,7 @@ export default defineConfig({
 
 ## CI では task-cache を依存の install の後に復元する
 
-CI の runner は毎回まっさらな状態で始まるので、`vp run` にしただけではキャッシュが毎回空になる。`node_modules/.vite/task-cache` を依存の install の後に復元し、検査の後に保存する。restore・save は `kstack-github-actions` の「キャッシュの restore・save は composite action に切り出す」に従い、1 つの composite action を `mode` で 2 回呼ぶ。
+CI の runner は毎回まっさらな状態で始まるので、`vp run` にしただけではキャッシュが毎回空になる。`node_modules/.vite/task-cache` を依存の install の後に復元し、検査の後に保存する。restore・save は `kstack-github-actions` の「キャッシュの restore・save は composite action に切り出す」のとおり composite action に置く。下の例は、1 つの action を `mode` で restore と save に切り替え、key を 1 ファイルに閉じる形にしている。
 
 ```yaml
 # job（setup-bun は依存の install までを持つ composite action）
