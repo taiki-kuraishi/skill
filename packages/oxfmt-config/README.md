@@ -214,6 +214,10 @@ oxfmt で表せる規約は無い。聞き直しと一部回答の扱い、UI �
 
 設定は作らない。規約の一覧は `@taiki-kuraishi/oxlint-config` の README の kstack-review-exemption の節と同じ。全規約が agent の作業手順と Git・GitHub の操作で、整形の選択肢に無い。
 
+### kstack-playbooks
+
+設定は作らない。規約の一覧は `@taiki-kuraishi/oxlint-config` の README の kstack-playbooks の節と同じ。全規約が agent の作業手順と判断で、整形の選択肢に無い。
+
 ### kstack-review-request
 
 oxfmt で表せる規約は無い。live review を足した変更で入った規約は agent の作業手順で、整形の選択肢に無い。規約の一覧は `@taiki-kuraishi/oxlint-config` の README の kstack-review-request の節と同じ。
