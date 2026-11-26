@@ -1,12 +1,13 @@
 ---
 name: kstack-skill-review
-description: taiki-kuraishi/skill リポジトリの SKILL（kstack-agents-md、kstack-better-auth、kstack-better-result、kstack-bot-driven-development、kstack-cloudflare-vite-plugin、kstack-code-comment、kstack-drift-review、kstack-drizzle-orm、kstack-gcloud、kstack-gcp-service-usage、kstack-gdscript、kstack-git、kstack-github-actions、kstack-handoff、kstack-hono、kstack-layerd-architecture、kstack-lefthook、kstack-mise-actions、kstack-mise-tasks、kstack-monorepo、kstack-nuqs、kstack-playbooks、kstack-playwright、kstack-react、kstack-readme、kstack-rest-api、kstack-review-exemption、kstack-review-request、kstack-root-driven-development、kstack-tanstack-db、kstack-tanstack-query、kstack-tanstack-router、kstack-terraform、kstack-testing、kstack-typescript、kstack-verification-guided-development、kstack-vite、kstack-vite-plus、kstack-worktree-diff）を読み込み、その規約からズレているコードを指摘するレビュー手順。コードレビュー、diff・PR のレビュー、「SKILL・規約に沿っているか見て」という依頼、実装後の自己レビューで使用すること。
+description: taiki-kuraishi/skill リポジトリの SKILL（kstack-agent-mode、kstack-agents-md、kstack-better-auth、kstack-better-result、kstack-bot-driven-development、kstack-cloudflare-vite-plugin、kstack-code-comment、kstack-drift-review、kstack-drizzle-orm、kstack-gcloud、kstack-gcp-service-usage、kstack-gdscript、kstack-git、kstack-github-actions、kstack-handoff、kstack-hono、kstack-layerd-architecture、kstack-lefthook、kstack-mise-actions、kstack-mise-tasks、kstack-monorepo、kstack-nuqs、kstack-playbooks、kstack-playwright、kstack-react、kstack-readme、kstack-rest-api、kstack-review-exemption、kstack-review-request、kstack-root-driven-development、kstack-tanstack-db、kstack-tanstack-query、kstack-tanstack-router、kstack-terraform、kstack-testing、kstack-typescript、kstack-verification-guided-development、kstack-vite、kstack-vite-plus、kstack-worktree-diff）を読み込み、その規約からズレているコードを指摘するレビュー手順。コードレビュー、diff・PR のレビュー、「SKILL・規約に沿っているか見て」という依頼、実装後の自己レビューで使用すること。
 ---
 
 # kstack-skill-review
 
 コードを、taiki-kuraishi/skill リポジトリで定義された下記の SKILL の規約と突き合わせてレビューする。指摘の根拠はすべてこれらの規約に置く。根拠が SKILL にあれば、指摘された側は規約を読んで納得でき、合意済みのルールとレビュアーの好みが混ざらない。
 
+- `kstack-agent-mode`
 - `kstack-agents-md`
 - `kstack-better-auth`
 - `kstack-better-result`
