@@ -205,6 +205,10 @@ oxfmt で表せる規約は無い。
 
 設定は作らない。規約の一覧は `@taiki-kuraishi/oxlint-config` の README の kstack-bot-driven-development の節と同じ。全規約が agent の作業手順と Git・GitHub の操作で、整形の選択肢に無い。
 
+### kstack-bot-mode
+
+設定は作らない。規約の一覧は `@taiki-kuraishi/oxlint-config` の README の kstack-bot-mode の節と同じ。全規約が agent の対話・作業手順と Git・GitHub の操作で、整形の選択肢に無い。
+
 ### kstack-root-driven-development
 
 oxfmt で表せる規約は無い。聞き直しと一部回答の扱い、UI のフェーズの live review の規約だけを載せる。
