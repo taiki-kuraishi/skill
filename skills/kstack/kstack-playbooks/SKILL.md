@@ -98,6 +98,6 @@ Good: どの playbook にも当たらないので、root-driven で目的とフ�
 
 ## 作業を終えたら
 
-依頼の作業を終えたら、最後の報告を書く前に `skill://kstack-playbook-proposal` を全文読み、その手順で playbook を提案するかを決める。
+依頼の作業を終えたら、最後の返答（bot は依頼元への最後の通知）を書く前に `skill://kstack-playbook-proposal` を全文読み、その手順で playbook を提案するかを決める。
 
 なぜ: playbook が無く手探りで進めた直後が、その手順を残せる一番の機会である。user が思い出して頼むのを待つと、手順は残らない。
