@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 # kstack-bot-mode
 
-bot が `/kstack-bot-mode` で受けた依頼を、最後までこの SKILL で進める。始める前に `skill://kstack-playbooks`（原則・振り分け表・playbook の回し方）と `skill://kstack-bot-driven-development`（と、それが読ませる `kstack-root-driven-development`）を全文読む。playbook と、この SKILL が指す SKILL・ファイルは、読み込んだ SKILL.md のディレクトリから解決する。読めなければ、試した absolute path とエラーを依頼元に送って止まる。
+bot が `/kstack-bot-mode` で受けた依頼を、最後までこの SKILL で進める。始める前に `skill://kstack-playbooks`（原則・振り分け表・playbook の回し方）と `skill://kstack-bot-driven-development`（と、それが読ませる `kstack-root-driven-development`）を全文読み、`kstack-playbooks` の「repo の playbook」の手順 1 で、作業する repo の playbook の一覧を作る。kstack の playbook と、この SKILL が指す SKILL・ファイルは、読み込んだ SKILL.md のディレクトリから解決する。読めなければ、試した absolute path とエラーを依頼元に送って止まる。
 
 進め方は playbook と bot-driven に従い、この SKILL は bot-driven に次の 4 点を足す。user review を省いた PR も draft のまま出し、merge は bot-driven の「merge」のとおり user の明示の指示を待つ。
 
@@ -23,7 +23,7 @@ Good: 「目的: Renovate PR #34 の CI を通す。背景: 依存の更新が�
 
 ## 原則と playbook
 
-依頼を `kstack-playbooks` の振り分け表で選ぶ。playbook を選んだら「playbook の回し方」で進め、コードか文書を変える playbook は bot-driven のフェーズ（gh stack の draft PR）にする。SKILL を選んだらその SKILL に従う。原則は作業の間使い、通知と PR の body では、判断を変えた原則の名前と、変えた判断を 1 行で添える。
+依頼を `kstack-playbooks` の「repo の playbook」と振り分け表で選ぶ。playbook を選んだら「playbook の回し方」で進め、コードか文書を変える playbook は bot-driven のフェーズ（gh stack の draft PR）にする。SKILL を選んだらその SKILL に従う。原則は作業の間使い、通知と PR の body では、判断を変えた原則の名前と、変えた判断を 1 行で添える。
 
 回し方の手順 2 に当たる判断は、bot-driven の手順 2 と同じく、既存に倣う案で進めて PR の `未解決事項` に書く。既存に倣う案が無い判断と、戻せない操作だけ止まって聞く。決めきれない判断が残った PR は、`kstack-review-exemption` の条件 3 で外れて user review に出る。
 

@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 # kstack-playbooks
 
-`kstack-agent-mode`（単独の session）と `kstack-bot-mode`（bot）が、作業の最初に全文読む。下の原則を作業の間ずっと使い、依頼を振り分け表で 1 つの playbook か開発フローに渡す。playbook は `playbooks/<名前>.md` にあり、この SKILL.md と同じディレクトリから読む（omp なら `skill://kstack-playbooks/playbooks/<名前>.md`）。要件の確かめ方、user に聞いて止まるか進むか、agent の使い方は mode ごとに違うので、読み込んだ mode に従う。聞くときの書き方は `kstack-user-question` に従う。
+`kstack-agent-mode`（単独の session）と `kstack-bot-mode`（bot）が、作業の最初に全文読む。下の原則を作業の間ずっと使い、依頼を repo の playbook と振り分け表で 1 つの playbook か開発フローに渡す。kstack の playbook は `playbooks/<名前>.md` にあり、この SKILL.md と同じディレクトリから読む（omp なら `skill://kstack-playbooks/playbooks/<名前>.md`）。repo の playbook は、下の「repo の playbook」のとおり作業する repo の root から読む。要件の確かめ方、user に聞いて止まるか進むか、agent の使い方は mode ごとに違うので、読み込んだ mode に従う。聞くときの書き方は `kstack-user-question` に従う。
 
 ## 原則
 
@@ -28,9 +28,26 @@ Good: 依頼を目的・背景・完了条件から書き、直ったかは同�
 
 なぜ: 原則は、playbook のどの手順にも書かれていない場面の判断に使う。名前で呼べるようにしておけば、user は長い指示を書かずに作業を直せる。
 
+## repo の playbook
+
+作業する repo の root に `.agents/playbooks/` があれば、その中の `*.md` を repo の playbook として使う。形は `playbooks/` の playbook と同じにし、「使う場面:」の行を振り分けの 1 行として読む。
+
+1. 作業の最初に、`.agents/playbooks/*.md` をファイル名の順に開き、「使う場面:」の行だけを読む。完了条件: 各ファイルの名前と使う場面の一覧ができている（ディレクトリが無ければ一覧は空）
+2. 依頼を、下の振り分け表より先に、この一覧の上から照らす。当たったら、そのファイルを全文読み、「playbook の回し方」で回す
+3. kstack の playbook と同じ名前のファイルは、kstack の playbook の代わりに使う。振り分け表のその行は、repo のファイルを指しているものとして読む
+
+repo の playbook は、手順の中で kstack の SKILL と playbook を参照してよい。AGENTS.md には規約と承認が要る操作を短く書き（`kstack-agents-md`）、repo の playbook には、それを使って繰り返す作業の手順と完了条件を書く。repo の playbook を足す・変える依頼は、どの playbook にも当たらない依頼として扱い、`kstack-user-question` の「何を作るかの承認は、中身を見せて取る」で下書きを見せてから書く。
+
+```text
+Bad: repo の `.agents/playbooks/post-deploy-watch.md` を読まずに、kstack の post-deploy-watch でログの場所を推測する
+Good: 同じ名前の repo の playbook があるので、そちらを全文読み、その repo のログの場所と版の確かめ方で回す
+```
+
+なぜ: ログの場所、リリースの手順、使っている環境のように、repo ごとにしか決まらない手順がある。kstack に書くと全 repo に効いてしまい、書かなければ毎回 user に聞くことになる。repo に置けば、その repo の作業だけが同じ手順で回る。
+
 ## 振り分け
 
-依頼を上の行から照らし、最初に当たったものを使う。依頼が 2 つ以上にまたがるとき（調べてから直す）は、前のものを終えてから次を選び直す。commit だけ、質問に答えるだけのように、コードも文書も変えない単発の依頼は表に照らさず、その操作の SKILL（`kstack-git` など）に従う。
+依頼を上の行から照らし、最初に当たったものを使う。repo の playbook があれば、表より先に上の「repo の playbook」の手順で照らす。依頼が 2 つ以上にまたがるとき（調べてから直す）は、前のものを終えてから次を選び直す。commit だけ、質問に答えるだけのように、コードも文書も変えない単発の依頼は表に照らさず、その操作の SKILL（`kstack-git` など）に従う。
 
 | 依頼                                                                                     | 使うもの                                                                                                                         |
 | ---------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
