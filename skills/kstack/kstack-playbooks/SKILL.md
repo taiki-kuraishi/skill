@@ -1,6 +1,6 @@
 ---
 name: kstack-playbooks
-description: kstack-agent-mode・kstack-bot-mode が最初に読む、作業の原則と、依頼を playbook に振り分ける表と回し方。playbook と kstack SKILL で決まっている作業の user review は kstack-review-exemption に従って省き、どの playbook にも当たらない、コードや文書を変える依頼は kstack-root-driven-development で設計とフェーズを user と確かめる
+description: kstack-agent-mode・kstack-bot-mode が最初に読む、作業の原則と、依頼を playbook に振り分ける表と回し方。playbook と kstack SKILL で決まっている作業の user review は kstack-review-exemption に従って省き、どの playbook にも当たらない、コードや文書を変える依頼は kstack-root-driven-development で設計とフェーズを user と確かめる。作業を終えたら kstack-playbook-proposal で playbook の提案を決める
 disable-model-invocation: true
 ---
 
@@ -95,3 +95,9 @@ Good: どの playbook にも当たらないので、root-driven で目的とフ�
 ```
 
 なぜ: playbook に当たらない作業は、設計とフェーズの切り方がどこにも決まっていない。先に user と合わせておけば、作り直しと実装中の聞き直しが減る。
+
+## 作業を終えたら
+
+依頼の作業を終えたら、最後の報告を書く前に `skill://kstack-playbook-proposal` を全文読み、その手順で playbook を提案するかを決める。
+
+なぜ: playbook が無く手探りで進めた直後が、その手順を残せる一番の機会である。user が思い出して頼むのを待つと、手順は残らない。
