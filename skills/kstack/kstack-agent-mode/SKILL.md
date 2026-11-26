@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 # kstack-agent-mode
 
-user が `/kstack-agent-mode` で呼んだ session を、最後までこの SKILL で進める。始める前に `skill://kstack-playbooks`（原則・振り分け表・playbook の回し方）と `skill://kstack-root-driven-development` を全文読む。playbook と、この SKILL が指す SKILL・ファイルは、読み込んだ SKILL.md のディレクトリから解決する。読めなければ、試した absolute path とエラーを user に示して止まる。
+user が `/kstack-agent-mode` で呼んだ session を、最後までこの SKILL で進める。始める前に `skill://kstack-playbooks`（原則・振り分け表・playbook の回し方）と `skill://kstack-root-driven-development` を全文読み、`kstack-playbooks` の「repo の playbook」の手順 1 で、作業する repo の playbook の一覧を作る。kstack の playbook と、この SKILL が指す SKILL・ファイルは、読み込んだ SKILL.md のディレクトリから解決する。読めなければ、試した absolute path とエラーを user に示して止まる。
 
 進め方は playbook と root-driven に従い、この SKILL は入口として次の 4 点だけを決める。
 
@@ -23,7 +23,7 @@ Good: 「目的: PR #12 の CI を通す。背景: merge できない。完了�
 
 ## 原則と playbook
 
-依頼を `kstack-playbooks` の振り分け表で選ぶ。playbook を選んだら「playbook の回し方」で進め、SKILL（`kstack-git`・`kstack-handoff` など）を選んだらその SKILL に従う。原則は作業の間使い、返答では、判断を変えた原則の名前と、変えた判断を 1 行で添える。
+依頼を `kstack-playbooks` の「repo の playbook」と振り分け表で選ぶ。playbook を選んだら「playbook の回し方」で進め、SKILL（`kstack-git`・`kstack-handoff` など）を選んだらその SKILL に従う。原則は作業の間使い、返答では、判断を変えた原則の名前と、変えた判断を 1 行で添える。
 
 ```text
 Bad: 「原則に従いました」とだけ書く
