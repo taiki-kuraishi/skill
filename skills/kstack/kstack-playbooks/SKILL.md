@@ -58,7 +58,7 @@ Good: 依頼を目的・背景・完了条件から書き、直ったかは同�
 1. 選んだ playbook の手順を、要約も並べ替えもせずに todo へ写してから始める。完了条件: todo に playbook の全手順が並んでいる
 2. 手順の途中で、SKILL にも playbook にも決まっていない判断が要ったら、その判断だけを読み込んだ mode の決まりで user に聞く。`kstack-root-driven-development` の「既存パターンから外れる実装」、期待する動きがどこにも書かれていないこと、データを消すなどの戻せない操作、UI の見た目がこれに当たる。判断が目的や対象を変えるなら、下の「playbook に当たらない依頼」に切り替える
 3. コードか文書を変えたら、出す前に `kstack-root-driven-development` 手順 5 の 3 つの review を subagent で回して直す。playbook の作業でも省かない
-4. user review を省けるかは `kstack-review-exemption` で決める
+4. user review を省けるかは `kstack-review-exemption` の「mode から使うとき」で決める
 5. 報告は playbook の「報告」の項目を、目的と背景から書く
 
 ```text
