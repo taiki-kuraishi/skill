@@ -32,18 +32,21 @@ Good: 依頼を目的・背景・完了条件から書き、直ったかは同�
 
 依頼を上の行から照らし、最初に当たったものを使う。依頼が 2 つ以上にまたがるとき（調べてから直す）は、前のものを終えてから次を選び直す。commit だけ、質問に答えるだけのように、コードも文書も変えない単発の依頼は表に照らさず、その操作の SKILL（`kstack-git` など）に従う。
 
-| 依頼                                                                                               | 使うもの                                                                                                                         |
-| -------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| 仕組み・原因・是非を知りたい。コードは変えない                                                     | `playbooks/investigation.md`                                                                                                     |
-| PR か commit の CI が落ちた                                                                        | `playbooks/ci-fix.md`                                                                                                            |
-| 期待する動きが文書・テスト・依頼・既存の挙動で決まっている不具合を直す                             | `playbooks/bug-fix.md`                                                                                                           |
-| コードを kstack SKILL の規約に、文書を実装に合わせる                                               | `playbooks/conformance.md`                                                                                                       |
-| diff・PR をレビューする                                                                            | `kstack-root-driven-development` 手順 5 の 3 つの review を subagent で並行に回し、報告を 1 つにまとめる。コードも PR も変えない |
-| PR を出す                                                                                          | `kstack-git` の「PR の作り方」。フェーズを積むときは `kstack-bot-driven-development` の「フェーズを stack に積む」               |
-| PR を merge する（user が merge を指示した）                                                       | `kstack-git` の「PR を merge する」。stack は `kstack-bot-driven-development` の「merge」                                        |
-| 業務ルールを定理で検証しながら API を作る                                                          | `kstack-verification-guided-development`                                                                                         |
-| 実装を子 session に並列で任せる（kstack-agent-mode のみ）                                          | `kstack-handoff`                                                                                                                 |
-| コードか文書を変える依頼で、どれにも当たらない（機能追加、設計を変えるリファクタリング、試作など） | 下の「playbook に当たらない依頼」                                                                                                |
+| 依頼                                                                                                     | 使うもの                                                                                                                         |
+| -------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| デプロイ後に、本番で変えた箇所が動いているか確かめる                                                     | `playbooks/post-deploy-watch.md`                                                                                                 |
+| 仕組み・原因・是非を知りたい。コードは変えない                                                           | `playbooks/investigation.md`                                                                                                     |
+| PR か commit の CI が落ちた                                                                              | `playbooks/ci-fix.md`                                                                                                            |
+| 期待する動きが文書・テスト・依頼・既存の挙動で決まっている不具合を直す                                   | `playbooks/bug-fix.md`                                                                                                           |
+| コードを kstack SKILL の規約に、文書を実装に合わせる                                                     | `playbooks/conformance.md`                                                                                                       |
+| drizzle の schema（テーブル・列・制約・index・外部キー）を変える                                         | `playbooks/db-schema.md`                                                                                                         |
+| 業務ルールを定理で検証しながら API を作る                                                                | `kstack-verification-guided-development`                                                                                         |
+| Hono・better-result・drizzle で層を分けた API の endpoint を作る・振る舞いを変える                       | `playbooks/api.md`                                                                                                               |
+| diff・PR をレビューする                                                                                  | `kstack-root-driven-development` 手順 5 の 3 つの review を subagent で並行に回し、報告を 1 つにまとめる。コードも PR も変えない |
+| PR を出す                                                                                                | `kstack-git` の「PR の作り方」。フェーズを積むときは `kstack-bot-driven-development` の「フェーズを stack に積む」               |
+| PR を merge する（user が merge を指示した）                                                             | `kstack-git` の「PR を merge する」。stack は `kstack-bot-driven-development` の「merge」                                        |
+| 実装を子 session に並列で任せる（kstack-agent-mode のみ）                                                | `kstack-handoff`                                                                                                                 |
+| コードか文書を変える依頼で、どれにも当たらない（画面の機能追加、設計を変えるリファクタリング、試作など） | 下の「playbook に当たらない依頼」                                                                                                |
 
 ## playbook の回し方
 
