@@ -48,7 +48,7 @@ build-image:
 
 ## キャッシュの restore・save は composite action に切り出す
 
-`actions/cache/restore`・`actions/cache/save` と `key`・`restore-keys` を workflow の job に直接書かない。`.github/actions/<name>/action.yml` の composite action にまとめ、job からは 1 step で呼ぶ。save を job の最後に置く必要があるなら、restore 用と save 用の 2 つに分けるか、`key` を output で渡す。
+`actions/cache/restore`・`actions/cache/save` と `key`・`restore-keys` を workflow の job に直接書かない。`.github/actions/<name>/action.yml` の composite action にまとめ、job からは 1 step で呼ぶ。save を job の最後に置く必要があるなら、1 つの action に `mode` input（`restore` / `save`）を持たせて 2 回呼び、`mode` がそれ以外なら action を失敗させる。restore 用と save 用の 2 つの action に分けると、key の組み立てが 2 つの action.yml に分かれる。
 
 ```yaml
 # Bad: job ごとに key の組み立てと restore/save を書き写している
@@ -64,15 +64,17 @@ build-image:
     path: node_modules/.cache
     key: task-lint-${{ runner.os }}-${{ runner.arch }}-${{ github.sha }}
 
-# Good: key の規則は composite action の中だけに置く
-- uses: ./.github/actions/task-cache-restore
+# Good: key の規則は 1 つの composite action の中だけに置き、mode で restore と save を切り替える
+- uses: ./.github/actions/task-cache
   with:
     name: lint
+    mode: restore
 # ...
 - if: success()
-  uses: ./.github/actions/task-cache-save
+  uses: ./.github/actions/task-cache
   with:
     name: lint
+    mode: save
 ```
 
-なぜ: key と restore-keys の prefix は restore と save、job 間で一致していないとキャッシュが黙ってヒットしなくなる。組み立てを 1 か所に閉じ込めれば、job 側は名前を渡すだけで済み、規則の変更も 1 か所で終わる。
+なぜ: key と restore-keys の prefix は restore と save、job 間で一致していないとキャッシュが黙ってヒットしなくなる。組み立てを 1 か所に閉じ込めれば、job 側は名前と `mode` を渡すだけで済み、規則の変更も 1 か所で終わる。`mode` を誤ったまま両方の step を飛ばすと、キャッシュが効かないまま job が成功する。
