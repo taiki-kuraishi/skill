@@ -64,18 +64,18 @@ echo "PORT=$PORT REVIEW_URL=$REVIEW_URL"
 
 ```bash
 network_args=(--host 127.0.0.1 --no-open -p <PORT>)
-[ -n "${CRIT_PUBLIC_URL:-}" ] && network_args+=(--public-url "<REVIEW_URL>")
+[ -n "${CRIT_PUBLIC_URL:-}" ] && network_args=(--host 0.0.0.0 --no-open -p <PORT> --public-url "<REVIEW_URL>")
 crit "${network_args[@]}" <対象の引数>
 ```
 
 `<対象の引数>` は、未コミット差分を review するとき `--base-branch HEAD` にする。引数なしの `crit` は topic branch で default branch との branch diff を既定にするので、承認後に commit した前のフェーズの変更まで review に出る。`HEAD` を基点にすると、未コミットの今回のフェーズだけが出る。PR を review するときは呼び出し元から受け取った PR の対象を渡す。
 
 ```text
-Bad: user に http://127.0.0.1:<port> や localhost の URL を渡す / job の出力から URL を拾おうとして待つ / --host を Tailscale の IP にする
-Good: CRIT_PUBLIC_URL と PORT から REVIEW_URL を決め、--public-url に同じ値を渡し、起動を確認してから REVIEW_URL を書く
+Bad: user に http://127.0.0.1:<port> や localhost の URL を渡す / job の出力から URL を拾おうとして待つ / CRIT_PUBLIC_URL があるのに loopback で listen する / --host を Tailscale の IP にする
+Good: CRIT_PUBLIC_URL と PORT から REVIEW_URL を決め、--host 0.0.0.0 で listen し、--public-url に同じ値を渡し、起動を確認してから REVIEW_URL を書く
 ```
 
-なぜ: loopback の URL は user の端末から開けない。`--public-url` は Host の許可と表示 URL を変えるだけで port の転送は作らないため、listen は loopback のまま既存の転送経路に任せる。port を先に決めると、URL を事前に確定でき、複数の review が同時に動いても衝突しない。port は node で取る。python3 は shim だけで版が未設定の環境があり、起動のたびに 1 往復失う。
+なぜ: loopback の URL は user の端末から開けない。`--public-url` は Host の許可と表示 URL を変えるだけで listen 先は変えないので、別の端末から開く環境では `--host 0.0.0.0` で listen して、公開ホストへの通信を Crit が直接受ける。Tailscale の IP を直接指定すると、IP が変わる環境や同じ Pod の別の経路から届かない。Crit には認証が無いので、0.0.0.0 にすると公開ホストに届く経路のどこからでも開ける。`CRIT_ALLOW_UNAUTHENTICATED_NETWORK` の同意は loopback 以外の `--host` と `--public-url` の両方に効くので、同意の扱いは変わらない。port を先に決めると、URL を事前に確定でき、複数の review が同時に動いても衝突しない。port は node で取る。python3 は shim だけで版が未設定の環境があり、起動のたびに 1 往復失う。
 
 ## live review で起動する
 
