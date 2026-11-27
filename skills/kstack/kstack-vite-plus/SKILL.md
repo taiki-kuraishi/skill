@@ -79,6 +79,9 @@ CI の runner は毎回まっさらな状態で始まるので、`vp run` にし
   with:
     path: node_modules/.vite/task-cache
     key: vite-task-${{ runner.os }}-${{ runner.arch }}-${{ github.run_id }}-${{ github.run_attempt }}
+- if: inputs.mode != 'restore' && inputs.mode != 'save'
+  shell: bash
+  run: exit 1
 ```
 
 なぜ: install は `node_modules` を作り直しうるので、復元はその後に置く。GitHub の cache は同じ key に上書きできないので key は run ごとに変え、入力の変化は Vite Task が task ごとに判定するので lockfile やソースの hash は key に入れない（key で絞ると、hit できた task の分まで復元されなくなる）。
