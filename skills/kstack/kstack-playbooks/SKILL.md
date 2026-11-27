@@ -77,7 +77,7 @@ Good: 同じ名前の repo の playbook があるので、そちらを全文読�
 
 1. 選んだ playbook の手順を、要約も並べ替えもせずに todo へ写してから始める。完了条件: todo に playbook の全手順が並んでいる
 2. 手順の途中で、SKILL にも playbook にも決まっていない判断が要ったら、その判断だけを読み込んだ mode の決まりで扱い、user に聞くときは `kstack-user-question` の書き方にする。`kstack-root-driven-development` の「既存パターンから外れる実装」、期待する動きがどこにも書かれていないこと、データを消すなどの戻せない操作、UI の見た目がこれに当たる。判断が目的や対象を変えるなら、下の「playbook に当たらない依頼」に切り替える
-3. コードか文書を変えたら、出す前に `kstack-root-driven-development` 手順 5 の 3 つの review を subagent で回して直す。playbook の作業でも省かない
+3. コードか文書を変えたら、出す前に `kstack-root-driven-development` 手順 5 の 3 つの review を subagent で回して直す。playbook の作業でも省かない。依頼にも playbook の手順にも無い文書（README.md・AGENTS.md・docs/）の変更は、review で見つかった古い文書も含め、playbook の作業のフェーズに入れず、root-driven 手順 3 のとおり文書だけのフェーズに分ける
 4. user review を省けるかは `kstack-review-exemption` の「mode から使うとき」で決める
 5. 報告は playbook の「報告」の項目を、目的と背景から書く
 
