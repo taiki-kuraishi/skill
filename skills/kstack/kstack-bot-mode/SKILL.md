@@ -1,6 +1,6 @@
 ---
 name: kstack-bot-mode
-description: bot（Orca の bot など、user と対話しながら作業しない agent）の入口。kstack-bot-driven-development の通知に背景と選んだ playbook か SKILL を足し、kstack-playbooks の原則を使い、依頼を playbook に振り分けて bot-driven の draft PR で進める。playbook と kstack SKILL で決まっている作業は kstack-review-exemption の判定を通れば user review なしで出し、どの playbook にも当たらない依頼は設計とフェーズを依頼元と確かめてから進める。別の session に任せるときは、依頼の最初の行でこの SKILL を読ませる
+description: bot（Orca の bot など、user と対話しながら作業しない agent）の入口。kstack-bot-driven-development の通知に背景と選んだ playbook か SKILL を足し、kstack-playbooks の原則を使い、依頼を playbook に振り分けて bot-driven の draft PR で進める。playbook と kstack SKILL で決まっている作業は kstack-review-exemption の判定を通れば user review なしで出し、どの playbook にも当たらない依頼は設計とフェーズを依頼元と確かめてから進める。別の session に任せるときは、依頼の最初に bot-mode・playbooks・bot-driven・root-driven・kstack-git の SKILL.md を absolute path で読ませ、PR を作った後に reviewer subagent で体裁を確かめるよう書く
 disable-model-invocation: true
 ---
 
@@ -19,7 +19,7 @@ Bad: 「目的: CI を通す」とだけ通知する
 Good: 「目的: Renovate PR #34 の CI を通す。背景: 依存の更新が止まっている。対象: … 完了条件: 落ちた check が通る。対象外: … playbook: CI の失敗を直す」と通知する
 ```
 
-なぜ: 通知に書いた目的と背景は、そのまま agent への依頼と PR の body の冒頭になる。背景が無いと、依頼を受けた agent は完了条件を満たすだけの近道を選ぶ。
+なぜ: 通知に書いた目的と背景は、そのまま agent への依頼と、PR の body の「概要」節（`kstack-git` の「PR の作り方」手順 4）の中身になる。背景が無いと、依頼を受けた agent は完了条件を満たすだけの近道を選ぶ。
 
 ## 原則と playbook
 
@@ -49,13 +49,13 @@ Good: 目的とフェーズの一覧・最初のフェーズの設計を送り�
 
 役割は bot-driven と root-driven の「責務」「Subagent contract」に従い、次の 3 点だけ足す。
 
-- 依頼は、目的・背景・完了条件から書き始め、Subagent contract の 7 項目をそのあとに並べる
+- subagent への依頼は、目的・背景・完了条件から書き始め、Subagent contract の 7 項目をそのあとに並べる
 - user review を省けるかの判定は、`kstack-review-exemption` のとおり fresh-context の subagent に決めさせる。root は自分で判定しない
-- bot-driven のとおりフローごと別の session（Orca の worker など）に任せるときは、依頼の最初の行を「`<この SKILL.md の absolute path>` を全文読んでから始める」にし、続けて目的・背景・完了条件・選んだ playbook を書く。PR を開いた session が、CI と review の指摘に応えて merge できる状態になるまでその PR を持つ
+- bot-driven のとおりフローごと別の session（Orca の worker など）に任せるときは、依頼の最初に、次の 5 つの SKILL.md を absolute path で並べて「全文読んでから始める」と書く: この SKILL、`kstack-playbooks`、`kstack-bot-driven-development`、`kstack-root-driven-development`、`kstack-git`。続けて「PR を作った後に、`kstack-git` の『PR の作り方』手順 6・7 の reviewer subagent に PR の体裁を確かめさせる」と書き、そのあとに目的・背景・完了条件・選んだ playbook を書く。PR を開いた session が、CI と review の指摘に応えて merge できる状態になるまでその PR を持つ
 
 ```text
 Bad: worker に「#45 の bug を直して」とだけ送る
-Good: 「/home/me/.agents/skills/kstack-bot-mode/SKILL.md を全文読んでから始める。目的: … 背景: … 完了条件: … playbook: バグ修正」と送る
+Good: 「次の 5 つを全文読んでから始める: /home/me/.agents/skills/kstack-bot-mode/SKILL.md、…/kstack-playbooks/SKILL.md、…/kstack-bot-driven-development/SKILL.md、…/kstack-root-driven-development/SKILL.md、…/kstack-git/SKILL.md。PR を作った後に reviewer subagent に体裁を確かめさせる。目的: … 背景: … 完了条件: … playbook: バグ修正」と送る
 ```
 
-なぜ: `/kstack-bot-mode` で読み込んだ取り決めは、新しく起動した session には届かない。最初の行で読ませないと、その session は user review の省き方や merge の決まりを知らずに進める。absolute path なら、`skill://` を解決できない環境でも読める。
+なぜ: `/kstack-bot-mode` で読み込んだ取り決めは、新しく起動した session には届かない。この SKILL だけを読ませると、その session は `kstack-git` を読まずに PR の title・節・assignee を自分で決めることがある。subagent を使わないよう前置きされた環境（Orca の worker など）では、依頼に書かない限り体裁の確認も行われない。absolute path なら、`skill://` を解決できない環境でも読める。
