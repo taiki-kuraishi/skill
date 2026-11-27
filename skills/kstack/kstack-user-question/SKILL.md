@@ -27,8 +27,8 @@ Good: 事実に A・B の実物（コード片や設定）を並べ、背景に�
 SKILL の見出し、規約の名前、agent が付けた呼び名（「案 A」「mode 形式」など）を書くときは、その中身を表すコード・設定・出力の例を、同じ message に並べる。例を出せないなら、その用語を使わずに中身を書く。
 
 ```text
-Bad: 「kstack-github-actions は restore と save を 2 つに分けるか key を output で渡すと書いているので、例の mode 形式とは食い違う」
-Good: 3 つの書き方を YAML で並べ（2 つの action、key を output で渡す、1 つの action を mode で切り替える）、「kstack-github-actions に書かれているのは前の 2 つで、この repo の CI は 3 つ目を使っている」と書く
+Bad: 「SKILL は restore と save を 1 つの action の mode で切り替えると書いているのに、例は 2 つの action に分けている」
+Good: 3 つの書き方を YAML で並べ（2 つの action、key を output で渡す、1 つの action を mode で切り替える）、「SKILL が勧めているのは 3 つ目で、この例は 1 つ目を使っている」と書く
 ```
 
 なぜ: 見出しや呼び名は、それを読んだ agent にしか意味が通じない。user が中身を知らない言葉で説明すると、user は判断できないまま「どういうこと？」と聞き返すことになる。
