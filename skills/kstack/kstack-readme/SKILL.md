@@ -1,6 +1,6 @@
 ---
 name: kstack-readme
-description: README（repo root の README.md と、monorepo の app・package の README.md）を書く・修正する・レビューするときの規約。root README には repo の名前・数行の概要・install と使い方の入口（install の 1 コマンドと最小の例 1 つ、詳しい手順は package の README へのリンク）・license だけを書き、構成表・テスト手順・詳しいセットアップを書かないこと、package の README に責務 section（実装すること / 実装しないこと）と使い方・セットアップ・テスト手順を書き、コードを読めば分かる実装の詳細を書かないこと、agent 向けの指示やコードを書く側の規約とすぐ古くなる数値や一覧を書かず、使い方・API 利用契約は README に残すこと、日本語で書き upstream から取り込んだ README は原文のまま残すことを扱う。package の新設、機能の実装やレビュー指摘への対応のついでに README を更新する場面でも発火させる。
+description: README（repo root の README.md と、monorepo の app・package の README.md）を書く・修正する・レビューするときの規約。root README には repo の名前・数行の概要・install と使い方の入口（install の 1 コマンドと最小の例 1 つ、詳しい手順は package の README へのリンク）・license だけを書き、構成表・テスト手順・詳しいセットアップを書かないこと、package の README に責務 section（実装すること / 実装しないこと）と使い方・セットアップ・テスト手順を書き、コードを読めば分かる実装の詳細を書かないこと、agent 向けの指示やコードを書く側の規約とすぐ古くなる数値や一覧を書かず、使い方・API 利用契約は README に残すこと、日本語で書き upstream から取り込んだ README は原文のまま残すことを扱う。package の新設や、kstack-root-driven-development の文書だけのフェーズを含め、依頼で README を書く・直すときと、README をレビューするときに発火させる。
 ---
 
 # kstack-readme
