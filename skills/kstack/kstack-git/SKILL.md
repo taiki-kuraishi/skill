@@ -69,14 +69,14 @@ Good: push した SHA の CI を完了まで監視し、成功・失敗と実行
 ## PR の作り方
 
 1. `git status --short` で PR に含める未 commit の変更があれば、先に commit する。現在の branch が default branch（`gh repo view --json defaultBranchRef --jq .defaultBranchRef.name`）なら、変更内容を表す kebab-case の branch を `git switch -c <topic>` で作ってから commit する。commit は上の「commit の書き方」に従う（emoji の有無は PR の指示と同じにする）
-2. `git log --oneline @{u}..HEAD`（upstream が無ければ `git log --oneline -10`）と `git diff @{u}...HEAD --stat` で内容を把握する。未 push なら先に `git push -u origin HEAD` する
+2. upstream が無ければ（`git rev-parse --abbrev-ref @{u}` が失敗する）、先に `git fetch origin <default branch>` と `git rebase origin/<default branch>` で最新の default branch を取り込み（conflict は直してから続ける）、`git push -u origin HEAD` で push する。base が default branch でない branch（gh stack の上の層など）は rebase せず、その branch を作ったフローの手順で取り込む。そのうえで `git log --oneline @{u}..HEAD` と `git diff @{u}...HEAD --stat` で内容を把握する
 3. title は英語 1 行で `<emoji> <prefix>: <summary>`（emoji 不要の指示があれば `<prefix>: <summary>`）。prefix は commit と同じ選び方にする
 4. body は日本語で書く。`pull_request_template.md`・`PULL_REQUEST_TEMPLATE.md`・`.github/pull_request_template.md`・`.github/PULL_REQUEST_TEMPLATE/` 配下のテンプレートがあればその構成に従い、無ければ「概要 / 変更内容 / 確認方法」の 3 節にする。内容のヒントが指示に無ければ diff から推測する
 5. `gh pr create --draft --assignee @me --title "<title>" --body "<body>"` で作る。指示に ready（`--ready`・`--no-draft` 相当）とあるときだけ `--draft` を外す
 6. 作った agent は read-only の subagent（reviewer）に、PR の URL・`gh pr view <URL> --json title,body,assignees,isDraft` の結果・repo の PR template（あれば）を渡し、次を確かめさせる: (1) assignee に自分（@me）が入っている (2) template があればその節がすべて埋まっている（無ければ「概要 / 変更内容 / 確認方法」） (3) title が `<emoji> <prefix>: <summary>`（emoji 不要の指示時は `<prefix>: <summary>`）の英語 1 行で、body が日本語 (4) draft かどうかが指示どおり
 7. ずれがあれば、作った agent が直し、直した後にもう一度 subagent に確かめさせる。title・body・assignee は `gh pr edit <URL>`、draft のずれは `gh pr ready <URL>`（ready にする）か `gh pr ready <URL> --undo`（draft に戻す）で直す。subagent には PR を編集させない
 
-なぜ: draft で作ると、CI と自分の確認が済む前に review を頼まずに済む。default branch で直接 commit しないので、PR の差分が topic branch に閉じる。agent は `gh pr create` の引数や template を取りこぼしやすく、作った本人は自分の書いた本文の漏れに気づきにくいので、別の subagent に確かめさせる。commit・PR の作成は、文脈を持つ作業した agent が行い、subagent は確認だけをする。作成を subagent に任せない。
+なぜ: draft で作ると、CI と自分の確認が済む前に review を頼まずに済む。default branch で直接 commit しないので、PR の差分が topic branch に閉じる。push 前に default branch を取り込むと、作業中に進んだ main との conflict と CI の失敗が review の前に分かり、force push も要らない。merge の時点の取り込みは merge queue や branch protection に任せる。agent は `gh pr create` の引数や template を取りこぼしやすく、作った本人は自分の書いた本文の漏れに気づきにくいので、別の subagent に確かめさせる。commit・PR の作成は、文脈を持つ作業した agent が行い、subagent は確認だけをする。作成を subagent に任せない。
 
 ## PR を merge する
 
