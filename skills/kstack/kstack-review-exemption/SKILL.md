@@ -1,6 +1,6 @@
 ---
 name: kstack-review-exemption
-description: kstack-root-driven-development・kstack-bot-driven-development と一緒に読み込み、taiki-kuraishi/skill の kstack SKILL で書き方が決まっているコードだけのフェーズで user review を省く追加の取り決め。省けるフェーズの条件（変更したファイルがすべてコメント以外の kstack SKILL の対象、今回の変更への gate 前の review の指摘がすべて解消、既存パターンから外れる実装・未決事項・UI の変更が無い）を fresh-context の subagent に判定させ、すべて満たすときに差分と従った規約を対にして示して「review を飛ばしてもいいですか」と user に確かめ、省いてよいと答えたときだけ省くこと、root-driven では Crit の gate を開かずに commit すること、bot-driven では答えを PR の merge の指示として ready にし gh stack merge することを扱う。kstack-agent-mode・kstack-bot-mode から使うときは、kstack-playbooks の playbook か repo の playbook（.agents/playbooks/）の手順で決まった変更も条件 1 に数え、条件を満たせば聞かずに省いて差分と規約・手順の対を記録する
+description: kstack-root-driven-development・kstack-bot-driven-development と一緒に読み込み、taiki-kuraishi/skill の kstack SKILL で書き方が決まっているコードだけのフェーズで user review を省く追加の取り決め。省けるフェーズの条件（変更したファイルがすべてコメント以外の kstack SKILL の対象、今回の変更への gate 前の review の指摘がすべて解消、既存パターンから外れる実装・未決事項・依頼に無い文書（README.md・AGENTS.md・docs/）の変更・UI の変更が無い）を fresh-context の subagent に判定させ、すべて満たすときに差分と従った規約を対にして示して「review を飛ばしてもいいですか」と user に確かめ、省いてよいと答えたときだけ省くこと、root-driven では Crit の gate を開かずに commit すること、bot-driven では答えを PR の merge の指示として ready にし gh stack merge することを扱う。kstack-agent-mode・kstack-bot-mode から使うときは、kstack-playbooks の playbook か repo の playbook（.agents/playbooks/）の手順で決まった変更も条件 1 に数え、条件を満たせば聞かずに省いて差分と規約・手順の対を記録する
 disable-model-invocation: true
 ---
 
@@ -14,7 +14,7 @@ disable-model-invocation: true
 
 1. **変更したファイルがすべて kstack SKILL の対象** — 手順 5 の `kstack-skill-review` で、変更したファイルごとに、コメント以外の書き方を定める SKILL が「適用」になっている。`kstack-code-comment` はどのファイルにも適用されるので、それだけのファイル（kstack SKILL の無い言語・設定・manifest など）が 1 つでもあれば外れる
 2. **今回の変更への手順 5 の指摘がすべて解消** — 3 つの review が今回の変更に出した違反・要確認・ドリフト・指摘をすべて直し、直さなかった指摘・SKILL 同士の食い違いが残っていない。「既存」に分けられた、今回の変更と無関係な既存の指摘は数えない。直して挙動が変わり得るなら、検証を subagent に出し直して通っている
-3. **判断が要る変更が無い** — 合意した目的・対象の範囲内で、開発フローの「既存パターンから外れる実装」に当たる変更と、user にしか決められない未決事項が無い
+3. **判断が要る変更が無い** — 合意した目的・対象の範囲内で、開発フローの「既存パターンから外れる実装」に当たる変更と、user にしか決められない未決事項が無い。依頼にも使った playbook の手順にも無い文書（README.md・AGENTS.md・docs/）の変更も判断が要る変更に数え、`kstack-readme`・`kstack-agents-md` が「適用」でも外れる。その変更は root-driven 手順 3 のとおり文書だけのフェーズに分け、実装のフェーズに混ぜない
 4. **UI が変わらない** — 見た目・操作が変わるフェーズは外れる。kstack SKILL はコードの書き方を決めるだけで、画面がどう見えるかは決めない
 
 ```text
