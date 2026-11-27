@@ -1,6 +1,6 @@
 ---
 name: kstack-agents-md
-description: AGENTS.md（CLAUDE.md など coding agent 向けの指示ファイルを含む）を書く・修正する・レビューするときの規約 — コードや設定ファイルを読めば分かる実装の事実（ファイル構成と各ファイルの中身、有効にした機能、resource や設定の値）を書かず、コードに現れないリポジトリの規約（terraform apply・デプロイ・DB migration の実行手順と認証、user の承認が要る操作、レビューと commit の運用）を書く。AGENTS.md と repo 独自の SKILL.md は日本語で書き、upstream から取り込んだ skill などは訳さず原文のまま残す。機能の実装やリファクタリング、レビュー指摘への対応のついでに AGENTS.md を更新する場面や、/init などで AGENTS.md を新しく作る場面、兄弟の app・package を参考に新しい app・package を足して、頼まれていなくても兄弟に倣って AGENTS.md を作る場面、AGENTS.md や SKILL.md を英語から日本語に書き直す場面でも発火させる。
+description: AGENTS.md（CLAUDE.md など coding agent 向けの指示ファイルを含む）を書く・修正する・レビューするときの規約 — コードや設定ファイルを読めば分かる実装の事実（ファイル構成と各ファイルの中身、有効にした機能、resource や設定の値）を書かず、コードに現れないリポジトリの規約（terraform apply・デプロイ・DB migration の実行手順と認証、user の承認が要る操作、レビューと commit の運用）を書く。AGENTS.md と repo 独自の SKILL.md は日本語で書き、upstream から取り込んだ skill などは訳さず原文のまま残す。依頼で AGENTS.md を書く・直すとき（/init などでの新設、兄弟の app・package に倣った新しい app・package への作成、AGENTS.md や SKILL.md の英語から日本語への書き直し、kstack-root-driven-development の文書だけのフェーズを含む）と、AGENTS.md をレビューするときに発火させる。
 ---
 
 # kstack-agents-md
@@ -40,7 +40,7 @@ user が差分をレビューしてから commit する
 
 なぜ: 実装の要約はコードを読まずに済ませる近道として使われ、コードを変えても追従しないので、それを信じた agent は古い前提で作業する。apply の手順や承認の決まりはコードのどこにも書かれていないので、AGENTS.md に無ければ agent は推測で実環境を変えてしまう。
 
-AGENTS.md を書き換えるのは、手順や運用の決まりが増えたり変わったりしたときだけ。機能を実装しただけなら AGENTS.md は変えない。既存の AGENTS.md に実装を要約した節があっても、それに倣って書き足したり、変更に合わせて書き直したりしない。その節が今回の変更で事実と食い違ったら、消すかどうかを user に聞く。
+AGENTS.md を書き換えるのは、手順や運用の決まりが増えたり変わったりしたときだけ。機能を実装しただけなら AGENTS.md は変えない。既存の AGENTS.md に実装を要約した節があっても、それに倣って書き足したり、変更に合わせて書き直したりしない。その節が今回の変更で事実と食い違ったら、実装のフェーズでは直さず、`kstack-root-driven-development` 手順 3 の文書だけのフェーズに回し、そこで消すかどうかを user に聞く。
 
 書く規約は、user と決めたことと、作業で実際に使って通った手順に限る。上の Good 例の手順や承認の決まりは書き方の見本なので、そのまま写さない。分からない規約は推測で埋めず、user に聞く。
 
