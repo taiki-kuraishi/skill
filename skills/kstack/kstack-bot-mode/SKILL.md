@@ -23,7 +23,7 @@ Good: 「目的: Renovate PR #34 の CI を通す。背景: 依存の更新が�
 
 ## 原則と playbook
 
-依頼を `kstack-playbooks` の「repo の playbook」と振り分け表で選ぶ。playbook を選んだら「playbook の回し方」で進め、コードか文書を変える playbook は bot-driven のフェーズ（gh stack の draft PR）にする。SKILL を選んだらその SKILL に従う。原則は作業の間使い、通知と PR の body では、判断を変えた原則の名前と、変えた判断を 1 行で添える。
+依頼を `kstack-playbooks` の「repo の playbook」と振り分け表で選ぶ。playbook を選んだら「playbook の回し方」で進め、コードか文書を変える playbook は bot-driven のフェーズ（gh stack の draft PR）にする。依頼にも playbook の手順にも無い文書（README.md・AGENTS.md・docs/）の変更は、bot-driven 手順 3 のとおり playbook の PR に入れず、文書だけの PR に分ける。SKILL を選んだらその SKILL に従う。原則は作業の間使い、通知と PR の body では、判断を変えた原則の名前と、変えた判断を 1 行で添える。
 
 回し方の手順 2 に当たる判断は、bot-driven の手順 2 と同じく、既存に倣う案で進めて PR の `未解決事項` に書く。既存に倣う案が無い判断と、戻せない操作だけ止まって聞く。決めきれない判断が残った PR は、`kstack-review-exemption` の条件 3 で外れて user review に出る。
 
