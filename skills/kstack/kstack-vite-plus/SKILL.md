@@ -51,7 +51,7 @@ export default defineConfig({
 
 ## CI では task-cache を依存の install の後に復元する
 
-CI の runner は毎回まっさらな状態で始まるので、`vp run` にしただけではキャッシュが毎回空になる。`node_modules/.vite/task-cache` を依存の install の後に復元し、検査の後に保存する。restore・save は `kstack-github-actions` の「キャッシュの restore・save は composite action に切り出す」のとおり composite action に置く。下の例は、1 つの action を `mode` で restore と save に切り替え、key を 1 ファイルに閉じる形にしている。
+CI の runner は毎回まっさらな状態で始まるので、`vp run` にしただけではキャッシュが毎回空になる。`node_modules/.vite/task-cache` を依存の install の後に復元し、検査の後に保存する。restore・save は `kstack-github-actions` の「キャッシュの restore・save は composite action に切り出す」のとおり、1 つの composite action を `mode` で切り替えて呼ぶ。
 
 ```yaml
 # job（setup-bun は依存の install までを持つ composite action）
@@ -79,6 +79,9 @@ CI の runner は毎回まっさらな状態で始まるので、`vp run` にし
   with:
     path: node_modules/.vite/task-cache
     key: vite-task-${{ runner.os }}-${{ runner.arch }}-${{ github.run_id }}-${{ github.run_attempt }}
+- if: inputs.mode != 'restore' && inputs.mode != 'save'
+  shell: bash
+  run: exit 1
 ```
 
 なぜ: install は `node_modules` を作り直しうるので、復元はその後に置く。GitHub の cache は同じ key に上書きできないので key は run ごとに変え、入力の変化は Vite Task が task ごとに判定するので lockfile やソースの hash は key に入れない（key で絞ると、hit できた task の分まで復元されなくなる）。
