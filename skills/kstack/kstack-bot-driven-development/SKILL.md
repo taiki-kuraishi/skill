@@ -33,9 +33,9 @@ Good: 目的と完了条件を通知して始め、フェーズごとに PR を�
 
 ## フェーズを stack に積む
 
-1. フェーズの実装を始める前に、最新の default branch の上に branch を作る。最初のフェーズは `git switch <default branch>` と `git pull --ff-only` で local の default branch を最新にしてから `gh stack init <topic>`、2 つ目からは `gh stack rebase`（default branch を取り込み、下の層を順に rebase する。push はしない）の後に `gh stack add <topic>`（`-m`・`-A` を付けない）。conflict で止まったら上の層で解き、`gh stack rebase --continue` で続けてから進む。branch 名は kebab-case でフェーズの成果を表す。既に PR のある branch から始めるときは `gh stack init --base <default branch> <その branch>` で取り込んでから `gh stack add` する
+1. フェーズの実装を始める前に、最新の default branch の上に branch を作る。最初のフェーズは `git fetch origin <default branch>` のあと `git switch <default branch>` と `git merge --ff-only origin/<default branch>` で手元の default branch を進めてから `gh stack init <topic>`、2 つ目からは `gh stack sync` で default branch を取り込んでから `gh stack add <topic>`（`-m`・`-A` を付けない）。branch 名は kebab-case でフェーズの成果を表す。既に PR のある branch から始めるときは `gh stack init --base <default branch> <その branch>` で取り込み、`gh stack sync` してから `gh stack add` する。`gh stack sync` は stack の branch をすべて rebase して force push する（`--force-with-lease --atomic`）ので、review 中の PR の commit も書き換わる。自分の stack の `gh stack sync` は、`kstack-playbooks` の「戻せる作業は止まらない」の force-push の例外として、指示を待たずに行う
 2. 現在のフェーズの変更だけを stage し、`kstack-git` の「commit の書き方」で commit する
-3. 手順 1 と同じく `gh stack rebase` で最新の default branch を取り込んでから、`gh stack submit --auto` で push し、draft PR を作る（取り込みで書き換わった下の層も push される）。`--auto` の PR は title が branch 名、body が空、assignee が無いので、`gh pr edit <URL>` で `kstack-git` の「PR の作り方」手順 3・4 の title と body にし、`--add-assignee @me` を付ける。body の `確認方法` には review subagent で直したことを、残った判断は最後に `未解決事項` 節を足して書く
+3. `gh stack sync` で、実装の間に進んだ default branch を取り込む。conflict すると sync は全 branch を元に戻して止まるので、`gh stack rebase` で解いてから次へ進む。そのあと `gh stack submit --auto` で push し、draft PR を作る。`--auto` の PR は title が branch 名、body が空、assignee が無いので、`gh pr edit <URL>` で `kstack-git` の「PR の作り方」手順 3・4 の title と body にし、`--add-assignee @me` を付ける。body の `確認方法` には review subagent で直したことを、残った判断は最後に `未解決事項` 節を足して書く
 4. `kstack-git` の「PR の作り方」手順 6・7 で、subagent に PR の体裁を確かめさせる。base が 1 つ下のフェーズの branch（最初のフェーズは default branch）になっているかも見させる
 5. push した commit の CI を `kstack-git` の「push した commit の CI を完了まで監視する」で監視する。監視は background job にし、終わるのを待たずに次のフェーズへ進む
 
