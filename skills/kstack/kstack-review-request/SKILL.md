@@ -49,7 +49,7 @@ Good: 開発フローは kstack-review-request に対象と証拠を渡し、そ
 
 ## 公開 URL で起動する
 
-user は別の端末から review するので、user に渡す URL は必ず公開ホストの URL にする。公開ホストは環境変数 `CRIT_PUBLIC_URL`（port の無い base URL）から読み、ホスト名を SKILL に書かない。設定が無いときだけ loopback の URL を使う。公開への同意は `CRIT_ALLOW_UNAUTHENTICATED_NETWORK` を継承し、未許可なら Crit の拒否を user に示して勝手に許可しない。
+user は別の端末から review するので、user に渡す URL は必ず公開ホストの URL にする。公開ホストは環境変数 `CRIT_PUBLIC_URL`（port の無い base URL）から読み、ホスト名を SKILL に書かない。設定が無いときだけ loopback の URL を使う。listen 先は `--host` で決めず、環境変数 `CRIT_HOST` に任せる（未設定なら Crit の既定の `127.0.0.1`）。公開への同意は `CRIT_ALLOW_UNAUTHENTICATED_NETWORK` を継承し、未許可なら Crit の拒否を user に示して勝手に許可しない。
 
 Crit は Finish Review まで終わらないので、`skill://crit` の foreground 実行ではなく、出力と終了を受け取れる background job で起動する（omp なら `async: true`・`timeout: 0`）。job の出力は終了まで届かないため、URL は Crit の出力から拾わず、起動前に同期で決める。
 
@@ -63,19 +63,19 @@ echo "PORT=$PORT REVIEW_URL=$REVIEW_URL"
 控えた値を埋めて background job で起動し、`crit status --json` の `sessions` に `PORT` の行が出たら、その `id`・`pid` を記録してから user に `REVIEW_URL` を書く。
 
 ```bash
-network_args=(--host 127.0.0.1 --no-open -p <PORT>)
-[ -n "${CRIT_PUBLIC_URL:-}" ] && network_args=(--host 0.0.0.0 --no-open -p <PORT> --public-url "<REVIEW_URL>")
+network_args=(--no-open -p <PORT>)
+[ -n "${CRIT_PUBLIC_URL:-}" ] && network_args+=(--public-url "<REVIEW_URL>")
 crit "${network_args[@]}" <対象の引数>
 ```
 
 `<対象の引数>` は、未コミット差分を review するとき `--base-branch HEAD` にする。引数なしの `crit` は topic branch で default branch との branch diff を既定にするので、承認後に commit した前のフェーズの変更まで review に出る。`HEAD` を基点にすると、未コミットの今回のフェーズだけが出る。PR を review するときは呼び出し元から受け取った PR の対象を渡す。
 
 ```text
-Bad: user に http://127.0.0.1:<port> や localhost の URL を渡す / job の出力から URL を拾おうとして待つ / CRIT_PUBLIC_URL があるのに loopback で listen する / --host を Tailscale の IP にする
-Good: CRIT_PUBLIC_URL と PORT から REVIEW_URL を決め、--host 0.0.0.0 で listen し、--public-url に同じ値を渡し、起動を確認してから REVIEW_URL を書く
+Bad: user に http://127.0.0.1:<port> や localhost の URL を渡す / job の出力から URL を拾おうとして待つ / --host を付けて CRIT_HOST を上書きする
+Good: CRIT_PUBLIC_URL と PORT から REVIEW_URL を決め、--public-url に同じ値を渡し、listen 先は CRIT_HOST に任せ、起動を確認してから REVIEW_URL を書く
 ```
 
-なぜ: loopback の URL は user の端末から開けない。`--public-url` は Host の許可と表示 URL を変えるだけで listen 先は変えないので、別の端末から開く環境では `--host 0.0.0.0` で listen して、公開ホストへの通信を Crit が直接受ける。Tailscale の IP を直接指定すると、IP が変わる環境や同じ Pod の別の経路から届かない。Crit には認証が無いので、0.0.0.0 にすると公開ホストに届く経路のどこからでも開ける。`CRIT_ALLOW_UNAUTHENTICATED_NETWORK` の同意は loopback 以外の `--host` と `--public-url` の両方に効くので、同意の扱いは変わらない。port を先に決めると、URL を事前に確定でき、複数の review が同時に動いても衝突しない。port は node で取る。python3 は shim だけで版が未設定の環境があり、起動のたびに 1 往復失う。
+なぜ: loopback の URL は user の端末から開けない。`--public-url` は Host の許可と表示 URL を変えるだけで listen 先は変えない。別の端末からどの経路で届くか（loopback への転送か、全アドレスでの listen か）は環境ごとに違うので、環境が `CRIT_HOST` で決める。`--host` を付けると `CRIT_HOST` より優先され、環境の設定が効かなくなる。port を先に決めると、URL を事前に確定でき、複数の review が同時に動いても衝突しない。port は node で取る。python3 は shim だけで版が未設定の環境があり、起動のたびに 1 往復失う。
 
 ## live review で起動する
 
