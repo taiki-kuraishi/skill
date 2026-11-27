@@ -1,6 +1,6 @@
 ---
 name: kstack-bot-driven-development
-description: bot（user と対話しながら作業しない agent）が、user との要件・フェーズの合意を取らずに依頼からフェーズを切り出して実装し、各フェーズを kstack-git に沿って commit し、gh stack で積んだ draft PR として出して user review を PR で受け、承認を待たずに次のフェーズへ進む開発フロー。PR の review 指摘・CI の失敗はそのフェーズの branch で直して上の branch に伝える
+description: bot（user と対話しながら作業しない agent）が、user との要件・フェーズの合意を取らずに依頼からフェーズを切り出して実装し、各フェーズを kstack-git に沿って commit し、gh stack で積んだ draft PR として出して user review を PR で受け、承認を待たずに次のフェーズへ進む開発フロー。依頼に無い README・AGENTS.md・docs/ の変更は実装の PR に入れず、文書だけのフェーズの PR に分ける。PR の review 指摘・CI の失敗はそのフェーズの branch で直して上の branch に伝える
 disable-model-invocation: true
 ---
 
@@ -22,7 +22,7 @@ root-driven-development の手順 3・4・5 にある「前のフェーズが承
 
 1. **目的を決めて通知する** — 依頼から `目的 / 対象 / 完了条件 / 対象外` を root が決め、依頼元に通知して承認を待たずに進む。依頼から目的か完了条件が決められないときだけ、`kstack-user-question` の書き方で 1 問だけ聞いて止まる。root-driven-development 手順 3 のフェーズの通知も同じく承認を待たない
 2. **既存パターンから外れそうなら既存に倣う** — root-driven-development の「既存パターンから外れる実装」に当たる案は書かず、既存に倣う案で実装する。外れる案とその代償は、そのフェーズの PR の `未解決事項` に 1 行で書く。既存に倣う案が無いときだけ、両案を示して止まって聞く
-3. **フェーズを PR に出して次へ進む** — 実装が終わったら、PR を出す前に root-driven-development 手順 5 の review（`kstack-skill-review`・`kstack-drift-review`・`ponytail-review` の subagent を、そのフェーズの変更範囲を示して並行に 1 回）を回して直す。その後、下の「フェーズを stack に積む」で PR を出し、依頼元に PR の URL を通知する。承認を待たずに手順 3（root-driven-development）に戻り、次のフェーズを切り出す。一覧に残りが無ければ、全 PR の URL を下の層から順に並べて終わる
+3. **フェーズを PR に出して次へ進む** — 実装が終わったら、PR を出す前に root-driven-development 手順 5 の review（`kstack-skill-review`・`kstack-drift-review`・`ponytail-review` の subagent を、そのフェーズの変更範囲を示して並行に 1 回）を回して直す。その後、下の「フェーズを stack に積む」で PR を出し、依頼元に PR の URL を通知する。承認を待たずに手順 3（root-driven-development）に戻り、次のフェーズを切り出す。一覧に残りが無ければ、全 PR の URL を下の層から順に並べて終わる。依頼にも playbook の手順にも無い文書（README.md・AGENTS.md・docs/）の変更は、review で見つかった古い文書も含め、root-driven-development 手順 3 のとおり実装のフェーズの PR に入れず、実装の後に文書だけのフェーズの PR として積む。文書の PR は user review を省かず、実装の PR は文書が混ざらない分 `kstack-review-exemption` の条件で省ける。merge はどの PR も下の「merge」のとおり指示を待つ
 
 ```text
 Bad: フェーズの PR を出した後、user の approve を待って止まる / 依頼の解釈を user に確認してから始める
