@@ -7,7 +7,7 @@
 1. 責務を決める。既存の package の README の責務 section と照らし、新しい package の名前と、実装すること・実装しないことを 1 行ずつ書く。完了条件: 各行に出典か user の答えがある
 2. 承認を取る。新しい package は `kstack-root-driven-development` の「既存パターンから外れる実装」に当たるので、既存の package に置く案と並べ、代償を 1 行ずつ添えて聞く。bot も聞いて止まる。完了条件: user の承認がある
 3. 器を作る。`package.json`、`src/index.ts`（外に出す名前はここにだけ並べる。`kstack-typescript`）、兄弟の package と同じ tsconfig を作り、root の workspaces と lockfile への登録も同じ commit にする
-4. README を書く（`kstack-readme`）。AGENTS.md は兄弟の package にあるときだけ、`kstack-agents-md` のとおり規約だけを書いて作る
+4. README を書く（`kstack-readme`）。依頼に無い AGENTS.md はこのフェーズで作らず、兄弟の package にあるときだけ、`kstack-root-driven-development` 手順 3 のとおり文書だけのフェーズに分けて、`kstack-agents-md` のとおり規約だけを書いて作る
 5. task を足す。package に閉じる task は、`kstack-mise-tasks` の「1 つの package・app に閉じるタスクは、そのディレクトリの mise.toml に書く」に従う。完了条件: `mise tasks --all` に `//<path>:<task>` が出る
 6. Worker の app なら、`kstack-cloudflare-vite-plugin` と `kstack-vite` に従って build を組む
 7. 確かめる。install・型検査・build・lint を subagent に流させ、他の package から import できることも確かめる。repo の CI が新しい package を拾わないときは、続けて CI・git hook・mise task の playbook を回す
