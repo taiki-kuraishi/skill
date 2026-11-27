@@ -68,7 +68,7 @@ Good: push した SHA の CI を完了まで監視し、成功・失敗と実行
 
 ## PR の作り方
 
-1. `git status --short` で PR に含める未 commit の変更があれば、先に commit する。現在の branch が default branch（`gh repo view --json defaultBranchRef --jq .defaultBranchRef.name`）なら、変更内容を表す kebab-case の branch を `git switch -c <topic>` で作ってから commit する。commit は上の「commit の書き方」に従う（emoji の有無は PR の指示と同じにする）
+1. `git status --short` で PR に含める未 commit の変更があれば、先に commit する。現在の branch が default branch（`gh repo view --json defaultBranchRef --jq .defaultBranchRef.name`）なら、変更内容を表す kebab-case の branch を `git switch -c <topic>` で作ってから commit する。commit は上の「commit の書き方」に従う（emoji の有無は PR の指示と同じにする）。commit の後、`git fetch origin <default branch>` で最新の default branch を取り込む。まだ push していない branch は `git rebase --autostash origin/<default branch>`、push 済みの branch は force push を避けて `git merge --autostash origin/<default branch>` のあと `git push` する。conflict が出たら直してから次へ進む。gh stack に積む branch は、この取り込みをせず `kstack-bot-driven-development` の「フェーズを stack に積む」に従う
 2. `git log --oneline @{u}..HEAD`（upstream が無ければ `git log --oneline -10`）と `git diff @{u}...HEAD --stat` で内容を把握する。未 push なら先に `git push -u origin HEAD` する
 3. title は英語 1 行で `<emoji> <prefix>: <summary>`（emoji 不要の指示があれば `<prefix>: <summary>`）。prefix は commit と同じ選び方にする
 4. body は日本語で書く。`pull_request_template.md`・`PULL_REQUEST_TEMPLATE.md`・`.github/pull_request_template.md`・`.github/PULL_REQUEST_TEMPLATE/` 配下のテンプレートがあればその構成に従い、無ければ「概要 / 変更内容 / 確認方法」の 3 節にする。内容のヒントが指示に無ければ diff から推測する
