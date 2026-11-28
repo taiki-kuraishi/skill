@@ -1,6 +1,6 @@
 ---
 name: kstack-bot-mode
-description: bot（Orca の bot など、user と対話しながら作業しない agent）の入口。kstack-bot-driven-development の通知に背景と選んだ playbook か SKILL を足し、kstack-playbooks の原則を使い、依頼を playbook に振り分けて bot-driven の draft PR で進める。playbook と kstack SKILL で決まっている作業は kstack-review-exemption の判定を通れば user review なしで出し、どの playbook にも当たらない依頼は設計とフェーズを依頼元と確かめてから進める。別の session に任せるときは、依頼の最初に bot-mode・playbooks・bot-driven・root-driven・kstack-git の SKILL.md を absolute path で読ませ、PR を作った後に reviewer subagent で体裁を確かめるよう書く
+description: bot（Orca の bot など、user と対話しながら作業しない agent）の入口。kstack-bot-driven-development の通知に背景と選んだ playbook か SKILL を足し、kstack-playbooks の原則を使い、依頼を playbook に振り分けて bot-driven の draft PR で進める。PR の変更を含む依頼の完了条件は merge と反映の後の状態で書き、確かめる前に依頼や進捗の記録（Orca の Item など）を完了にしない。playbook と kstack SKILL で決まっている作業は kstack-review-exemption の判定を通れば user review なしで出し、どの playbook にも当たらない依頼は設計とフェーズを依頼元と確かめてから進める。別の session に任せるときは、依頼の最初に bot-mode・playbooks・bot-driven・root-driven・kstack-git の SKILL.md を absolute path で読ませ、PR を作った後に reviewer subagent で体裁を確かめるよう書く
 disable-model-invocation: true
 ---
 
@@ -8,7 +8,7 @@ disable-model-invocation: true
 
 bot が `/kstack-bot-mode` で受けた依頼を、最後までこの SKILL で進める。始める前に `skill://kstack-playbooks`（原則・振り分け表・playbook の回し方）と `skill://kstack-bot-driven-development`（と、それが読ませる `kstack-root-driven-development`）を全文読み、`kstack-playbooks` の「repo の playbook」の手順 1 で、作業する repo の playbook の一覧を作る。kstack の playbook と、この SKILL が指す SKILL・ファイルは、読み込んだ SKILL.md のディレクトリから解決する。読めなければ、試した absolute path とエラーを依頼元に送って止まる。
 
-進め方は playbook と bot-driven に従い、この SKILL は bot-driven に次の 4 点を足す。user review を省いた PR も draft のまま出し、merge は bot-driven の「merge」のとおり user の明示の指示を待つ。
+進め方は playbook と bot-driven に従い、この SKILL は bot-driven に次の 5 点を足す。user review を省いた PR も draft のまま出し、merge は bot-driven の「merge」のとおり user の明示の指示を待つ。
 
 ## 通知に背景と playbook を足す
 
@@ -16,10 +16,21 @@ bot-driven 手順 1 の通知（目的 / 対象 / 完了条件 / 対象外）に
 
 ```text
 Bad: 「目的: CI を通す」とだけ通知する
-Good: 「目的: Renovate PR #34 の CI を通す。背景: 依存の更新が止まっている。対象: … 完了条件: 落ちた check が通る。対象外: … playbook: CI の失敗を直す」と通知する
+Good: 「目的: Renovate PR #34 の CI を通す。背景: 依存の更新が止まっている。対象: … 完了条件: 落ちた check が通り、PR が merge される。対象外: … playbook: CI の失敗を直す」と通知する
 ```
 
 なぜ: 通知に書いた目的と背景は、そのまま agent への依頼と、PR の body の「概要」節（`kstack-git` の「PR の作り方」手順 4）の中身になる。背景が無いと、依頼を受けた agent は完了条件を満たすだけの近道を選ぶ。
+
+## 完了は、merge と反映を確かめてから
+
+PR の変更を含む依頼では、通知の完了条件を、依頼元が求める結果を merge と反映の後の状態で書く。「PR を出した」や「check が通る」のように bot だけで満たせる状態を完了条件にすると、bot は依頼元の判断より先に完了を宣言することになる。別の session に任せるときは、その session の完了条件を merge できる状態までにし、merge の後の確認は bot が行う。bot-driven 手順 3 の最後に PR の URL を並べるのは merge 待ちの報告で、完了の報告ではない。依頼元への完了の報告と、進捗の記録（Orca の Item など）を完了にする操作は、完了条件を自分で確かめた後か、依頼元が完了にしてよいと言ったときだけ行う。完了条件に依頼元の作業（merge、投稿など）が残っていれば、その作業を待っている状態にして、bot の側では完了にしない。
+
+```text
+Bad: 完了条件を「ログインの不具合を直す PR を出した」と書き、PR を出した時点で Item を完了にする
+Good: 完了条件を「PR が merge され、deploy 先でログインできることを確かめた」と書き、PR を出したら Item を merge 待ちにし、merge の後に確かめてから完了にする
+```
+
+なぜ: merge や反映の前に完了にすると、依頼元は残っている作業を一覧から見失い、終わっていない依頼を自分で開け直すことになる。
 
 ## 原則と playbook
 
